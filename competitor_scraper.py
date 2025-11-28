@@ -62,46 +62,35 @@ def clean_rupiah(text):
 
 def get_ubs_price():
     try:
-        scraper = cloudscraper.create_scraper(
-            browser={
-                "browser": "chrome",
-                "platform": "windows",
-                "desktop": True,
-            }
-        )
-
-        # STEP 1 -> GET halaman untuk generate cookie
-        scraper.get("https://www.indogold.id/harga-emas-fisik/")
-
-        # STEP 2 -> POST untuk ambil data UBS
         url = "https://www.indogold.id/home/get_data_pricelist"
-        payload = "type=pricelist&type_gold=ubs"
 
         headers = {
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             "Origin": "https://www.indogold.id",
-            "Referer": "https://www.indogold.id/harga-emas-fisik/",
-            "X-Requested-With": "XMLHttpRequest",
+            "Referer": "https://www.indogold.id/harga-emas-hari-ini",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+            "Accept": "*/*"
         }
 
-        r = scraper.post(url, data=payload, headers=headers)
-        print("UBS RAW =>", r.text[:300])  # DEBUG
+        form = {
+            "form": '{"product":"UBS_5"}',
+            "simulasi-token": "de15246fb6f274dbd807684c0ca0b807"
+        }
 
-        data = r.json()
+        response = requests.post(url, data=form, headers=headers, timeout=10)
+        print("UBS RAW:", response.text)   # debugging
 
-        # Ambil 1 gram data
-        denom = data["data"]["data_denom"]
+        data = response.json()
 
-        first_key = list(denom.keys())[0]
-        gram2025 = denom[first_key]["Tahun 2025"]
+        # gunakan pecahan 1 gram (atau yang paling sering dipakai)
+        denom = data["data"]["data_denom"]["1.0"]["Tahun 2025"]
 
-        jual = clean_rupiah(gram2025["harga"])
-        beli = clean_rupiah(gram2025["harga_buyback"])
+        harga_jual = int(denom["harga"].replace("Rp. ", "").replace(".", ""))
+        harga_beli = int(denom["harga_buyback"].replace("Rp. ", "").replace(".", ""))
 
-        return {"jual": jual, "beli": beli}
+        return {"jual": harga_jual, "beli": harga_beli}
 
     except Exception as e:
-        print("UBS ERROR =>", e)
+        print("UBS Error:", e)
         return None
 
 
@@ -120,6 +109,7 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
 
 
