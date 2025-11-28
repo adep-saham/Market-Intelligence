@@ -62,23 +62,13 @@ def clean_rupiah(text):
 
 def get_ubs_price():
     try:
-        proxy_url = "https://old-river-ece0.best-adeprasetyo.workers.dev/get_ubs"   # ganti URL worker kamu
-        response = requests.get(proxy_url, timeout=10)
-
-        if response.status_code != 200:
-            return None
-
-        data = response.json()
-        denoms = data["data"]["data_denom"]["1.0"]["Tahun 2025"]
-
-        harga_jual = int(denoms["harga"].replace("Rp. ", "").replace(".", ""))
-        harga_beli = int(denoms["harga_buyback"].replace("Rp. ", "").replace(".", ""))
-
-        return {"jual": harga_jual, "beli": harga_beli}
-
-    except Exception as e:
-        print("UBS error:", e)
+        url = "https://old-river-ece0.best-adeprasetyo.workers.dev/get_ubs"
+        res = requests.get(url, timeout=10)
+        data = res.json()
+        return data
+    except:
         return None
+
 
 
 
@@ -97,6 +87,7 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
 
 
