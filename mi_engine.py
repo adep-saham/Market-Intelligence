@@ -23,26 +23,39 @@ def load_traffic(path="data/traffic_website.csv"):
 # ======================================================
 
 def fetch_gold_price_kitco():
-    url = "https://www.kitco.com/json/live_gold.json"
-
+    """
+    API Kitco asli sering error. 
+    Kita ganti ke sumber stabil: 
+    https://api.metals.live/v1/spot
+    """
     try:
-        r = requests.get(url, timeout=5)
+        r = requests.get("https://api.metals.live/v1/spot", timeout=5)
         data = r.json()
 
-        bid = float(data.get("bid", 0))
-        ask = float(data.get("ask", 0))
-        mid = (bid + ask) / 2
-        time = data.get("time")
+        # Format data contoh:
+        # [
+        #   ["gold", 2334.25],
+        #   ["silver", 29.5]
+        # ]
+        gold_price = None
+        for row in data:
+            if row[0] == "gold":
+                gold_price = float(row[1])
 
+        if gold_price is None:
+            return {"error": "Gold price not found"}
+
+        # kita jadikan mid = spot price
         return {
-            "bid": bid,
-            "ask": ask,
-            "mid": mid,
-            "time": time,
+            "bid": gold_price,
+            "ask": gold_price,
+            "mid": gold_price,
             "error": None
         }
+
     except Exception as e:
         return {"error": str(e)}
+
 
 
 # ======================================================
@@ -140,3 +153,4 @@ def recommend_price(global_price, competitor_df, elasticity=-0.8):
         recommended *= 1.01
 
     return round(recommended, 0)
+
