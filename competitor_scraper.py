@@ -1,6 +1,6 @@
 import requests
 
-BASE = "https://old-river-ece0.best-adeprasetyo.workers.dev"  # ganti sesuai worker kamu
+BASE = "https://lively-wind-03ad.best-adeprasetyo.workers.dev"  # ganti sesuai worker kamu
 
 
 def get_indogold_price():
@@ -40,3 +40,4 @@ def get_galeri24_price():
         }
     except:
         return None
+
