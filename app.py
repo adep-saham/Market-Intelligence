@@ -142,9 +142,7 @@ if menu == "Dashboard":
 
     st.title("📊 Dashboard Market Intelligence – Premium")
 
-    # ===============================
-    # FIX: DEFINE GOLD VARIABLES
-    # ===============================
+    # DEFINE GOLD VARIABLES (pastikan ini sudah ada)
     gold_usd = kitco.get("mid", 0)
     gold_idr = gold_usd * usdidr
     gold_per_gram_usd = gold_usd / 31.1034768
@@ -156,80 +154,58 @@ if menu == "Dashboard":
     day1_idr = day1_usd * usdidr if day1_usd else None
     day2_idr = day2_usd * usdidr if day2_usd else None
 
-    # HARGA EMAS - NEW CLEAN UI
+    # ================================
+    # GOLD PRICE – PREMIUM GOLD EDITION
+    # ================================
     c1, c2, c3, c4, c5 = st.columns(5)
 
-    
-    # HARGA EMAS - NEW CLEAN UI
+    with c1:
+        st.markdown(f"""
+        <div class="gold-card">
+            <div class="gold-title">Spot (USD)</div>
+            <div class="gold-value">${gold_usd:,.2f}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-  # ================================
-# GOLD PRICE – PREMIUM GOLD EDITION
-# ================================
+    with c2:
+        st.markdown(f"""
+        <div class="gold-card">
+            <div class="gold-title">Spot (IDR)</div>
+            <div class="gold-value">Rp {gold_idr:,.0f}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-c1, c2, c3, c4, c5 = st.columns(5)
+    with c3:
+        st.markdown(f"""
+        <div class="gold-card">
+            <div class="gold-title">Per Gram (IDR)</div>
+            <div class="gold-value">Rp {gold_per_gram_idr:,.0f}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-# Spot USD
-with c1:
-    st.markdown(f"""
-    <div class="gold-card">
-        <div class="gold-title">Spot (USD)</div>
-        <div class="gold-value">${gold_usd:,.2f}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    with c4:
+        v = f"${day1_usd:,.2f}" if day1_usd else "N/A"
+        st.markdown(f"""
+        <div class="gold-card">
+            <div class="gold-title">Day-1 Price</div>
+            <div class="gold-value">{v}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-# Spot IDR
-with c2:
-    st.markdown(f"""
-    <div class="gold-card">
-        <div class="gold-title">Spot (IDR)</div>
-        <div class="gold-value">Rp {gold_idr:,.0f}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    with c5:
+        v = f"${day2_usd:,.2f}" if day2_usd else "N/A"
+        st.markdown(f"""
+        <div class="gold-card">
+            <div class="gold-title">Day-2 Price</div>
+            <div class="gold-value">{v}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-# Per Gram IDR
-with c3:
-    st.markdown(f"""
-    <div class="gold-card">
-        <div class="gold-title">Per Gram (IDR)</div>
-        <div class="gold-value">Rp {gold_per_gram_idr:,.0f}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# Day-1
-with c4:
-    if day1_usd:
-        v = f"${day1_usd:,.2f}"
-    else:
-        v = "N/A"
-    st.markdown(f"""
-    <div class="gold-card">
-        <div class="gold-title">Day-1 Price</div>
-        <div class="gold-value">{v}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# Day-2
-with c5:
-    if day2_usd:
-        v = f"${day2_usd:,.2f}"
-    else:
-        v = "N/A"
-    st.markdown(f"""
-    <div class="gold-card">
-        <div class="gold-title">Day-2 Price</div>
-        <div class="gold-value">{v}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-
-    # Grafik & tabel setelah semua KPI
+    # JANGAN HILANGKAN TUTUP IF DI ATAS SEBELUM MASUK ke HALAMAN LAIN
     st.markdown('<div class="section-title">📈 Tren Harga Global</div>', unsafe_allow_html=True)
     st.line_chart(g.set_index("date")["price"], use_container_width=True)
-
     st.markdown('<div class="section-title">🛒 Gap Kompetitor</div>', unsafe_allow_html=True)
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
-
-
 
 # ===========================================================
 # COMPETITOR PAGE
@@ -238,41 +214,34 @@ elif menu == "Competitor":
     st.title("🏷 Competitor Intelligence")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
 
-
 # ===========================================================
 # FORECAST PAGE
 # ===========================================================
 elif menu == "Forecast":
     st.title("🔮 Forecast Demand Harian")
-
     st.line_chart(forecast_df["forecast_qty"], use_container_width=True)
-
-    st.write("📌 *Model menggunakan regresi linear tanpa sklearn (lightweight mode).*")
-
+    st.write("📌 *Model menggunakan regresi linear.*")
 
 # ===========================================================
 # EWS PAGE
 # ===========================================================
 elif menu == "EWS":
     st.title("⚠ Early Warning System")
-
     if alerts:
         for a in alerts:
             st.error(a)
     else:
         st.success("Tidak ada alert. Semua stabil.")
 
-
 # ===========================================================
 # PRICING PAGE
 # ===========================================================
 elif menu == "Pricing":
     st.title("💰 Pricing Intelligence")
-
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
-
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
