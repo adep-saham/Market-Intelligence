@@ -23,6 +23,7 @@ from competitor_scraper import (
     get_indogold,
     get_antam_butik
 )
+from competitor_scraper import get_all_competitor_prices
 
 
 
@@ -261,6 +262,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
