@@ -218,33 +218,35 @@ if menu == "Dashboard":
 # COMPETITOR PAGE
 # ===========================================================
 elif menu == "Competitor":
+    st.title("🏷 Competitor & Pricing Intelligence")
 
-    st.subheader("🏷️ Price Comparison (API)")
-    
-    c1, c2, c3 = st.columns(3)
-    
-    with c1:
-        st.caption("IndoGold")
-        price = get_indogold_price()
-        st.write(f"Rp {price:,}" if price else "N/A")
-    
-    with c2:
-        st.caption("Hartadinata")
-        price = get_hartadinata_price()
-        st.write(f"Rp {price:,}" if price else "N/A")
-    
-    with c3:
-        st.caption("UBS Gold")
-        price = get_ubs_price()
-        st.write(f"Rp {price:,}" if price else "N/A")
-    
+    from competitor_scraper import (
+        get_indogold_price,
+        get_hartadinata_price,
+        get_ubs_price
+    )
+
+    # ambil data
     indogold = get_indogold_price()
     hartadinata = get_hartadinata_price()
     ubs = get_ubs_price()
-    
-    st.write("IndoGold:", f"Rp {indogold:,}" if indogold else "N/A")
-    st.write("Hartadinata:", f"Rp {hartadinata:,}" if hartadinata else "N/A")
-    st.write("UBS Gold:", f"Rp {ubs:,}" if ubs else "N/A")
+
+    st.subheader("💰 Price Comparison (Web Scraper)")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.caption("IndoGold")
+        st.write(f"Rp {indogold:,}" if indogold else "N/A")
+
+    with col2:
+        st.caption("Hartadinata")
+        st.write(f"Rp {hartadinata:,}" if hartadinata else "N/A")
+
+    with col3:
+        st.caption("UBS Gold")
+        st.write(f"Rp {ubs:,}" if ubs else "N/A")
+
 
 # ===========================================================
 # FORECAST PAGE
@@ -273,6 +275,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
