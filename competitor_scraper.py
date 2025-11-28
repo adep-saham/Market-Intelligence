@@ -30,45 +30,32 @@ def get_indogold_price():
 # ===================================================
 # 2. SCRAPER HARTADINATA (emasmu.co.id)
 # ===================================================
-def get_hartadinata_price():
+def get_hartadinata_price_html():
     try:
-        url = "https://emasku.co.id/api/prices"
-
-        headers = {
-            "User-Agent": "Mozilla/5.0",
-            "Accept": "application/json",
-            "Origin": "https://emasku.co.id",
-            "Referer": "https://emasku.co.id/",
-            "X-Requested-With": "XMLHttpRequest"
-        }
-
+        url = "https://emasku.co.id/price"
+        headers = {"User-Agent": "Mozilla/5.0"}
         res = requests.get(url, headers=headers, timeout=10)
 
-        # DEBUG print
-        print("HARTADINATA RAW:", res.text)
+        soup = BeautifulSoup(res.text, "html.parser")
 
-        data = res.json()
-
-        if "data" not in data or len(data["data"]) == 0:
+        # cari baris '1 gr'
+        row = soup.find("tr", string=lambda x: x and "1 gr" in x)
+        if not row:
             return None
 
-        # Ambil Gold Series (biasanya index 0)
-        gold_series = data["data"][0]
-        prices = gold_series.get("prices", [])
+        cols = row.find_all("td")
+        if len(cols) < 3:
+            return None
 
-        # Cari gramasi 1 gram
-        for item in prices:
-            if float(item.get("gramasi", 0)) == 1.0:
-                return {
-                    "jual": item["price"],
-                    "beli": item["buyback_price"]
-                }
+        harga_beli = int(cols[1].text.replace("Rp", "").replace(".", "").strip())
+        harga_jual = int(cols[2].text.replace("Rp", "").replace(".", "").strip())
 
-        return None
+        return {"jual": harga_jual, "beli": harga_beli}
 
     except Exception as e:
-        print("ERROR HARTADINATA:", e)
+        print("ERROR HARTADINATA HTML:", e)
         return None
+
 
 
 
@@ -85,5 +72,6 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
 
