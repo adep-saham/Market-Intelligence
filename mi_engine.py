@@ -24,26 +24,23 @@ def load_traffic(path="data/traffic_website.csv"):
 
 def fetch_gold_price():
     """
-    Ambil harga emas dari Coingecko.
-    Coingecko memberikan harga per gram, jadi harus dikonversi ke troy ounce.
+    Ambil LBMA gold price dari BISAPI (gratis dan stabil).
     """
     try:
-        url = "https://api.coingecko.com/api/v3/simple/price?ids=gold&vs_currencies=usd"
+        url = "https://www.bis-api.com/api/v1/gold/spot"
         r = requests.get(url, timeout=8)
         data = r.json()
 
-        price_per_gram = float(data["gold"]["usd"])
-
-        # konversi gram → troy ounce (XAU)
-        price_per_ounce = price_per_gram * 31.1034768
+        gold_price = float(data["price"])
 
         return {
-            "mid": price_per_ounce,
+            "mid": gold_price,
             "error": None
         }
 
     except Exception as e:
         return {"mid": 0, "error": str(e)}
+
 
 
 # ======================================================
@@ -141,6 +138,7 @@ def recommend_price(global_price, competitor_df, elasticity=-0.8):
         recommended *= 1.01
 
     return round(recommended, 0)
+
 
 
 
