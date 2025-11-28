@@ -151,6 +151,18 @@ if menu == "Dashboard":
             gold_per_gram_idr = gold_per_gram_usd * usdidr
             
             st.metric("Gold Price / Gram (IDR)", f"Rp {gold_per_gram_idr:,.0f}")
+            # Konversi dan perhitungan GOLD
+            gold_usd = kitco["mid"]
+            gold_idr = gold_usd * usdidr
+            
+            gold_per_gram_usd = gold_usd / 31.1034768
+            gold_per_gram_idr = gold_per_gram_usd * usdidr
+            
+            gold_day1_usd = kitco["day1"]
+            gold_day2_usd = kitco["day2"]
+            
+            gold_day1_idr = gold_day1_usd * usdidr if gold_day1_usd else 0
+            gold_day2_idr = gold_day2_usd * usdidr if gold_day2_usd else 0
 
            
     st.markdown('<div class="section-title">📈 Tren Harga Global</div>', unsafe_allow_html=True)
@@ -202,6 +214,7 @@ elif menu == "Pricing":
 
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
