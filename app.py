@@ -19,6 +19,7 @@ from mi_engine import (
 
 from competitor_scraper import get_indogold_price, get_hartadinata_price, get_ubs_price
 
+print("DEBUG UBS:", get_ubs_price())
 
 # ===========================================================
 # UI SETUP
@@ -213,7 +214,6 @@ if menu == "Dashboard":
 # ===========================================================
 # COMPETITOR PAGE
 # ===========================================================
-print("DEBUG UBS:", get_ubs_price())
 
 elif menu == "Competitor":
     st.title("🏷 Competitor & Pricing Intelligence")
@@ -283,6 +283,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
