@@ -28,13 +28,19 @@ def fetch_gold_price():
         r = requests.get(url, timeout=10)
         data = r.json()
 
-        return {
-            "mid": float(data["price_usd"]),
-            "error": None
-        }
+        # Ambil price_usd dari JSON worker
+        price = float(data.get("price_usd", 0))
+
+        if price > 0:
+            return {
+                "mid": price,
+                "error": None
+            }
+        else:
+            return {"mid": 0, "error": "gold"}
+
     except Exception as e:
         return {"mid": 0, "error": str(e)}
-
 
 
 # ======================================================
@@ -132,6 +138,7 @@ def recommend_price(global_price, competitor_df, elasticity=-0.8):
         recommended *= 1.01
 
     return round(recommended, 0)
+
 
 
 
