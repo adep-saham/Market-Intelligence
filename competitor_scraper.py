@@ -62,7 +62,7 @@ def clean_rupiah(text):
 
 def get_ubs_price():
     try:
-        url = "https://old-river-ece0.best-adeprasetyo.workers.dev/get_ubs"
+        url = "https://old-river-ece0.best-adeprasetyo.workers.dev/galeri24"
         res = requests.get(url, timeout=10)
         data = res.json()
         return data
@@ -87,6 +87,7 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
 
 
