@@ -252,6 +252,10 @@ elif menu == "Competitor":
         st.metric("Harga Beli", f"Rp {int(galeri24['beli']):,}" if galeri24 else "N/A")
         st.caption(f"Update: {galeri24['last_update']}" if galeri24 else "Update: —")
 
+    st.markdown("---")
+
+    spot_data = get_gold_price()
+    spot_per_gram = spot_data.get("per_gram")
     run_price_elasticity()
 
         
@@ -283,6 +287,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
