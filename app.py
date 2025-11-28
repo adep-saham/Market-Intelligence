@@ -103,7 +103,6 @@ else:
 # DASHBOARD PAGE
 # ===========================================================
 if menu == "Dashboard":
-st.write("DEBUG:", kitco)
 
     st.title("📊 Dashboard Market Intelligence – Premium")
 
@@ -157,7 +156,7 @@ st.write("DEBUG:", kitco)
                 <h2>N/A</h2>
             </div>
             """, unsafe_allow_html=True)
-
+            st.write("DEBUG:", kitco)
     st.markdown('<div class="section-title">📈 Tren Harga Global</div>', unsafe_allow_html=True)
     st.line_chart(g.set_index("date")["price"], use_container_width=True)
 
@@ -207,6 +206,7 @@ elif menu == "Pricing":
 
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
