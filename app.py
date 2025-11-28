@@ -24,7 +24,6 @@ from competitor_scraper import (
 
 
 
-
 # ===========================================================
 # UI SETUP
 # ===========================================================
@@ -238,8 +237,14 @@ elif menu == "Competitor":
         st.caption("UBS Gold")
         price = get_ubs_price()
         st.write(f"Rp {price:,}" if price else "N/A")
-
-
+    
+    indogold = get_indogold_price()
+    hartadinata = get_hartadinata_price()
+    ubs = get_ubs_price()
+    
+    st.write("IndoGold:", f"Rp {indogold:,}" if indogold else "N/A")
+    st.write("Hartadinata:", f"Rp {hartadinata:,}" if hartadinata else "N/A")
+    st.write("UBS Gold:", f"Rp {ubs:,}" if ubs else "N/A")
 
 # ===========================================================
 # FORECAST PAGE
@@ -268,6 +273,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
