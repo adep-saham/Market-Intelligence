@@ -218,24 +218,26 @@ if menu == "Dashboard":
 # ===========================================================
 # COMPETITOR PAGE
 # ===========================================================
-st.subheader("🏷️ Price Comparison (API)")
+elif menu == "Competitor":
 
-c1, c2, c3 = st.columns(3)
-
-with c1:
-    st.caption("IndoGold")
-    price = get_indogold_price()
-    st.write(f"Rp {price:,}" if price else "N/A")
-
-with c2:
-    st.caption("Hartadinata")
-    price = get_hartadinata_price()
-    st.write(f"Rp {price:,}" if price else "N/A")
-
-with c3:
-    st.caption("UBS Gold")
-    price = get_ubs_price()
-    st.write(f"Rp {price:,}" if price else "N/A")
+    st.subheader("🏷️ Price Comparison (API)")
+    
+    c1, c2, c3 = st.columns(3)
+    
+    with c1:
+        st.caption("IndoGold")
+        price = get_indogold_price()
+        st.write(f"Rp {price:,}" if price else "N/A")
+    
+    with c2:
+        st.caption("Hartadinata")
+        price = get_hartadinata_price()
+        st.write(f"Rp {price:,}" if price else "N/A")
+    
+    with c3:
+        st.caption("UBS Gold")
+        price = get_ubs_price()
+        st.write(f"Rp {price:,}" if price else "N/A")
 
 
 
@@ -266,6 +268,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
