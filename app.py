@@ -224,6 +224,10 @@ if menu == "Dashboard":
 # COMPETITOR PAGE
 # ===========================================================
 
+# ===========================================================
+# COMPETITOR PAGE
+# ===========================================================
+
 elif menu == "Competitor":
     st.title("🏷 Competitor & Pricing Intelligence")
 
@@ -243,7 +247,7 @@ elif menu == "Competitor":
         st.metric("Harga Jual", f"Rp {indogold['jual']:,}" if indogold else "N/A")
         st.metric("Harga Beli", f"Rp {indogold['beli']:,}" if indogold else "N/A")
         st.caption("Update: —")
-    
+
     # ============================
     # HARTADINATA (EMASKU)
     # ============================
@@ -252,7 +256,7 @@ elif menu == "Competitor":
         st.metric("Harga Jual", f"Rp {hartadinata['jual']:,}" if hartadinata else "N/A")
         st.metric("Harga Beli", f"Rp {hartadinata['beli']:,}" if hartadinata else "N/A")
         st.caption(f"Update: {hartadinata['last_update']}" if hartadinata else "Update: —")
-    
+
     # ============================
     # GALERI 24 (Pegadaian)
     # ============================
@@ -263,18 +267,16 @@ elif menu == "Competitor":
         st.caption(f"Update: {galeri24['last_update']}" if galeri24 else "Update: —")
 
     st.markdown("---")
-    
-    
-   # gunakan nilai yang sudah dihitung di Dashboard
-    spot_per_gram = gold_per_gram_idr  # IDR per gram
 
+    # ===========================================================
+    #  SPOT GOLD UNTUK ELASTICITY (IDR/GRAM)
+    # ===========================================================
+    # GUNAKAN NILAI GLOBAL DARI KITCO YANG SUDAH PASTI ADA
+    spot_per_gram = gold_per_gram_idr  # float IDR/gram
+
+    # Jalankan modul price elasticity
     run_price_elasticity(spot_per_gram)
 
-    if spot_data is None:
-        st.error("Gagal mengambil data spot emas — API kosong / error.")
-        spot_per_gram = 0
-    else:
-        spot_per_gram = float(spot_data["gram"])
 
 
 # ===========================================================
@@ -304,6 +306,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
