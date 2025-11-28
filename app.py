@@ -77,7 +77,7 @@ comp = load_competitor()
 sales = load_sales()
 traffic = load_traffic()
 
-kitco = fetch_gold_price_kitco()
+kitco = fetch_gold_price_yahoo()
 usdidr = fetch_usdidr()
 
 lm_price = g["price"].iloc[-1]
@@ -195,4 +195,5 @@ elif menu == "Pricing":
 
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
