@@ -30,7 +30,7 @@ def get_indogold_price():
 # ===================================================
 # 2. SCRAPER HARTADINATA (emasmu.co.id)
 # ===================================================
-def get_hartadinata_price_html():
+def get_hartadinata_price():
     try:
         url = "https://emasku.co.id/price"
         headers = {"User-Agent": "Mozilla/5.0"}
@@ -38,25 +38,20 @@ def get_hartadinata_price_html():
 
         soup = BeautifulSoup(res.text, "html.parser")
 
-        # cari baris '1 gr'
+        # Cari baris '1 gr'
         row = soup.find("tr", string=lambda x: x and "1 gr" in x)
         if not row:
             return None
 
         cols = row.find_all("td")
-        if len(cols) < 3:
-            return None
-
         harga_beli = int(cols[1].text.replace("Rp", "").replace(".", "").strip())
         harga_jual = int(cols[2].text.replace("Rp", "").replace(".", "").strip())
 
         return {"jual": harga_jual, "beli": harga_beli}
 
     except Exception as e:
-        print("ERROR HARTADINATA HTML:", e)
+        print("ERROR HARTADINATA:", e)
         return None
-
-
 
 
 # ===================================================
@@ -72,6 +67,7 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
 
 
