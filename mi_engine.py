@@ -24,35 +24,39 @@ def load_traffic(path="data/traffic_website.csv"):
 
 def fetch_gold_price_yahoo():
     """
-    Ambil harga emas COMEX (GC=F) dari Yahoo Finance.
-    Ini gratis dan stabil.
+    Ambil harga emas COMEX GC=F dari Yahoo Finance.
+    Sudah pakai 3 fallback agar tidak pernah N/A.
     """
-    url = "https://query1.finance.yahoo.com/v8/finance/chart/GC=F"
+    url = "https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=1d"
 
     try:
-        r = requests.get(url, timeout=6)
+        r = requests.get(url, timeout=8)
         data = r.json()
 
         result = data["chart"]["result"][0]
         meta = result["meta"]
 
-        # Harga emas (USD/oz)
-        gold_price = float(meta["regularMarketPrice"])
+        # Fallback 1: normal
+        if "regularMarketPrice" in meta:
+            price = float(meta["regularMarketPrice"])
+            return {"mid": price, "error": None}
 
-        return {
-            "mid": gold_price,
-            "bid": gold_price,
-            "ask": gold_price,
-            "error": None
-        }
+        # Fallback 2: lastClose
+        if "chartPreviousClose" in meta:
+            price = float(meta["chartPreviousClose"])
+            return {"mid": price, "error": None}
+
+        # Fallback 3: ambil dari data close array
+        close_data = result.get("indicators", {}).get("quote", [{}])[0].get("close", [])
+        close_data = [c for c in close_data if c is not None]
+        if close_data:
+            return {"mid": float(close_data[-1]), "error": None}
+
+        # Kalau semua gagal
+        return {"mid": 0, "error": "No price data found"}
 
     except Exception as e:
-        return {
-            "mid": 0,
-            "error": str(e)
-        }
-
-
+        return {"mid": 0, "error": str(e)}
 
 
 # ======================================================
@@ -150,6 +154,7 @@ def recommend_price(global_price, competitor_df, elasticity=-0.8):
         recommended *= 1.01
 
     return round(recommended, 0)
+
 
 
 
