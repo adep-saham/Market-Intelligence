@@ -32,35 +32,22 @@ def get_indogold_price():
 # ===================================================
 def get_hartadinata_price():
     try:
-        url = "https://emasku.co.id/price"
+        url = "https://emasku.co.id/api/v1/branding/prices/one"
         headers = {"User-Agent": "Mozilla/5.0"}
-        res = requests.get(url, headers=headers, timeout=10)
+        res = requests.get(url, headers=headers, timeout=10).json()
 
-        soup = BeautifulSoup(res.text, "html.parser")
-
-        # Cari semua <td> yang mengandung teks "1 gr"
-        td = soup.find("td", string=lambda x: x and ("1 gr" in x or "1gr" in x))
-        if not td:
-            print("Tidak menemukan baris 1 gr!")
+        if res.get("code") != 200:
             return None
 
-        row = td.find_parent("tr")
-        cols = row.find_all("td")
-
-        # Kolom biasanya:
-        # 0 = Gramasi
-        # 1 = Basic Price
-        # 2 = Buyback Price
-        harga_jual = int(cols[1].text.replace("Rp", "").replace(".", "").strip())
-        harga_beli = int(cols[2].text.replace("Rp", "").replace(".", "").strip())
+        data = res.get("data", {})
 
         return {
-            "jual": harga_jual,
-            "beli": harga_beli
+            "jual": int(data.get("latest_price")),
+            "beli": int(data.get("buyback_price"))
         }
 
     except Exception as e:
-        print("ERROR HARTADINATA:", e)
+        print("ERROR Hartadinata:", e)
         return None
 
 
@@ -78,6 +65,7 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
 
 
