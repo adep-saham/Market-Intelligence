@@ -62,36 +62,24 @@ def clean_rupiah(text):
 
 def get_ubs_price():
     try:
-        url = "https://www.indogold.id/home/get_data_pricelist"
+        proxy_url = "https://old-river-ece0.best-adeprasetyo.workers.dev/"   # ganti URL worker kamu
+        response = requests.get(proxy_url, timeout=10)
 
-        headers = {
-            "Origin": "https://www.indogold.id",
-            "Referer": "https://www.indogold.id/harga-emas-hari-ini",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-            "Accept": "*/*"
-        }
-
-        form = {
-            "form": '{"product":"UBS_5"}',
-            "simulasi-token": "de15246fb6f274dbd807684c0ca0b807"
-        }
-
-        response = requests.post(url, data=form, headers=headers, timeout=10)
-        print("UBS RAW:", response.text)   # debugging
+        if response.status_code != 200:
+            return None
 
         data = response.json()
+        denoms = data["data"]["data_denom"]["1.0"]["Tahun 2025"]
 
-        # gunakan pecahan 1 gram (atau yang paling sering dipakai)
-        denom = data["data"]["data_denom"]["1.0"]["Tahun 2025"]
-
-        harga_jual = int(denom["harga"].replace("Rp. ", "").replace(".", ""))
-        harga_beli = int(denom["harga_buyback"].replace("Rp. ", "").replace(".", ""))
+        harga_jual = int(denoms["harga"].replace("Rp. ", "").replace(".", ""))
+        harga_beli = int(denoms["harga_buyback"].replace("Rp. ", "").replace(".", ""))
 
         return {"jual": harga_jual, "beli": harga_beli}
 
     except Exception as e:
-        print("UBS Error:", e)
+        print("UBS error:", e)
         return None
+
 
 
 
@@ -109,6 +97,7 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
 
 
