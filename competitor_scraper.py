@@ -61,7 +61,7 @@ def get_ubs_price():
         }
 
         resp = requests.post(url, headers=headers, timeout=10)
-
+        print("RAW UBS:", resp.text[:500])
         if resp.status_code != 200:
             print("UBS Error: status", resp.status_code)
             return None
@@ -107,6 +107,7 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
 
 
