@@ -220,7 +220,7 @@ elif menu == "Competitor":
     indogold = get_indogold_price()
     hartadinata = get_hartadinata_price()
     ubs = get_ubs_price()
-  
+    print("DEBUG — UBS:", ubs)
     st.subheader("📦 Price Comparison (API)")
     
     col1, col2, col3 = st.columns(3)
@@ -282,6 +282,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
