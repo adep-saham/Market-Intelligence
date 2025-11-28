@@ -143,8 +143,16 @@ if menu == "Dashboard":
             </div>
             """, unsafe_allow_html=True)
 
-    if kitco_idr:
-        st.metric("Harga Kitco (IDR)", f"Rp {kitco_idr:,.0f}")
+    if kitco["mid"] > 0:
+    st.markdown(f"""
+    <div class="kpi">
+        <p>Yahoo Gold (COMEX)</p>
+        <h2>${kitco["mid"]:.2f}</h2>
+    </div>
+    """, unsafe_allow_html=True)
+    else:
+    st.warning(f"Yahoo Finance API error: {kitco['error']}")
+
 
     st.markdown('<div class="section-title">📈 Tren Harga Global</div>', unsafe_allow_html=True)
     st.line_chart(g.set_index("date")["price"], use_container_width=True)
@@ -195,5 +203,6 @@ elif menu == "Pricing":
 
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
