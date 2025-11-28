@@ -237,11 +237,16 @@ elif menu == "Competitor":
 # Hartadinata
 # ==========================
     with col2:
-        st.write("### Hartadinata")
-        st.metric("Harga Jual", f"Rp {hartadinata['jual']:,}" if hartadinata else "N/A")
-        st.metric("Harga Beli", f"Rp {hartadinata['beli']:,}" if hartadinata else "N/A")
+        st.write("### Hartadinata (Emasku)")
 
-        print("HRTA:", get_hartadinata_price())
+        if hartadinata:
+            st.metric("Harga Jual", f"Rp {hartadinata['jual']:,}")
+            st.metric("Harga Beli", f"Rp {hartadinata['beli']:,}")
+            st.caption(f"Update: {hartadinata.get('last_update','—')}")
+        else:
+            st.metric("Harga Jual", "N/A")
+            st.metric("Harga Beli", "N/A")
+            st.caption("Update: —")
         
 # ==========================
 # Galeri 24 (Pegadaian)
@@ -288,6 +293,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
