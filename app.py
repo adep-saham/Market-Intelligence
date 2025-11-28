@@ -17,7 +17,7 @@ from mi_engine import (
     fetch_usdidr
 )
 
-from competitor_scraper import get_indogold_price, get_hartadinata_price
+from competitor_scraper import get_indogold_price, get_hartadinata_price, get_ubs_price
 
 
 # ===========================================================
@@ -241,6 +241,15 @@ elif menu == "Competitor":
 
         print("HRTA:", get_hartadinata_price())
 
+        ubs = get_ubs_price()
+        
+        col3.subheader("UBS Gold")
+        col3.metric("Harga Jual", f"Rp {ubs['jual']:,}" if ubs else "N/A")
+        col3.metric("Harga Beli", f"Rp {ubs['beli']:,}" if ubs else "N/A")
+        
+        
+
+
 # ===========================================================
 # FORECAST PAGE
 # ===========================================================
@@ -268,6 +277,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
