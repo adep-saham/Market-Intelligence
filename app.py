@@ -103,6 +103,7 @@ else:
 # DASHBOARD PAGE
 # ===========================================================
 if menu == "Dashboard":
+st.write("DEBUG:", kitco)
 
     st.title("📊 Dashboard Market Intelligence – Premium")
 
@@ -206,6 +207,7 @@ elif menu == "Pricing":
 
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
