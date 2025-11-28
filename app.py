@@ -254,7 +254,7 @@ elif menu == "Competitor":
 
     st.markdown("---")
 
-    spot_data = get_gold_price()
+    spot_data = spot_data = get_world_gold()
     spot_per_gram = spot_data.get("per_gram")
     run_price_elasticity(spot_per_gram)
 
@@ -287,6 +287,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
