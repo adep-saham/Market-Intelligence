@@ -222,6 +222,17 @@ if menu == "Dashboard":
 elif menu == "Competitor":
     st.title("🏷 Competitor Intelligence")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+    ubs = get_ubs_gold()
+    halim = get_king_halim()
+    harta = get_hartadinata()
+    indo = get_indogold()
+    antam = get_antam_butik()
+    
+    st.metric("UBS Gold", ubs)
+    st.metric("King Halim", halim)
+    st.metric("Hartadinata", harta)
+    st.metric("IndoGold", indo)
+    st.metric("Antam Butik", antam)
 
 # ===========================================================
 # FORECAST PAGE
@@ -250,6 +261,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
