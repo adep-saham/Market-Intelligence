@@ -79,7 +79,7 @@ traffic = load_traffic()
 
 kitco = fetch_gold_price()
 usdidr = fetch_usdidr()
-
+st.write("DEBUG:", kitco)
 lm_price = g["price"].iloc[-1]
 gap = detect_price_gap(lm_price, comp)
 forecast_df = forecast_demand(sales)
@@ -207,6 +207,7 @@ elif menu == "Pricing":
 
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
