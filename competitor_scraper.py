@@ -60,9 +60,10 @@ def clean_rupiah(text):
 def get_ubs_price():
     try:
         url = "https://www.indogold.id/home/get_data_pricelist"
-        
+
         payload = {
-            "type": "UBS"    # ⚠️ WAJIB
+            "type": "pricelist",
+            "type_gold": "ubs"
         }
 
         headers = {
@@ -73,11 +74,11 @@ def get_ubs_price():
         resp = requests.post(url, data=payload, headers=headers, timeout=10)
 
         raw = resp.text
-        print("DEBUG UBS RAW:", raw[:200])  # cek data mentah
+        print("DEBUG UBS RAW:", raw[:300])
 
         data = json.loads(raw)
 
-        # Ambil pecahan 1 gram
+        # Pecahan 1 gram
         one_gram = data["data"]["data_denom"]["1.0"]["Tahun 2025"]
 
         jual = clean_rupiah(one_gram["harga"])
@@ -88,6 +89,7 @@ def get_ubs_price():
     except Exception as e:
         print("UBS ERROR:", e)
         return None
+
 
 
 # ===================================================
@@ -103,6 +105,7 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
 
 
