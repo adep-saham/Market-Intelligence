@@ -18,7 +18,7 @@ from mi_engine import (
 )
 
 from competitor_scraper import get_indogold_price, get_hartadinata_price, get_galeri24_price
-
+from price_elasticity import run_price_elasticity
 
 # ===========================================================
 # UI SETUP
@@ -252,7 +252,7 @@ elif menu == "Competitor":
         st.metric("Harga Beli", f"Rp {int(galeri24['beli']):,}" if galeri24 else "N/A")
         st.caption(f"Update: {galeri24['last_update']}" if galeri24 else "Update: —")
 
-
+    run_price_elasticity()
 
         
 
@@ -283,6 +283,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
