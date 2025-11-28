@@ -106,75 +106,77 @@ if menu == "Dashboard":
 
     st.title("📊 Dashboard Market Intelligence – Premium")
 
-    col1, col2, col3, col4 = st.columns(4)
+    # HARGA EMAS - NEW CLEAN UI
 
-    # Harga LM global (CSV)
-    with col1:
+# Buat 5 kolom
+c1, c2, c3, c4, c5 = st.columns(5)
+
+# Harga Spot (USD)
+with c1:
+    if kitco.get("error"):
+        st.warning("⚠ Gold API Error")
+    else:
         st.markdown(f"""
         <div class="kpi">
-            <p>Harga Global (CSV)</p>
-            <h2>Rp {lm_price:,.0f}</h2>
+            <p>Gold Price (Spot)</p>
+            <h2>${gold_usd:,.2f}</h2>
         </div>
         """, unsafe_allow_html=True)
 
-    # Kompetitor
-    with col2:
+# Harga Spot (IDR)
+with c2:
+    if not kitco.get("error"):
         st.markdown(f"""
         <div class="kpi">
-            <p>Avg Kompetitor</p>
-            <h2>Rp {comp["price"].mean():,.0f}</h2>
+            <p>Gold Price (IDR)</p>
+            <h2>Rp {gold_idr:,.0f}</h2>
         </div>
         """, unsafe_allow_html=True)
 
-    # Harga rekomendasi
-    with col3:
+# Harga per Gram (IDR)
+with c3:
+    if not kitco.get("error"):
         st.markdown(f"""
         <div class="kpi">
-            <p>Harga Rekomendasi</p>
-            <h2>Rp {recommended_price:,.0f}</h2>
+            <p>Gold Price / Gram (IDR)</p>
+            <h2>Rp {gold_per_gram_idr:,.0f}</h2>
         </div>
         """, unsafe_allow_html=True)
 
-    # Harga emas dunia (Spot)
-    with col4:
-        if kitco.get("error"):
-            st.warning("⚠ Gold API Error")
-        else:
-            gold_usd = kitco["mid"]
-            gold_idr = gold_usd * usdidr
+# Day-1
+with c4:
+    if day1_usd:
+        st.markdown(f"""
+        <div class="kpi">
+            <p>Day-1 Gold Price</p>
+            <h2>${day1_usd:,.2f}</h2>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown(f"""
+        <div class="kpi">
+            <p>Day-1 Gold Price</p>
+            <h2>N/A</h2>
+        </div>
+        """, unsafe_allow_html=True)
 
-            # Harga per gram
-            gold_per_gram_usd = gold_usd / 31.1034768
-            gold_per_gram_idr = gold_per_gram_usd * usdidr
+# Day-2
+with c5:
+    if day2_usd:
+        st.markdown(f"""
+        <div class="kpi">
+            <p>Day-2 Gold Price</p>
+            <h2>${day2_usd:,.2f}</h2>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown(f"""
+        <div class="kpi">
+            <p>Day-2 Gold Price</p>
+            <h2>N/A</h2>
+        </div>
+        """, unsafe_allow_html=True)
 
-            # Day-1 & Day-2
-            day1_usd = kitco.get("day1")
-            day2_usd = kitco.get("day2")
-
-            day1_idr = day1_usd * usdidr if day1_usd else None
-            day2_idr = day2_usd * usdidr if day2_usd else None
-
-            st.markdown(f"""
-            <div class="kpi">
-                <p>Gold Price (Spot)</p>
-                <h2>${gold_usd:,.2f}</h2>
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.metric("Gold Price (IDR)", f"Rp {gold_idr:,.0f}")
-            st.metric("Gold Price / Gram (IDR)", f"Rp {gold_per_gram_idr:,.0f}")
-
-            # Day-1
-            if day1_usd:
-                st.metric("Day-1 Gold Price", f"${day1_usd:,.2f}", f"Rp {day1_idr:,.0f}")
-            else:
-                st.metric("Day-1 Gold Price", "N/A")
-
-            # Day-2
-            if day2_usd:
-                st.metric("Day-2 Gold Price", f"${day2_usd:,.2f}", f"Rp {day2_idr:,.0f}")
-            else:
-                st.metric("Day-2 Gold Price", "N/A")
 
     # Grafik & tabel setelah semua KPI
     st.markdown('<div class="section-title">📈 Tren Harga Global</div>', unsafe_allow_html=True)
@@ -227,6 +229,7 @@ elif menu == "Pricing":
 
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
