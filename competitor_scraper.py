@@ -38,20 +38,31 @@ def get_hartadinata_price():
 
         soup = BeautifulSoup(res.text, "html.parser")
 
-        # Cari baris '1 gr'
-        row = soup.find("tr", string=lambda x: x and "1 gr" in x)
-        if not row:
+        # Cari semua <td> yang mengandung teks "1 gr"
+        td = soup.find("td", string=lambda x: x and ("1 gr" in x or "1gr" in x))
+        if not td:
+            print("Tidak menemukan baris 1 gr!")
             return None
 
+        row = td.find_parent("tr")
         cols = row.find_all("td")
-        harga_beli = int(cols[1].text.replace("Rp", "").replace(".", "").strip())
-        harga_jual = int(cols[2].text.replace("Rp", "").replace(".", "").strip())
 
-        return {"jual": harga_jual, "beli": harga_beli}
+        # Kolom biasanya:
+        # 0 = Gramasi
+        # 1 = Basic Price
+        # 2 = Buyback Price
+        harga_jual = int(cols[1].text.replace("Rp", "").replace(".", "").strip())
+        harga_beli = int(cols[2].text.replace("Rp", "").replace(".", "").strip())
+
+        return {
+            "jual": harga_jual,
+            "beli": harga_beli
+        }
 
     except Exception as e:
         print("ERROR HARTADINATA:", e)
         return None
+
 
 
 # ===================================================
@@ -67,6 +78,7 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
 
 
