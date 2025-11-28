@@ -62,7 +62,7 @@ def clean_rupiah(text):
 
 def get_ubs_price():
     try:
-        proxy_url = "https://old-river-ece0.best-adeprasetyo.workers.dev/"   # ganti URL worker kamu
+        proxy_url = "https://old-river-ece0.best-adeprasetyo.workers.dev/get_ubs"   # ganti URL worker kamu
         response = requests.get(proxy_url, timeout=10)
 
         if response.status_code != 200:
@@ -97,6 +97,7 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
 
 
