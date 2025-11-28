@@ -59,26 +59,29 @@ def clean_rupiah(text):
 
 def get_ubs_price():
     try:
+        import requests
+        import json
+
         url = "https://www.indogold.id/home/get_data_pricelist"
 
-        payload = {
-            "type": "pricelist",
-            "type_gold": "ubs"
-        }
+        # Payload EXACT dari browser
+        payload = "type=pricelist&type_gold=ubs"
 
         headers = {
-            "User-Agent": "Mozilla/5.0",
-            "Content-Type": "application/x-www-form-urlencoded"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "Origin": "https://www.indogold.id",
+            "Referer": "https://www.indogold.id/harga-emas-fisik/",
+            "X-Requested-With": "XMLHttpRequest",
+            "Accept": "*/*",
         }
 
-        resp = requests.post(url, data=payload, headers=headers, timeout=10)
+        response = requests.post(url, data=payload, headers=headers, timeout=10)
 
-        raw = resp.text
-        print("DEBUG UBS RAW:", raw[:300])
+        print("DEBUG UBS RAW:", response.text[:300])  # Debug penting
 
-        data = json.loads(raw)
+        data = json.loads(response.text)
 
-        # Pecahan 1 gram
         one_gram = data["data"]["data_denom"]["1.0"]["Tahun 2025"]
 
         jual = clean_rupiah(one_gram["harga"])
@@ -87,7 +90,7 @@ def get_ubs_price():
         return {"jual": jual, "beli": beli}
 
     except Exception as e:
-        print("UBS ERROR:", e)
+        print("UBS ERROR =>", e)
         return None
 
 
@@ -105,6 +108,7 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
 
 
