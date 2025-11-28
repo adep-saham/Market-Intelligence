@@ -239,7 +239,7 @@ elif menu == "Competitor":
         st.metric("Harga Jual", f"Rp {hartadinata['jual']:,}" if hartadinata else "N/A")
         st.metric("Harga Beli", f"Rp {hartadinata['beli']:,}" if hartadinata else "N/A")
 
-print("HRTA:", get_hartadinata_price())
+        print("HRTA:", get_hartadinata_price())
 
 # ===========================================================
 # FORECAST PAGE
@@ -268,6 +268,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
