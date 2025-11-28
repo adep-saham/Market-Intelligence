@@ -55,7 +55,9 @@ def get_ubs_price():
         url = "https://www.indogold.id/home/get_data_pricelist"
         headers = {
             "User-Agent": "Mozilla/5.0",
-            "Content-Type": "application/json"
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://www.indogold.id",
+            "Referer": "https://www.indogold.id/",
         }
 
         resp = requests.post(url, headers=headers, timeout=10)
@@ -105,6 +107,7 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
 
 
