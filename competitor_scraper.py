@@ -1,4 +1,6 @@
 import requests
+import json
+import re
 
 # ===================================================
 # 1. SCRAPER INDOGOLD
@@ -50,41 +52,42 @@ def get_hartadinata_price():
         print("ERROR Hartadinata:", e)
         return None
 
+def clean_rupiah(text):
+    if not text:
+        return None
+    return int(re.sub(r"[^\d]", "", text))
+
 def get_ubs_price():
     try:
         url = "https://www.indogold.id/home/get_data_pricelist"
         
-        headers = {
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "X-Requested-With": "XMLHttpRequest",
-            "User-Agent": "Mozilla/5.0"
+        payload = {
+            "type": "UBS"    # ⚠️ WAJIB
         }
-        
-        data = "tahun=2025"
 
-        resp = requests.post(url, headers=headers, data=data, timeout=10)
-        
-        # Debug
-        print("UBS STATUS:", resp.status_code)
-        print("UBS RAW:", resp.text[:300])
+        headers = {
+            "User-Agent": "Mozilla/5.0",
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
 
-        js = resp.json()
+        resp = requests.post(url, data=payload, headers=headers, timeout=10)
 
-        # DATA tersimpan di:
-        # js["data"]["data_denom"]
-        denom = js["data"]["data_denom"]
+        raw = resp.text
+        print("DEBUG UBS RAW:", raw[:200])  # cek data mentah
 
-        g1 = denom["1.0"]["Tahun 2025"]
+        data = json.loads(raw)
 
-        jual = int(g1["harga"].replace("Rp.", "").replace(",", "").strip())
-        beli = int(g1["harga_buyback"].replace("Rp.", "").replace(",", "").strip())
+        # Ambil pecahan 1 gram
+        one_gram = data["data"]["data_denom"]["1.0"]["Tahun 2025"]
+
+        jual = clean_rupiah(one_gram["harga"])
+        beli = clean_rupiah(one_gram["harga_buyback"])
 
         return {"jual": jual, "beli": beli}
 
     except Exception as e:
-        print("ERROR UBS:", e)
+        print("UBS ERROR:", e)
         return None
-
 
 
 # ===================================================
@@ -100,6 +103,7 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
 
 
