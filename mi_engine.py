@@ -23,25 +23,15 @@ def load_traffic(path="data/traffic_website.csv"):
 # ======================================================
 
 def fetch_gold_price():
-    """
-    Ambil harga emas dari Coingecko.
-    Coingecko memberikan harga per gram, jadi harus dikonversi ke troy ounce.
-    """
     try:
-        url = "https://api.coingecko.com/api/v3/simple/price?ids=gold&vs_currencies=usd"
-        r = requests.get(url, timeout=8)
+        url = "https://wandering-cell-d423.best-adeprasetyo.workers.dev/"
+        r = requests.get(url, timeout=10)
         data = r.json()
 
-        price_per_gram = float(data["gold"]["usd"])
-
-        # konversi gram → troy ounce (XAU)
-        price_per_ounce = price_per_gram * 31.1034768
-
         return {
-            "mid": price_per_ounce,
+            "mid": float(data["price_usd"]),
             "error": None
         }
-
     except Exception as e:
         return {"mid": 0, "error": str(e)}
 
@@ -142,6 +132,7 @@ def recommend_price(global_price, competitor_df, elasticity=-0.8):
         recommended *= 1.01
 
     return round(recommended, 0)
+
 
 
 
