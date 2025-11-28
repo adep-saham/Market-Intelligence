@@ -18,7 +18,11 @@ from mi_engine import (
 )
 
 from competitor_scraper import get_indogold_price, get_hartadinata_price, get_galeri24_price
-from price_elasticity import run_price_elasticity
+from price_elasticity import (
+    run_price_elasticity,
+    get_world_gold   # ← WAJIB agar tidak NameError
+)
+
 
 
 # ===========================================================
@@ -254,9 +258,9 @@ elif menu == "Competitor":
         st.caption(f"Update: {galeri24['last_update']}" if galeri24 else "Update: —")
 
     st.markdown("---")
-
-    spot_data = spot_data = get_world_gold()
-    spot_per_gram = spot_data.get("per_gram")
+    
+    spot_price_usd = get_world_gold()         # return float
+    spot_per_gram = spot_price_usd / 31.1035  # convert to per gram
     run_price_elasticity(spot_per_gram)
 
         
@@ -288,6 +292,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
