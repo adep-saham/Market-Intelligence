@@ -19,14 +19,7 @@ from mi_engine import (
 
 from competitor_scraper import get_indogold_price, get_hartadinata_price, get_galeri24_price
 from price_elasticity import run_price_elasticity
-from price_elasticity import (
-    get_galeri24,
-    get_indogold,
-    get_hrta,
-    get_world_gold,   # ← WAJIB
-    load_my_price,
-    calculate_elasticity
-)
+
 
 # ===========================================================
 # UI SETUP
@@ -295,6 +288,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
