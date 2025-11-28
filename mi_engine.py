@@ -24,22 +24,23 @@ def load_traffic(path="data/traffic_website.csv"):
 
 def fetch_gold_price():
     """
-    Gold price dari TradingEconomics (CDN, tidak diblokir, stabil).
-    GC1:COM = COMEX Gold Futures.
+    Ambil harga emas dari Coingecko.
+    Coingecko memberikan harga per gram, jadi harus dikonversi ke troy ounce.
     """
     try:
-        url = "https://api.tradingeconomics.com/markets/commodities"
-        r = requests.get(url, timeout=10)
+        url = "https://api.coingecko.com/api/v3/simple/price?ids=gold&vs_currencies=usd"
+        r = requests.get(url, timeout=8)
         data = r.json()
 
-        for item in data:
-            if item.get("symbol") == "GC1:COM":
-                return {
-                    "mid": float(item["close"]),
-                    "error": None
-                }
+        price_per_gram = float(data["gold"]["usd"])
 
-        return {"mid": 0, "error": "Gold symbol not found"}
+        # konversi gram → troy ounce (XAU)
+        price_per_ounce = price_per_gram * 31.1034768
+
+        return {
+            "mid": price_per_ounce,
+            "error": None
+        }
 
     except Exception as e:
         return {"mid": 0, "error": str(e)}
@@ -141,6 +142,7 @@ def recommend_price(global_price, competitor_df, elasticity=-0.8):
         recommended *= 1.01
 
     return round(recommended, 0)
+
 
 
 
