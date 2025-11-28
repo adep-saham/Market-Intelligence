@@ -52,18 +52,31 @@ def generate_alerts(global_spike, competitor_war, traffic_drop):
     return alerts
 
 # -------------------------------
-# 4. Forecasting
+# 4. Forecasting (Tanpa sklearn)
 # -------------------------------
 def forecast_demand(sales_df, days_forward=7):
     sales_df = sales_df.dropna()
+
+    # t = 0,1,2,3,...
     sales_df["t"] = range(len(sales_df))
-    X = sales_df[["t"]]
-    y = sales_df["qty"]
-    model = LinearRegression()
-    model.fit(X, y)
-    future = pd.DataFrame({"t": range(len(sales_df), len(sales_df) + days_forward)})
-    future["forecast_qty"] = model.predict(future[["t"]])
-    return future
+
+    # Manual linear regression
+    x = sales_df["t"].values
+    y = sales_df["qty"].values
+
+    # hitung slope dan intercept
+    n = len(x)
+    slope = (n * (x*y).sum() - x.sum()*y.sum()) / (n*(x**2).sum() - (x.sum())**2)
+    intercept = (y.sum() - slope * x.sum()) / n
+
+    # predict future
+    future_t = range(len(sales_df), len(sales_df) + days_forward)
+    forecasts = [slope * t + intercept for t in future_t]
+
+    return pd.DataFrame({
+        "t": list(future_t),
+        "forecast_qty": forecasts
+    })
 
 # -------------------------------
 # 5. Pricing Recommendation Engine
