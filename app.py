@@ -106,6 +106,24 @@ if menu == "Dashboard":
 
     st.title("📊 Dashboard Market Intelligence – Premium")
 
+    # ===============================
+    # FIX: DEFINE GOLD VARIABLES
+    # ===============================
+    gold_usd = kitco.get("mid", 0)
+    gold_idr = gold_usd * usdidr
+    gold_per_gram_usd = gold_usd / 31.1034768
+    gold_per_gram_idr = gold_per_gram_usd * usdidr
+
+    day1_usd = kitco.get("day1", None)
+    day2_usd = kitco.get("day2", None)
+
+    day1_idr = day1_usd * usdidr if day1_usd else None
+    day2_idr = day2_usd * usdidr if day2_usd else None
+
+    # HARGA EMAS - NEW CLEAN UI
+    c1, c2, c3, c4, c5 = st.columns(5)
+
+    
     # HARGA EMAS - NEW CLEAN UI
 
     # Buat 5 kolom
@@ -229,6 +247,7 @@ elif menu == "Pricing":
 
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
