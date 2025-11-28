@@ -213,6 +213,8 @@ if menu == "Dashboard":
 # ===========================================================
 # COMPETITOR PAGE
 # ===========================================================
+print("DEBUG UBS:", get_ubs_price())
+
 elif menu == "Competitor":
     st.title("🏷 Competitor & Pricing Intelligence")
 
@@ -281,6 +283,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
