@@ -1,12 +1,18 @@
 import streamlit as st
+import pandas as pd
 
 st.set_page_config(page_title="MI Logam Mulia", layout="wide")
 
-st.title("✔ Aplikasi Streamlit Berhasil Jalan")
-st.write("Ini adalah versi NORMAL tanpa modul MI.")
+st.title("📊 Market Intelligence – Step 1")
+st.write("Tahap ini menampilkan data dummy terlebih dahulu.")
 
-st.subheader("Tes Komponen UI")
-st.write("Jika halaman ini muncul, berarti Streamlit Anda tidak error.")
+# === Dummy Data ===
+global_price = pd.DataFrame({
+    "date": pd.date_range("2024-01-01", periods=7),
+    "price": [1000000, 1002000, 1001500, 1003000, 1002500, 1004000, 1003500]
+})
 
-st.metric("Harga Emas (Dummy)", "Rp 1.234.000", "+0.20%")
-st.line_chart([1,2,3,4,5,6])
+st.subheader("📈 Harga Emas Global (Dummy)")
+st.line_chart(global_price.set_index("date")["price"])
+
+st.success("Step 1 berhasil. Data dummy tampil normal.")
