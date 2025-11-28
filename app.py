@@ -108,6 +108,7 @@ if menu == "Dashboard":
 
     col1, col2, col3, col4 = st.columns(4)
 
+    # Harga LM global (CSV)
     with col1:
         st.markdown(f"""
         <div class="kpi">
@@ -116,6 +117,7 @@ if menu == "Dashboard":
         </div>
         """, unsafe_allow_html=True)
 
+    # Kompetitor
     with col2:
         st.markdown(f"""
         <div class="kpi">
@@ -124,6 +126,7 @@ if menu == "Dashboard":
         </div>
         """, unsafe_allow_html=True)
 
+    # Harga rekomendasi
     with col3:
         st.markdown(f"""
         <div class="kpi">
@@ -132,44 +135,54 @@ if menu == "Dashboard":
         </div>
         """, unsafe_allow_html=True)
 
+    # Harga emas dunia (Spot)
     with col4:
         if kitco.get("error"):
             st.warning("⚠ Gold API Error")
         else:
+            gold_usd = kitco["mid"]
+            gold_idr = gold_usd * usdidr
+
+            # Harga per gram
+            gold_per_gram_usd = gold_usd / 31.1034768
+            gold_per_gram_idr = gold_per_gram_usd * usdidr
+
+            # Day-1 & Day-2
+            day1_usd = kitco.get("day1")
+            day2_usd = kitco.get("day2")
+
+            day1_idr = day1_usd * usdidr if day1_usd else None
+            day2_idr = day2_usd * usdidr if day2_usd else None
+
             st.markdown(f"""
             <div class="kpi">
                 <p>Gold Price (Spot)</p>
-                <h2>${kitco['mid']:,.2f}</h2>
+                <h2>${gold_usd:,.2f}</h2>
             </div>
             """, unsafe_allow_html=True)
-    
-            gold_idr = kitco["mid"] * usdidr
-            st.metric("Gold Price (IDR)", f"Rp {gold_idr:,.0f}")
-            
-            # Konversi harga per gram
-            gold_per_gram_usd = kitco["mid"] / 31.1034768
-            gold_per_gram_idr = gold_per_gram_usd * usdidr
-            
-            st.metric("Gold Price / Gram (IDR)", f"Rp {gold_per_gram_idr:,.0f}")
-            # Konversi dan perhitungan GOLD
-            gold_usd = kitco["mid"]
-            gold_idr = gold_usd * usdidr
-            
-            gold_per_gram_usd = gold_usd / 31.1034768
-            gold_per_gram_idr = gold_per_gram_usd * usdidr
-            
-            gold_day1_usd = kitco["day1"]
-            gold_day2_usd = kitco["day2"]
-            
-            gold_day1_idr = gold_day1_usd * usdidr if gold_day1_usd else 0
-            gold_day2_idr = gold_day2_usd * usdidr if gold_day2_usd else 0
 
-           
+            st.metric("Gold Price (IDR)", f"Rp {gold_idr:,.0f}")
+            st.metric("Gold Price / Gram (IDR)", f"Rp {gold_per_gram_idr:,.0f}")
+
+            # Day-1
+            if day1_usd:
+                st.metric("Day-1 Gold Price", f"${day1_usd:,.2f}", f"Rp {day1_idr:,.0f}")
+            else:
+                st.metric("Day-1 Gold Price", "N/A")
+
+            # Day-2
+            if day2_usd:
+                st.metric("Day-2 Gold Price", f"${day2_usd:,.2f}", f"Rp {day2_idr:,.0f}")
+            else:
+                st.metric("Day-2 Gold Price", "N/A")
+
+    # Grafik & tabel setelah semua KPI
     st.markdown('<div class="section-title">📈 Tren Harga Global</div>', unsafe_allow_html=True)
     st.line_chart(g.set_index("date")["price"], use_container_width=True)
 
     st.markdown('<div class="section-title">🛒 Gap Kompetitor</div>', unsafe_allow_html=True)
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 # ===========================================================
@@ -214,6 +227,7 @@ elif menu == "Pricing":
 
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
