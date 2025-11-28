@@ -17,13 +17,11 @@ from mi_engine import (
     fetch_usdidr
 )
 from competitor_scraper import (
-    get_ubs_gold,
-    get_king_halim,
-    get_hartadinata,
-    get_indogold,
-    get_antam_butik
+    get_indogold_price,
+    get_hartadinata_price,
+    get_ubs_price
 )
-from competitor_scraper import get_all_competitor_prices
+
 
 
 
@@ -220,25 +218,25 @@ if menu == "Dashboard":
 # ===========================================================
 # COMPETITOR PAGE
 # ===========================================================
-elif menu == "Competitor":
+st.subheader("🏷️ Price Comparison (API)")
 
-    st.header("🔎 Competitor & Pricing Intelligence")
+c1, c2, c3 = st.columns(3)
 
-    with st.spinner("Mengambil data kompetitor..."):
-        competitor_prices = get_all_competitor_prices()
+with c1:
+    st.caption("IndoGold")
+    price = get_indogold_price()
+    st.write(f"Rp {price:,}" if price else "N/A")
 
-    st.subheader("📊 Price Comparison")
-    cols = st.columns(3)
+with c2:
+    st.caption("Hartadinata")
+    price = get_hartadinata_price()
+    st.write(f"Rp {price:,}" if price else "N/A")
 
-    items = list(competitor_prices.items())
+with c3:
+    st.caption("UBS Gold")
+    price = get_ubs_price()
+    st.write(f"Rp {price:,}" if price else "N/A")
 
-    for i, (brand, price) in enumerate(items):
-        with cols[i % 3]:
-            st.metric(
-                label=brand,
-                value=f"Rp {price:,}" if price else "N/A",
-                delta=None
-            )
 
 
 # ===========================================================
@@ -268,6 +266,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
