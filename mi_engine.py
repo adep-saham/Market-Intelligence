@@ -1,4 +1,5 @@
 import pandas as pd
+import requests
 
 # ======================================================
 # 1. DATA LOADER
@@ -18,7 +19,48 @@ def load_traffic(path="data/traffic_website.csv"):
 
 
 # ======================================================
-# 2. COMPETITOR MONITORING
+# 2. KITCO GOLD API (LIVE)
+# ======================================================
+
+def fetch_gold_price_kitco():
+    url = "https://www.kitco.com/json/live_gold.json"
+
+    try:
+        r = requests.get(url, timeout=5)
+        data = r.json()
+
+        bid = float(data["bid"])
+        ask = float(data["ask"])
+        mid = (bid + ask) / 2
+        time = data["time"]
+
+        return {
+            "bid": bid,
+            "ask": ask,
+            "mid": mid,
+            "time": time,
+            "error": None
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+
+# ======================================================
+# 3. USD/IDR API (LIVE)
+# ======================================================
+
+def fetch_usdidr():
+    url = "https://api.exchangerate.host/latest?base=USD&symbols=IDR"
+    try:
+        r = requests.get(url, timeout=5)
+        data = r.json()
+        return data["rates"]["IDR"]
+    except:
+        return 15500  # fallback
+
+
+# ======================================================
+# 4. COMPETITOR MONITORING
 # ======================================================
 
 def detect_price_gap(lm_price, competitor_df):
@@ -30,12 +72,11 @@ def detect_price_gap(lm_price, competitor_df):
     return competitor_df
 
 def near_price_war(competitor_df, threshold=-500):
-    # perang harga jika gap < threshold
     return competitor_df[competitor_df["gap"] < threshold]
 
 
 # ======================================================
-# 3. EARLY WARNING SYSTEM (EWS)
+# 5. EARLY WARNING SYSTEM (EWS)
 # ======================================================
 
 def check_global_price_spike(global_price_df, threshold=1.0):
@@ -64,7 +105,7 @@ def generate_alerts(global_spike, competitor_war, traffic_drop):
 
 
 # ======================================================
-# 4. FORECAST DEMAND (NO SKLEARN – MANUAL LR)
+# 6. FORECAST DEMAND (NO SKLEARN)
 # ======================================================
 
 def forecast_demand(sales_df, days_forward=7):
@@ -73,10 +114,8 @@ def forecast_demand(sales_df, days_forward=7):
 
     x = df["t"].values
     y = df["qty"].values
-
     n = len(x)
 
-    # manual slope & intercept
     slope = (n * (x*y).sum() - x.sum()*y.sum()) / (n*(x**2).sum() - (x.sum()**2))
     intercept = (y.sum() - slope * x.sum()) / n
 
@@ -90,7 +129,7 @@ def forecast_demand(sales_df, days_forward=7):
 
 
 # ======================================================
-# 5. PRICING ENGINE
+# 7. PRICING ENGINE
 # ======================================================
 
 def recommend_price(global_price, competitor_df, elasticity=-0.8):
