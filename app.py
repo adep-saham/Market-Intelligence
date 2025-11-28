@@ -16,11 +16,8 @@ from mi_engine import (
     fetch_gold_price,
     fetch_usdidr
 )
-from competitor_scraper import (
-    get_indogold_buy_price,
-    get_indogold_sell_price
-)
 
+from competitor_scraper import get_indogold_price, get_hartadinata_price
 
 
 # ===========================================================
@@ -219,24 +216,29 @@ if menu == "Dashboard":
 elif menu == "Competitor":
     st.title("🏷 Competitor & Pricing Intelligence")
 
-    with st.container():
-        st.subheader("📊 Price Comparison (Web Scraper)")
-    
-        col1, col2 = st.columns(2)
-    
-        # Ambil harga
-        ig_buy = get_indogold_buy_price()
-        ig_sell = get_indogold_sell_price()
-    
-        with col1:
-            st.write("### IndoGold Buy")
-            st.write(f"Rp {ig_buy:,}" if ig_buy else "N/A")
-    
-        with col2:
-            st.write("### IndoGold Sell")
-            st.write(f"Rp {ig_sell:,}" if ig_sell else "N/A")
+    indogold = get_indogold_price()
+    hartadinata = get_hartadinata_price()
 
+    st.subheader("📦 Price Comparison (API)")
 
+    col1, col2 = st.columns(2)
+
+# ==========================
+# IndoGold
+# ==========================
+    with col1:
+        st.write("### IndoGold")
+        st.metric("Harga Jual", f"Rp {indogold['jual']:,}" if indogold else "N/A")
+        st.metric("Harga Beli", f"Rp {indogold['beli']:,}" if indogold else "N/A")
+
+# ==========================
+# Hartadinata
+# ==========================
+    with col2:
+        st.write("### Hartadinata")
+        st.metric("Harga Jual", f"Rp {hartadinata['jual']:,}" if hartadinata else "N/A")
+        st.metric("Harga Beli", f"Rp {hartadinata['beli']:,}" if hartadinata else "N/A")
+   
 # ===========================================================
 # FORECAST PAGE
 # ===========================================================
@@ -264,6 +266,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
