@@ -53,27 +53,42 @@ def get_hartadinata_price():
 def get_ubs_price():
     try:
         url = "https://www.indogold.id/home/get_data_pricelist"
-        resp = requests.post(url, timeout=10)
+        headers = {
+            "User-Agent": "Mozilla/5.0",
+            "Content-Type": "application/json"
+        }
+
+        resp = requests.post(url, headers=headers, timeout=10)
 
         if resp.status_code != 200:
+            print("UBS Error: status", resp.status_code)
             return None
 
         data = resp.json()
 
-        # Struktur JSON
+        # Pastikan struktur JSON benar
+        if "data" not in data or "data_denom" not in data["data"]:
+            print("UBS Error: struktur tidak sesuai", data)
+            return None
+
         denom = data["data"]["data_denom"]
 
         # Ambil pecahan 1 gram
+        if "1.0" not in denom:
+            print("UBS Error: tidak ada '1.0' dalam denom:", denom.keys())
+            return None
+        
         dat = denom["1.0"]["Tahun 2025"]
 
-        harga_jual = int(dat["harga"].replace("Rp. ", "").replace(",", ""))
-        harga_beli = int(dat["harga_buyback"].replace("Rp. ", "").replace(",", ""))
+        harga_jual = int(dat["harga"].replace("Rp.", "").replace(" ", "").replace(",", ""))
+        harga_beli = int(dat["harga_buyback"].replace("Rp.", "").replace(" ", "").replace(",", ""))
 
         return {"jual": harga_jual, "beli": harga_beli}
 
     except Exception as e:
         print("UBS ERROR:", e)
         return None
+
 
 
 
@@ -90,6 +105,7 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
 
 
