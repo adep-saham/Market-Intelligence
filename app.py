@@ -108,74 +108,74 @@ if menu == "Dashboard":
 
     # HARGA EMAS - NEW CLEAN UI
 
-# Buat 5 kolom
-c1, c2, c3, c4, c5 = st.columns(5)
-
-# Harga Spot (USD)
-with c1:
-    if kitco.get("error"):
-        st.warning("⚠ Gold API Error")
-    else:
-        st.markdown(f"""
-        <div class="kpi">
-            <p>Gold Price (Spot)</p>
-            <h2>${gold_usd:,.2f}</h2>
-        </div>
-        """, unsafe_allow_html=True)
-
-# Harga Spot (IDR)
-with c2:
-    if not kitco.get("error"):
-        st.markdown(f"""
-        <div class="kpi">
-            <p>Gold Price (IDR)</p>
-            <h2>Rp {gold_idr:,.0f}</h2>
-        </div>
-        """, unsafe_allow_html=True)
-
-# Harga per Gram (IDR)
-with c3:
-    if not kitco.get("error"):
-        st.markdown(f"""
-        <div class="kpi">
-            <p>Gold Price / Gram (IDR)</p>
-            <h2>Rp {gold_per_gram_idr:,.0f}</h2>
-        </div>
-        """, unsafe_allow_html=True)
-
-# Day-1
-with c4:
-    if day1_usd:
-        st.markdown(f"""
-        <div class="kpi">
-            <p>Day-1 Gold Price</p>
-            <h2>${day1_usd:,.2f}</h2>
-        </div>
-        """, unsafe_allow_html=True)
-    else:
-        st.markdown(f"""
-        <div class="kpi">
-            <p>Day-1 Gold Price</p>
-            <h2>N/A</h2>
-        </div>
-        """, unsafe_allow_html=True)
-
-# Day-2
-with c5:
-    if day2_usd:
-        st.markdown(f"""
-        <div class="kpi">
-            <p>Day-2 Gold Price</p>
-            <h2>${day2_usd:,.2f}</h2>
-        </div>
-        """, unsafe_allow_html=True)
-    else:
-        st.markdown(f"""
-        <div class="kpi">
-            <p>Day-2 Gold Price</p>
-            <h2>N/A</h2>
-        </div>
-        """, unsafe_allow_html=True)
+    # Buat 5 kolom
+    c1, c2, c3, c4, c5 = st.columns(5)
+    
+    # Harga Spot (USD)
+    with c1:
+        if kitco.get("error"):
+            st.warning("⚠ Gold API Error")
+        else:
+            st.markdown(f"""
+            <div class="kpi">
+                <p>Gold Price (Spot)</p>
+                <h2>${gold_usd:,.2f}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    # Harga Spot (IDR)
+    with c2:
+        if not kitco.get("error"):
+            st.markdown(f"""
+            <div class="kpi">
+                <p>Gold Price (IDR)</p>
+                <h2>Rp {gold_idr:,.0f}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    # Harga per Gram (IDR)
+    with c3:
+        if not kitco.get("error"):
+            st.markdown(f"""
+            <div class="kpi">
+                <p>Gold Price / Gram (IDR)</p>
+                <h2>Rp {gold_per_gram_idr:,.0f}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    # Day-1
+    with c4:
+        if day1_usd:
+            st.markdown(f"""
+            <div class="kpi">
+                <p>Day-1 Gold Price</p>
+                <h2>${day1_usd:,.2f}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div class="kpi">
+                <p>Day-1 Gold Price</p>
+                <h2>N/A</h2>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    # Day-2
+    with c5:
+        if day2_usd:
+            st.markdown(f"""
+            <div class="kpi">
+                <p>Day-2 Gold Price</p>
+                <h2>${day2_usd:,.2f}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div class="kpi">
+                <p>Day-2 Gold Price</p>
+                <h2>N/A</h2>
+            </div>
+            """, unsafe_allow_html=True)
 
 
     # Grafik & tabel setelah semua KPI
@@ -229,6 +229,7 @@ elif menu == "Pricing":
 
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
