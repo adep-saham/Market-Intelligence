@@ -22,43 +22,36 @@ def load_traffic(path="data/traffic_website.csv"):
 # 2. KITCO GOLD API (LIVE)
 # ======================================================
 
-def fetch_gold_price_lbma(api_key="YOUR_METALS_API_KEY"):
+def fetch_gold_price_yahoo():
     """
-    Fetch LBMA Gold Price via Metals-API (akurasi tinggi)
-    XAU = LBMA Gold Spot
+    Ambil harga emas COMEX (GC=F) dari Yahoo Finance.
+    Ini gratis dan stabil.
     """
-
-    url = (
-        f"https://metals-api.com/api/latest"
-        f"?access_key={api_key}"
-        f"&base=USD&symbols=XAU"
-    )
+    url = "https://query1.finance.yahoo.com/v8/finance/chart/GC=F"
 
     try:
-        r = requests.get(url, timeout=8)
+        r = requests.get(url, timeout=6)
         data = r.json()
 
-        # Jika error dari API
-        if "error" in data:
-            return {
-                "mid": 0,
-                "error": data["error"]["info"]
-            }
+        result = data["chart"]["result"][0]
+        meta = result["meta"]
 
-        # Metals-API memberi harga dalam bentuk:
-        # 1 USD = XAU
-        # sehingga harus dibalik:
-        # XAUUSD = 1 / rate
-        rate = float(data["rates"]["XAU"])
-        gold_price_usd = 1 / rate  # Harga emas per troy ounce USD
+        # Harga emas (USD/oz)
+        gold_price = float(meta["regularMarketPrice"])
 
         return {
-            "mid": gold_price_usd,
+            "mid": gold_price,
+            "bid": gold_price,
+            "ask": gold_price,
             "error": None
         }
 
     except Exception as e:
-        return {"mid": 0, "error": str(e)}
+        return {
+            "mid": 0,
+            "error": str(e)
+        }
+
 
 
 
@@ -157,5 +150,6 @@ def recommend_price(global_price, competitor_df, elasticity=-0.8):
         recommended *= 1.01
 
     return round(recommended, 0)
+
 
 
