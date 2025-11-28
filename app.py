@@ -248,7 +248,7 @@ elif menu == "Competitor":
             st.metric("Harga Jual", f"Rp {ubs['jual']:,}")
             st.metric("Harga Beli", f"Rp {ubs['beli']:,}")
         else:
-            print("HRTA:", get_ubs_price())
+            print("UBS TEST:", get_ubs_price())
             st.metric("Harga Jual", "N/A")
             st.metric("Harga Beli", "N/A")
         
@@ -281,6 +281,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
