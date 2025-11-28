@@ -17,9 +17,8 @@ from mi_engine import (
     fetch_usdidr
 )
 from competitor_scraper import (
-    get_indogold_price,
-    get_hartadinata_price,
-    get_ubs_price
+    get_indogold_buy_price,
+    get_indogold_sell_price
 )
 
 
@@ -235,17 +234,22 @@ elif menu == "Competitor":
 
     col1, col2, col3 = st.columns(3)
 
+    with st.container():
+    st.subheader("📊 Price Comparison (Web Scraper)")
+
+    col1, col2 = st.columns(2)
+
+    # Ambil harga
+    ig_buy = get_indogold_buy_price()
+    ig_sell = get_indogold_sell_price()
+
     with col1:
-        st.caption("IndoGold")
-        st.write(f"Rp {indogold:,}" if indogold else "N/A")
+        st.write("### IndoGold Buy")
+        st.write(f"Rp {ig_buy:,}" if ig_buy else "N/A")
 
     with col2:
-        st.caption("Hartadinata")
-        st.write(f"Rp {hartadinata:,}" if hartadinata else "N/A")
-
-    with col3:
-        st.caption("UBS Gold")
-        st.write(f"Rp {ubs:,}" if ubs else "N/A")
+        st.write("### IndoGold Sell")
+        st.write(f"Rp {ig_sell:,}" if ig_sell else "N/A")
 
 
 # ===========================================================
@@ -275,6 +279,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
