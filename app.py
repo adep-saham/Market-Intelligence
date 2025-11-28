@@ -219,37 +219,22 @@ if menu == "Dashboard":
 elif menu == "Competitor":
     st.title("🏷 Competitor & Pricing Intelligence")
 
-    from competitor_scraper import (
-        get_indogold_price,
-        get_hartadinata_price,
-        get_ubs_price
-    )
-
-    # ambil data
-    indogold = get_indogold_price()
-    hartadinata = get_hartadinata_price()
-    ubs = get_ubs_price()
-
-    st.subheader("💰 Price Comparison (Web Scraper)")
-
-    col1, col2, col3 = st.columns(3)
-
     with st.container():
-    st.subheader("📊 Price Comparison (Web Scraper)")
-
-    col1, col2 = st.columns(2)
-
-    # Ambil harga
-    ig_buy = get_indogold_buy_price()
-    ig_sell = get_indogold_sell_price()
-
-    with col1:
-        st.write("### IndoGold Buy")
-        st.write(f"Rp {ig_buy:,}" if ig_buy else "N/A")
-
-    with col2:
-        st.write("### IndoGold Sell")
-        st.write(f"Rp {ig_sell:,}" if ig_sell else "N/A")
+        st.subheader("📊 Price Comparison (Web Scraper)")
+    
+        col1, col2 = st.columns(2)
+    
+        # Ambil harga
+        ig_buy = get_indogold_buy_price()
+        ig_sell = get_indogold_sell_price()
+    
+        with col1:
+            st.write("### IndoGold Buy")
+            st.write(f"Rp {ig_buy:,}" if ig_buy else "N/A")
+    
+        with col2:
+            st.write("### IndoGold Sell")
+            st.write(f"Rp {ig_sell:,}" if ig_sell else "N/A")
 
 
 # ===========================================================
@@ -279,6 +264,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
