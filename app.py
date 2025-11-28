@@ -243,8 +243,12 @@ elif menu == "Competitor":
 
         print("HRTA:", get_hartadinata_price())
         
+# ==========================
+# UBS Gold
+# ==========================        
     with col3:
         st.write("### UBS Gold")
+        st.code(get_ubs_price())
         if ubs:
             st.metric("Harga Jual", f"Rp {ubs['jual']:,}")
             st.metric("Harga Beli", f"Rp {ubs['beli']:,}")
@@ -282,6 +286,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
