@@ -256,13 +256,11 @@ elif menu == "Competitor":
 
     st.markdown("---")
     
-    spot_price_usd = get_world_gold()         # return float
+    
    # gunakan nilai yang sudah dihitung di Dashboard
     spot_per_gram = gold_per_gram_idr  # IDR per gram
 
     run_price_elasticity(spot_per_gram)
-
-    spot_data = get_world_gold()
 
     if spot_data is None:
         st.error("Gagal mengambil data spot emas — API kosong / error.")
@@ -298,6 +296,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
