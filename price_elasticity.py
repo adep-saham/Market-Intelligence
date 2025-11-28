@@ -51,14 +51,17 @@ def run_price_elasticity(spot_per_gram):
 
 def get_world_gold():
     """
-    Ambil harga emas spot dari API Anda (IDR per gram)
-    Return: float (IDR/gram)
+    Ambil spot emas dari API Anda (IDR/gram).
+    Return: dict seperti {"gram": 123456}
     """
     try:
-        r = requests.get(URL_SPOT, timeout=10).json()
-        return float(r["gram"])
+        data = fetch_json(URL_SPOT)
+        if data and isinstance(data, dict) and "gram" in data:
+            return data
+        return None
     except:
         return None
+
 
 
 
@@ -161,5 +164,6 @@ def run_price_elasticity():
     st.write(f"- IndoGold: **{prem_ig*100:.2f}%**")
     st.write(f"- Hartadinata: **{prem_hr*100:.2f}%**")
     st.write(f"- Galeri 24: **{prem_g24*100:.2f}%**")
+
 
 
