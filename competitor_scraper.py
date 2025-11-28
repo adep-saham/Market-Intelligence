@@ -4,41 +4,27 @@ import requests
 # 1. SCRAPER INDOGOLD
 # ===================================================
 def get_indogold_price():
-    """
-    Mengambil harga BELI & JUAL dari IndoGold.
-    Harga terbaru berada di candle: [timestamp, open, high, low, close].
-    close adalah harga terbaru.
-    """
-
     try:
-        url_beli  = "https://www.indogold.id/ajax/chart_interval/GOLD/7"   # Harga beli
-        url_jual  = "https://www.indogold.id/ajax/chart_interval/GOLD/10"  # Harga jual
+        url_jual = "https://www.indogold.id/ajax/chart_interval/GOLD/7"
+        url_beli = "https://www.indogold.id/ajax/chart_interval/GOLD/7"
 
-        headers = {"User-Agent": "Mozilla/5.0"}
+        data_jual = requests.get(url_jual, timeout=10).json()
+        data_beli = requests.get(url_beli, timeout=10).json()
 
-        # GET data jual
-        jual_res = requests.get(url_jual, headers=headers, timeout=10).json()
-        beli_res = requests.get(url_beli, headers=headers, timeout=10).json()
+        last_jual = data_jual[0]["data"][-1]   # high = index 2
+        last_beli = data_beli[0]["data"][-1]   # low  = index 3
 
-        # Validasi response format
-        if not jual_res or not beli_res:
-            return None
-        
-        # Ambil harga CLOSE terakhir → elemen ke-1 → CLOSE = index ke-4
-        jual_candle = jual_res[0]["data"][-1]
-        beli_candle = beli_res[0]["data"][-1]
-
-        harga_jual = jual_candle[4]
-        harga_beli = beli_candle[4]
+        harga_jual = last_jual[2]   # high
+        harga_beli = last_beli[3]   # low
 
         return {
             "jual": harga_jual,
             "beli": harga_beli
         }
 
-    except Exception as e:
-        print("Error IndoGold:", e)
+    except:
         return None
+
 
 
 # ===================================================
@@ -99,4 +85,5 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
