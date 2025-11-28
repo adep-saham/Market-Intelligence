@@ -120,6 +120,14 @@ traffic = load_traffic()
 
 kitco = fetch_gold_price()
 usdidr = fetch_usdidr()
+# ===========================================================
+# GLOBAL GOLD VARIABLES (AGAR BISA DIPAKAI SEMUA HALAMAN)
+# ===========================================================
+gold_usd = kitco.get("mid", 0)
+gold_per_gram_usd = gold_usd / 31.1034768
+gold_per_gram_idr = gold_per_gram_usd * usdidr
+
+
 
 lm_price = g["price"].iloc[-1]
 gap = detect_price_gap(lm_price, comp)
@@ -296,6 +304,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
