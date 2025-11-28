@@ -62,13 +62,20 @@ def get_ubs_price():
         import requests
         import json
 
-        url = "https://www.indogold.id/home/get_data_pricelist"
+        # STEP 1 → Ambil cookie dari halaman Indogold
+        session = requests.Session()
+        session.get("https://www.indogold.id/harga-emas-fisik/", headers={
+            "User-Agent": "Mozilla/5.0"
+        })
 
-        # Payload EXACT dari browser
+        # Cookie akan otomatis tersimpan di session.cookies
+
+        # STEP 2 → POST untuk ambil harga UBS
+        url = "https://www.indogold.id/home/get_data_pricelist"
         payload = "type=pricelist&type_gold=ubs"
 
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "User-Agent": "Mozilla/5.0",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             "Origin": "https://www.indogold.id",
             "Referer": "https://www.indogold.id/harga-emas-fisik/",
@@ -76,16 +83,19 @@ def get_ubs_price():
             "Accept": "*/*",
         }
 
-        response = requests.post(url, data=payload, headers=headers, timeout=10)
+        response = session.post(url, data=payload, headers=headers, timeout=10)
 
-        print("DEBUG UBS RAW:", response.text[:300])  # Debug penting
+        # Debug response
+        print("DEBUG UBS RAW:", response.text[:400])
+        print("DEBUG UBS COOKIES:", session.cookies.get_dict())
 
         data = json.loads(response.text)
 
-        one_gram = data["data"]["data_denom"]["1.0"]["Tahun 2025"]
+        first_key = list(data["data"]["data_denom"].keys())[0]
+        one_gram_data = data["data"]["data_denom"][first_key]["Tahun 2025"]
 
-        jual = clean_rupiah(one_gram["harga"])
-        beli = clean_rupiah(one_gram["harga_buyback"])
+        jual = clean_rupiah(one_gram_data["harga"])
+        beli = clean_rupiah(one_gram_data["harga_buyback"])
 
         return {"jual": jual, "beli": beli}
 
@@ -108,6 +118,7 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
 
 
