@@ -53,44 +53,37 @@ def get_hartadinata_price():
 def get_ubs_price():
     try:
         url = "https://www.indogold.id/home/get_data_pricelist"
-        headers = {
-            "User-Agent": "Mozilla/5.0",
-            "Accept": "application/json, text/plain, */*",
-            "Origin": "https://www.indogold.id",
-            "Referer": "https://www.indogold.id/",
-        }
-
-        resp = requests.post(url, headers=headers, timeout=10)
-        print("RAW UBS:", resp.text[:500])
-        if resp.status_code != 200:
-            print("UBS Error: status", resp.status_code)
-            return None
-
-        data = resp.json()
-
-        # Pastikan struktur JSON benar
-        if "data" not in data or "data_denom" not in data["data"]:
-            print("UBS Error: struktur tidak sesuai", data)
-            return None
-
-        denom = data["data"]["data_denom"]
-
-        # Ambil pecahan 1 gram
-        if "1.0" not in denom:
-            print("UBS Error: tidak ada '1.0' dalam denom:", denom.keys())
-            return None
         
-        dat = denom["1.0"]["Tahun 2025"]
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "X-Requested-With": "XMLHttpRequest",
+            "User-Agent": "Mozilla/5.0"
+        }
+        
+        data = "tahun=2025"
 
-        harga_jual = int(dat["harga"].replace("Rp.", "").replace(" ", "").replace(",", ""))
-        harga_beli = int(dat["harga_buyback"].replace("Rp.", "").replace(" ", "").replace(",", ""))
+        resp = requests.post(url, headers=headers, data=data, timeout=10)
+        
+        # Debug
+        print("UBS STATUS:", resp.status_code)
+        print("UBS RAW:", resp.text[:300])
 
-        return {"jual": harga_jual, "beli": harga_beli}
+        js = resp.json()
+
+        # DATA tersimpan di:
+        # js["data"]["data_denom"]
+        denom = js["data"]["data_denom"]
+
+        g1 = denom["1.0"]["Tahun 2025"]
+
+        jual = int(g1["harga"].replace("Rp.", "").replace(",", "").strip())
+        beli = int(g1["harga_buyback"].replace("Rp.", "").replace(",", "").strip())
+
+        return {"jual": jual, "beli": beli}
 
     except Exception as e:
-        print("UBS ERROR:", e)
+        print("ERROR UBS:", e)
         return None
-
 
 
 
@@ -107,6 +100,7 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
 
 
