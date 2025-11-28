@@ -22,39 +22,43 @@ def load_traffic(path="data/traffic_website.csv"):
 # 2. KITCO GOLD API (LIVE)
 # ======================================================
 
-def fetch_gold_price_kitco():
+def fetch_gold_price_lbma(api_key="YOUR_METALS_API_KEY"):
     """
-    API Kitco asli sering error. 
-    Kita ganti ke sumber stabil: 
-    https://api.metals.live/v1/spot
+    Fetch LBMA Gold Price via Metals-API (akurasi tinggi)
+    XAU = LBMA Gold Spot
     """
+
+    url = (
+        f"https://metals-api.com/api/latest"
+        f"?access_key={api_key}"
+        f"&base=USD&symbols=XAU"
+    )
+
     try:
-        r = requests.get("https://api.metals.live/v1/spot", timeout=5)
+        r = requests.get(url, timeout=8)
         data = r.json()
 
-        # Format data contoh:
-        # [
-        #   ["gold", 2334.25],
-        #   ["silver", 29.5]
-        # ]
-        gold_price = None
-        for row in data:
-            if row[0] == "gold":
-                gold_price = float(row[1])
+        # Jika error dari API
+        if "error" in data:
+            return {
+                "mid": 0,
+                "error": data["error"]["info"]
+            }
 
-        if gold_price is None:
-            return {"error": "Gold price not found"}
+        # Metals-API memberi harga dalam bentuk:
+        # 1 USD = XAU
+        # sehingga harus dibalik:
+        # XAUUSD = 1 / rate
+        rate = float(data["rates"]["XAU"])
+        gold_price_usd = 1 / rate  # Harga emas per troy ounce USD
 
-        # kita jadikan mid = spot price
         return {
-            "bid": gold_price,
-            "ask": gold_price,
-            "mid": gold_price,
+            "mid": gold_price_usd,
             "error": None
         }
 
     except Exception as e:
-        return {"error": str(e)}
+        return {"mid": 0, "error": str(e)}
 
 
 
@@ -153,4 +157,5 @@ def recommend_price(global_price, competitor_df, elasticity=-0.8):
         recommended *= 1.01
 
     return round(recommended, 0)
+
 
