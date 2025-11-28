@@ -54,24 +54,28 @@ def get_hartadinata_price():
         print("ERROR Hartadinata:", e)
         return None
 
-def clean_rupiah(text):
-    if not text:
-        return None
-    return int(re.sub(r"[^\d]", "", text))
+# ==========================================
+# 3. GALERI 24 (Pagadaian)
+# via Cloudflare Worker Anda
+# ==========================================
+GALERI24_WORKER_URL = "https://old-river-ece0.best-adeprasetyo.workers.dev/galeri24"
 
-
-def get_ubs_price():
+def get_galeri24_price():
     try:
-        url = "https://old-river-ece0.best-adeprasetyo.workers.dev/galeri24"
-        res = requests.get(url, timeout=10)
-        data = res.json()
-        return data
-    except:
+        r = requests.get(GALERI24_WORKER_URL, timeout=10)
+        data = r.json()
+
+        # memastikan data valid
+        if "jual" in data and "beli" in data:
+            return {
+                "jual": int(data["jual"]),
+                "beli": int(data["beli"]),
+                "last_update": data.get("last_update")
+            }
+
         return None
-
-
-
-
+    except Exception as e:
+        return {"error": str(e)}
 
 
 # ===================================================
@@ -87,6 +91,7 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
 
 
