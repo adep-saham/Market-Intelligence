@@ -29,10 +29,10 @@ def fetch_gold_price_kitco():
         r = requests.get(url, timeout=5)
         data = r.json()
 
-        bid = float(data["bid"])
-        ask = float(data["ask"])
+        bid = float(data.get("bid", 0))
+        ask = float(data.get("ask", 0))
         mid = (bid + ask) / 2
-        time = data["time"]
+        time = data.get("time")
 
         return {
             "bid": bid,
@@ -56,7 +56,7 @@ def fetch_usdidr():
         data = r.json()
         return data["rates"]["IDR"]
     except:
-        return 15500  # fallback
+        return 15500  # fallback stabil
 
 
 # ======================================================
@@ -105,7 +105,7 @@ def generate_alerts(global_spike, competitor_war, traffic_drop):
 
 
 # ======================================================
-# 6. FORECAST DEMAND (NO SKLEARN)
+# 6. FORECAST DEMAND
 # ======================================================
 
 def forecast_demand(sales_df, days_forward=7):
