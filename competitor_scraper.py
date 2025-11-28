@@ -45,26 +45,34 @@ def get_indogold_price():
 # 2. SCRAPER HARTADINATA (emasmu.co.id)
 # ===================================================
 def get_hartadinata_price():
-    """
-    Endpoint resmi Hartadinata (Emasku.co.id)
-    Mengambil harga 1 gram sebagai standar.
-    """
-
     try:
         url = "https://emasku.co.id/api/prices"
-        headers = {"User-Agent": "Mozilla/5.0"}
+
+        headers = {
+            "User-Agent": "Mozilla/5.0",
+            "Accept": "application/json",
+            "Origin": "https://emasku.co.id",
+            "Referer": "https://emasku.co.id/",
+            "X-Requested-With": "XMLHttpRequest"
+        }
 
         res = requests.get(url, headers=headers, timeout=10)
+
+        # DEBUG print
+        print("HARTADINATA RAW:", res.text)
+
         data = res.json()
 
-        if "data" not in data:
+        if "data" not in data or len(data["data"]) == 0:
             return None
 
-        gold_series = data["data"][0]   # Ambil series Gold
+        # Ambil Gold Series (biasanya index 0)
+        gold_series = data["data"][0]
         prices = gold_series.get("prices", [])
 
+        # Cari gramasi 1 gram
         for item in prices:
-            if float(item["gramasi"]) == 1.0:  # Gunakan gramasi 1 gram
+            if float(item.get("gramasi", 0)) == 1.0:
                 return {
                     "jual": item["price"],
                     "beli": item["buyback_price"]
@@ -73,8 +81,9 @@ def get_hartadinata_price():
         return None
 
     except Exception as e:
-        print("Error Hartadinata:", e)
+        print("ERROR HARTADINATA:", e)
         return None
+
 
 
 # ===================================================
@@ -90,3 +99,4 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
