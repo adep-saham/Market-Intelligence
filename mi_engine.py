@@ -24,19 +24,22 @@ def load_traffic(path="data/traffic_website.csv"):
 
 def fetch_gold_price():
     """
-    Ambil LBMA gold price dari BISAPI (gratis dan stabil).
+    Gold price dari TradingEconomics (CDN, tidak diblokir, stabil).
+    GC1:COM = COMEX Gold Futures.
     """
     try:
-        url = "https://www.bis-api.com/api/v1/gold/spot"
-        r = requests.get(url, timeout=8)
+        url = "https://api.tradingeconomics.com/markets/commodities"
+        r = requests.get(url, timeout=10)
         data = r.json()
 
-        gold_price = float(data["price"])
+        for item in data:
+            if item.get("symbol") == "GC1:COM":
+                return {
+                    "mid": float(item["close"]),
+                    "error": None
+                }
 
-        return {
-            "mid": gold_price,
-            "error": None
-        }
+        return {"mid": 0, "error": "Gold symbol not found"}
 
     except Exception as e:
         return {"mid": 0, "error": str(e)}
@@ -138,6 +141,7 @@ def recommend_price(global_price, competitor_df, elasticity=-0.8):
         recommended *= 1.01
 
     return round(recommended, 0)
+
 
 
 
