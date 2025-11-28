@@ -79,7 +79,7 @@ traffic = load_traffic()
 
 kitco = fetch_gold_price_yahoo()
 usdidr = fetch_usdidr()
-
+st.write("DEBUG:", kitco)
 lm_price = g["price"].iloc[-1]
 gap = detect_price_gap(lm_price, comp)
 forecast_df = forecast_demand(sales)
@@ -156,7 +156,7 @@ if menu == "Dashboard":
                 <h2>N/A</h2>
             </div>
             """, unsafe_allow_html=True)
-            st.write("DEBUG:", kitco)
+           
     st.markdown('<div class="section-title">📈 Tren Harga Global</div>', unsafe_allow_html=True)
     st.line_chart(g.set_index("date")["price"], use_container_width=True)
 
@@ -206,6 +206,7 @@ elif menu == "Pricing":
 
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
