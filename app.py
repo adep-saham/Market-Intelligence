@@ -143,15 +143,25 @@ if menu == "Dashboard":
             </div>
             """, unsafe_allow_html=True)
 
-    if kitco["mid"] > 0:
+   if kitco["mid"] > 0:
     st.markdown(f"""
     <div class="kpi">
         <p>Yahoo Gold (COMEX)</p>
         <h2>${kitco["mid"]:.2f}</h2>
     </div>
     """, unsafe_allow_html=True)
-    else:
-    st.warning(f"Yahoo Finance API error: {kitco['error']}")
+
+    # Konversi IDR
+    gold_idr = kitco["mid"] * usdidr
+    st.metric("Gold Price (IDR)", f"Rp {gold_idr:,.0f}")
+
+else:
+    st.markdown(f"""
+    <div class="kpi">
+        <p>Yahoo Gold (COMEX)</p>
+        <h2>N/A</h2>
+    </div>
+    """, unsafe_allow_html=True)
 
 
     st.markdown('<div class="section-title">📈 Tren Harga Global</div>', unsafe_allow_html=True)
@@ -203,6 +213,7 @@ elif menu == "Pricing":
 
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
