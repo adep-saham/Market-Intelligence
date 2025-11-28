@@ -24,28 +24,19 @@ def load_traffic(path="data/traffic_website.csv"):
 
 def fetch_gold_price():
     """
-    Ambil harga emas dari Metals.Live (paling stabil & gratis).
-    Return sama seperti Yahoo (mid, error).
+    Ambil harga emas dari Coingecko (stabil, tanpa API key, tidak diblokir).
     """
     try:
-        r = requests.get("https://api.metals.live/v1/spot", timeout=8)
+        url = "https://api.coingecko.com/api/v3/simple/price?ids=gold&vs_currencies=usd"
+        r = requests.get(url, timeout=8)
         data = r.json()
 
-        gold_price = None
-        for row in data:
-            if row[0] == "gold":
-                gold_price = float(row[1])
-                break
+        gold_price = data["gold"]["usd"]
 
-        if gold_price:
-            return {"mid": gold_price, "error": None}
-        else:
-            return {"mid": 0, "error": "Gold price not found."}
+        return {"mid": float(gold_price), "error": None}
 
     except Exception as e:
         return {"mid": 0, "error": str(e)}
-
-
 
 # ======================================================
 # 3. USD/IDR API (LIVE)
@@ -142,6 +133,7 @@ def recommend_price(global_price, competitor_df, elasticity=-0.8):
         recommended *= 1.01
 
     return round(recommended, 0)
+
 
 
 
