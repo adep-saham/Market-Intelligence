@@ -132,7 +132,7 @@ if menu == "Dashboard":
         </div>
         """, unsafe_allow_html=True)
 
-        with col4:
+    with col4:
 
         # ==========================
         # Gold Price (Metals.Live)
@@ -155,7 +155,7 @@ if menu == "Dashboard":
                 <p>Gold Price (Spot)</p>
                 <h2>N/A</h2>
             </div>
-            """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)    
 
            
     st.markdown('<div class="section-title">📈 Tren Harga Global</div>', unsafe_allow_html=True)
@@ -207,6 +207,7 @@ elif menu == "Pricing":
 
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
