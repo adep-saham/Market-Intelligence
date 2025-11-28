@@ -16,6 +16,15 @@ from mi_engine import (
     fetch_gold_price,
     fetch_usdidr
 )
+from competitor_scraper import (
+    get_ubs_gold,
+    get_king_halim,
+    get_hartadinata,
+    get_indogold,
+    get_antam_butik
+)
+
+
 
 # ===========================================================
 # UI SETUP
@@ -241,6 +250,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
