@@ -13,7 +13,7 @@ from mi_engine import (
     check_global_price_spike,
     check_traffic_drop,
     recommend_price,
-    fetch_gold_price_yahoo,
+    fetch_gold_price,
     fetch_usdidr
 )
 
@@ -77,7 +77,7 @@ comp = load_competitor()
 sales = load_sales()
 traffic = load_traffic()
 
-kitco = fetch_gold_price_yahoo()
+kitco = fetch_gold_price()
 usdidr = fetch_usdidr()
 
 lm_price = g["price"].iloc[-1]
@@ -206,6 +206,7 @@ elif menu == "Pricing":
 
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
