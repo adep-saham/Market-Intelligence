@@ -50,6 +50,34 @@ def get_hartadinata_price():
         print("ERROR Hartadinata:", e)
         return None
 
+def get_ubs_price():
+    try:
+        url = "https://www.indogold.id/home/get_data_pricelist"
+        headers = {
+            "User-Agent": "Mozilla/5.0",
+            "Accept": "application/json",
+        }
+
+        res = requests.post(url, headers=headers, timeout=10).json()
+
+        denom = res["data"]["data_denom"]
+        ubs_1g = denom.get("1.0", {}).get("Tahun 2025")
+
+        if not ubs_1g:
+            return None
+
+        # Format "Rp. 2,399,000" → 2399000
+        def clean(x):
+            return int(x.replace("Rp.", "").replace(".", "").replace(",", "").strip())
+
+        return {
+            "jual": clean(ubs_1g["harga"]),
+            "beli": clean(ubs_1g["harga_buyback"]),
+        }
+
+    except Exception as e:
+        print("ERROR UBS:", e)
+        return None
 
 
 # ===================================================
@@ -65,6 +93,7 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
 
 
