@@ -7,7 +7,16 @@ import requests
 URL_INDOGOLD = "https://old-river-ece0.best-adeprasetyo.workers.dev/indogold"
 URL_HRTA = "https://old-river-ece0.best-adeprasetyo.workers.dev/hartadinata"
 URL_GALERI24 = "https://old-river-ece0.best-adeprasetyo.workers.dev/galeri24"
-URL_SPOT = "https://data-asli-kamu.com/api/spot"   # ganti spot API kamu
+
+def run_price_elasticity(spot_price_from_app):
+    st.subheader("📈 Price Elasticity Modeling (AI)")
+
+    if spot_price_from_app is None or spot_price_from_app <= 0:
+        st.error("Gagal mengambil harga spot emas")
+        return
+
+    spot_price = spot_price_from_app
+    st.metric("Harga Spot per Gram", f"Rp {spot_price:,}")
 
 
 # ============================
@@ -109,3 +118,4 @@ def run_price_elasticity():
     st.write(f"- IndoGold: **{prem_ig*100:.2f}%**")
     st.write(f"- Hartadinata: **{prem_hr*100:.2f}%**")
     st.write(f"- Galeri 24: **{prem_g24*100:.2f}%**")
+
