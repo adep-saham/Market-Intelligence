@@ -17,7 +17,7 @@ from mi_engine import (
     fetch_usdidr
 )
 
-from competitor_scraper import get_indogold_price, get_hartadinata_price, get_ubs_price
+from competitor_scraper import get_indogold_price, get_hartadinata_price, get_galeri24_price
 
 
 # ===========================================================
@@ -219,8 +219,8 @@ elif menu == "Competitor":
 
     indogold = get_indogold_price()
     hartadinata = get_hartadinata_price()
-    ubs = get_ubs_price()
-    print("DEBUG — UBS:", ubs)
+    galeri24 = get_galeri24_price()
+    
     st.subheader("📦 Price Comparison (API)")
     
     col1, col2, col3 = st.columns(3)
@@ -244,17 +244,18 @@ elif menu == "Competitor":
         print("HRTA:", get_hartadinata_price())
         
 # ==========================
-# UBS Gold
-# ==========================        
+# Galeri 24 (Pegadaian)
+# ==========================
     with col3:
-        st.write("### UBS Gold")
-        st.code(get_ubs_price())
-       
-        if ubs:
-            st.metric("Harga Jual", f"Rp {ubs['jual']:,}")
-            st.metric("Harga Beli", f"Rp {ubs['beli']:,}")
+        st.write("### Galeri 24 (Pegadaian)")
+
+        if galeri24 and "jual" in galeri24:
+            st.metric("Harga Jual", f"Rp {galeri24['jual']:,}")
+            st.metric("Harga Beli", f"Rp {galeri24['beli']:,}")
+
+            if galeri24.get("last_update"):
+                st.caption(f"Update: {galeri24['last_update']}")
         else:
-            print("UBS TEST:", get_ubs_price())
             st.metric("Harga Jual", "N/A")
             st.metric("Harga Beli", "N/A")
         
@@ -287,6 +288,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
