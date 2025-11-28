@@ -3,16 +3,29 @@ import pandas as pd
 
 st.set_page_config(page_title="MI Logam Mulia", layout="wide")
 
-st.title("📊 Market Intelligence – Step 1")
-st.write("Tahap ini menampilkan data dummy terlebih dahulu.")
+st.title("📊 Market Intelligence – Step 2")
+st.write("Tahap ini memuat data CSV dari folder data/.")
 
-# === Dummy Data ===
-global_price = pd.DataFrame({
-    "date": pd.date_range("2024-01-01", periods=7),
-    "price": [1000000, 1002000, 1001500, 1003000, 1002500, 1004000, 1003500]
-})
+# === Load CSV ===
+try:
+    global_price = pd.read_csv("data/harga_global.csv")
+    competitor = pd.read_csv("data/kompetitor.csv")
+    sales = pd.read_csv("data/penjualan_lm.csv")
+    traffic = pd.read_csv("data/traffic_website.csv")
 
-st.subheader("📈 Harga Emas Global (Dummy)")
-st.line_chart(global_price.set_index("date")["price"])
+    st.success("CSV berhasil dimuat.")
+except Exception as e:
+    st.error(f"Error loading CSV: {e}")
+    st.stop()
 
-st.success("Step 1 berhasil. Data dummy tampil normal.")
+st.subheader("📈 Harga Global")
+st.dataframe(global_price)
+
+st.subheader("📊 Kompetitor")
+st.dataframe(competitor)
+
+st.subheader("🛒 Penjualan LM")
+st.dataframe(sales)
+
+st.subheader("🌐 Traffic Website")
+st.dataframe(traffic)
