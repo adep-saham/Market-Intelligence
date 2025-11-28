@@ -225,38 +225,33 @@ elif menu == "Competitor":
 
     col1, col2, col3 = st.columns(3)
 
-    # ==========================
-    # IndoGold
-    # ==========================
+    # ============================
+    # INDO GOLD
+    # ============================
     with col1:
         st.write("### IndoGold")
         st.metric("Harga Jual", f"Rp {indogold['jual']:,}" if indogold else "N/A")
         st.metric("Harga Beli", f"Rp {indogold['beli']:,}" if indogold else "N/A")
-        st.caption(f"Update: {indogold['last_update'] if indogold else '—'}")
-
-    # ==========================
-    # Hartadinata - Emasku
-    # ==========================
+        st.caption("Update: —")
+    
+    # ============================
+    # HARTADINATA (EMASKU)
+    # ============================
     with col2:
         st.write("### Hartadinata (Emasku)")
         st.metric("Harga Jual", f"Rp {hartadinata['jual']:,}" if hartadinata else "N/A")
         st.metric("Harga Beli", f"Rp {hartadinata['beli']:,}" if hartadinata else "N/A")
-        st.caption(f"Update: {hartadinata['last_update'] if hartadinata else '—'}")
-
-    # ==========================
-    # Galeri 24
-    # ==========================
+        st.caption(f"Update: {hartadinata['last_update']}" if hartadinata else "Update: —")
+    
+    # ============================
+    # GALERI 24 (Pegadaian)
+    # ============================
     with col3:
         st.write("### Galeri 24 (Pegadaian)")
+        st.metric("Harga Jual", f"Rp {int(galeri24['jual']):,}" if galeri24 else "N/A")
+        st.metric("Harga Beli", f"Rp {int(galeri24['beli']):,}" if galeri24 else "N/A")
+        st.caption(f"Update: {galeri24['last_update']}" if galeri24 else "Update: —")
 
-        if galeri24 and isinstance(galeri24, dict):
-            st.metric("Harga Jual", f"Rp {galeri24.get('jual', 0):,}")
-            st.metric("Harga Beli", f"Rp {galeri24.get('beli', 0):,}")
-            st.caption(f"Update: {galeri24.get('last_update', '—')}")
-        else:
-            st.metric("Harga Jual", "N/A")
-            st.metric("Harga Beli", "N/A")
-            st.caption("Update: —")
 
 
         
@@ -288,6 +283,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
