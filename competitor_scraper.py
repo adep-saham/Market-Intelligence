@@ -1,6 +1,8 @@
 import requests
 import json
 import re
+import cloudscraper
+
 
 # ===================================================
 # 1. SCRAPER INDOGOLD
@@ -57,51 +59,51 @@ def clean_rupiah(text):
         return None
     return int(re.sub(r"[^\d]", "", text))
 
+
 def get_ubs_price():
     try:
-        import requests
-        import json
+        scraper = cloudscraper.create_scraper(
+            browser={
+                "browser": "chrome",
+                "platform": "windows",
+                "desktop": True,
+            }
+        )
 
-        # STEP 1 → Ambil cookie dari halaman Indogold
-        session = requests.Session()
-        session.get("https://www.indogold.id/harga-emas-fisik/", headers={
-            "User-Agent": "Mozilla/5.0"
-        })
+        # STEP 1 -> GET halaman untuk generate cookie
+        scraper.get("https://www.indogold.id/harga-emas-fisik/")
 
-        # Cookie akan otomatis tersimpan di session.cookies
-
-        # STEP 2 → POST untuk ambil harga UBS
+        # STEP 2 -> POST untuk ambil data UBS
         url = "https://www.indogold.id/home/get_data_pricelist"
         payload = "type=pricelist&type_gold=ubs"
 
         headers = {
-            "User-Agent": "Mozilla/5.0",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             "Origin": "https://www.indogold.id",
             "Referer": "https://www.indogold.id/harga-emas-fisik/",
             "X-Requested-With": "XMLHttpRequest",
-            "Accept": "*/*",
         }
 
-        response = session.post(url, data=payload, headers=headers, timeout=10)
+        r = scraper.post(url, data=payload, headers=headers)
+        print("UBS RAW =>", r.text[:300])  # DEBUG
 
-        # Debug response
-        print("DEBUG UBS RAW:", response.text[:400])
-        print("DEBUG UBS COOKIES:", session.cookies.get_dict())
+        data = r.json()
 
-        data = json.loads(response.text)
+        # Ambil 1 gram data
+        denom = data["data"]["data_denom"]
 
-        first_key = list(data["data"]["data_denom"].keys())[0]
-        one_gram_data = data["data"]["data_denom"][first_key]["Tahun 2025"]
+        first_key = list(denom.keys())[0]
+        gram2025 = denom[first_key]["Tahun 2025"]
 
-        jual = clean_rupiah(one_gram_data["harga"])
-        beli = clean_rupiah(one_gram_data["harga_buyback"])
+        jual = clean_rupiah(gram2025["harga"])
+        beli = clean_rupiah(gram2025["harga_buyback"])
 
         return {"jual": jual, "beli": beli}
 
     except Exception as e:
         print("UBS ERROR =>", e)
         return None
+
 
 
 
@@ -118,6 +120,7 @@ def get_all_competitors():
         "hartadinata": get_hartadinata_price(),
         # "ubs": get_ubs_price()   ← nanti kalau sudah siap UBS
     }
+
 
 
 
