@@ -22,41 +22,29 @@ def load_traffic(path="data/traffic_website.csv"):
 # 2. KITCO GOLD API (LIVE)
 # ======================================================
 
-def fetch_gold_price_yahoo():
+def fetch_gold_price():
     """
-    Ambil harga emas COMEX GC=F dari Yahoo Finance.
-    Sudah pakai 3 fallback agar tidak pernah N/A.
+    Ambil harga emas dari Metals.Live (paling stabil & gratis).
+    Return sama seperti Yahoo (mid, error).
     """
-    url = "https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=1d"
-
     try:
-        r = requests.get(url, timeout=8)
+        r = requests.get("https://api.metals.live/v1/spot", timeout=8)
         data = r.json()
 
-        result = data["chart"]["result"][0]
-        meta = result["meta"]
+        gold_price = None
+        for row in data:
+            if row[0] == "gold":
+                gold_price = float(row[1])
+                break
 
-        # Fallback 1: normal
-        if "regularMarketPrice" in meta:
-            price = float(meta["regularMarketPrice"])
-            return {"mid": price, "error": None}
-
-        # Fallback 2: lastClose
-        if "chartPreviousClose" in meta:
-            price = float(meta["chartPreviousClose"])
-            return {"mid": price, "error": None}
-
-        # Fallback 3: ambil dari data close array
-        close_data = result.get("indicators", {}).get("quote", [{}])[0].get("close", [])
-        close_data = [c for c in close_data if c is not None]
-        if close_data:
-            return {"mid": float(close_data[-1]), "error": None}
-
-        # Kalau semua gagal
-        return {"mid": 0, "error": "No price data found"}
+        if gold_price:
+            return {"mid": gold_price, "error": None}
+        else:
+            return {"mid": 0, "error": "Gold price not found."}
 
     except Exception as e:
         return {"mid": 0, "error": str(e)}
+
 
 
 # ======================================================
@@ -154,6 +142,7 @@ def recommend_price(global_price, competitor_df, elasticity=-0.8):
         recommended *= 1.01
 
     return round(recommended, 0)
+
 
 
 
