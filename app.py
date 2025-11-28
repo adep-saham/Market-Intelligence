@@ -132,15 +132,15 @@ if menu == "Dashboard":
         </div>
         """, unsafe_allow_html=True)
 
-    with col4:
+        with col4:
 
         # ==========================
-        # Yahoo Gold (COMEX)
+        # Gold Price (Metals.Live)
         # ==========================
         if kitco["mid"] > 0:
             st.markdown(f"""
             <div class="kpi">
-                <p>Yahoo Gold (COMEX)</p>
+                <p>Gold Price (Spot)</p>
                 <h2>${kitco["mid"]:.2f}</h2>
             </div>
             """, unsafe_allow_html=True)
@@ -152,10 +152,11 @@ if menu == "Dashboard":
         else:
             st.markdown("""
             <div class="kpi">
-                <p>Yahoo Gold (COMEX)</p>
+                <p>Gold Price (Spot)</p>
                 <h2>N/A</h2>
             </div>
             """, unsafe_allow_html=True)
+
            
     st.markdown('<div class="section-title">📈 Tren Harga Global</div>', unsafe_allow_html=True)
     st.line_chart(g.set_index("date")["price"], use_container_width=True)
@@ -206,6 +207,7 @@ elif menu == "Pricing":
 
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
