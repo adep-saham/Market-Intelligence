@@ -297,14 +297,16 @@ elif menu == "Competitor":
     st.subheader("🤖 Rekomendasi Harga (Copilot AI)")
 
     if st.button("Generate with Copilot AI"):
-        from pricing_ai import gpt_price_recommendation
-        ai_text = gpt_price_recommendation(
-            spot_per_gram_idr,
-            competitors["IndoGold"],
-            competitors["Hartadinata"],
-            competitors["Galeri 24"],
-            my_price
-        )
+        from pricing_ai import gemini_price_recommendation
+
+        ai_text = gemini_price_recommendation(
+        spot_per_gram_idr,
+        competitors["IndoGold"],
+        competitors["Hartadinata"],
+        competitors["Galeri 24"],
+        my_price
+    )
+
 
 
         # tampilkan AI response
@@ -338,6 +340,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
