@@ -294,9 +294,9 @@ elif menu == "Competitor":
     # AI PRICE RECOMMENDATION BY COPILOT
     # ===========================================================
     st.write("---")
-    st.subheader("🤖 Rekomendasi Harga (Copilot AI)")
+    st.subheader("🤖 Rekomendasi Harga (Berdasarkan AI)")
 
-    if st.button("Generate with Copilot AI"):
+    if st.button("Generate with Ade AI"):
         from pricing_ai import gemini_price_recommendation
 
         ai_text = gemini_price_recommendation(
@@ -340,6 +340,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
