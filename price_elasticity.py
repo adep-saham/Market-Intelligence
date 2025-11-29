@@ -6,7 +6,63 @@ import requests
 # ============================
 URL_INDOGOLD = "https://old-river-ece0.best-adeprasetyo.workers.dev/indogold"
 URL_HRTA = "https://old-river-ece0.best-adeprasetyo.workers.dev/hartadinata"
-URL_GALERI24 = "https://lively-wind-03ad.best-adeprasetyo.workers.dev/galeri24"
+URL_GALERI24 = "https://old-river-ece0.best-adeprasetyo.workers.dev/galeri24"
+URL_SPOT = "https://data-asli-kamu.com/api/spot"
+
+import streamlit as st
+
+def run_price_elasticity(spot_per_gram):
+    st.subheader("📉 Price Elasticity Analysis")
+
+    st.write(f"Spot Gold (per gram, USD): **${spot_per_gram:,.2f}**")
+
+    # Ambil harga kompetitor dari API worker Anda
+    indogold = fetch_json(URL_INDOGOLD)
+    hartadinata = fetch_json(URL_HRTA)
+    galeri24 = fetch_json(URL_GALERI24)
+
+    competitors = {
+        "IndoGold": indogold.get("jual"),
+        "Hartadinata": hartadinata.get("jual"),
+        "Galeri24": galeri24.get("jual")
+    }
+
+    st.write("### Perbandingan Premium vs Spot")
+    for name, price in competitors.items():
+        if price:
+            premium = calculate_premium(price, spot_per_gram)
+            st.write(f"- **{name}**: Premium {premium*100:.2f}%")
+
+    st.write("### Input Harga Kamu")
+
+    my_price = st.number_input("Harga Jual Kamu (Rp)", min_value=0, value=1000000)
+
+    # Hitung rekomendasi
+    valid_prices = [p for p in competitors.values() if p]
+    if valid_prices:
+        avg_comp = sum(valid_prices) / len(valid_prices)
+        rec_price = recommend_price(my_price, avg_comp)
+
+        st.write("### Rekomendasi AI")
+        st.write(f"- Rata-rata Competitor: Rp {avg_comp:,.0f}")
+        st.write(f"- Harga Kamu: Rp {my_price:,.0f}")
+        st.success(f"Rekomendasi AI: **Rp {rec_price:,.0f}**")
+
+
+def get_world_gold():
+    """
+    Ambil spot emas dari API Anda (IDR/gram).
+    Return: dict seperti {"gram": 123456}
+    """
+    try:
+        data = fetch_json(URL_SPOT)
+        if data and isinstance(data, dict) and "gram" in data:
+            return data
+        return None
+    except:
+        return None
+
+
 
 
 # ============================
@@ -14,14 +70,15 @@ URL_GALERI24 = "https://lively-wind-03ad.best-adeprasetyo.workers.dev/galeri24"
 # ============================
 def fetch_json(url):
     try:
-        return requests.get(url, timeout=10).json()
+        res = requests.get(url, timeout=10)
+        return res.json()
     except:
         return {}
 
 
 def calculate_premium(price, spot_gram):
-    if not price or not spot_gram:
-        return None
+    if spot_gram <= 0:
+        return 0
     return (price / spot_gram) - 1
 
 
@@ -31,84 +88,82 @@ def recommend_price(my_price, competitor_avg, elasticity=0.3):
 
 
 # ============================
-# SCRAPERS – SAMA DENGAN COMPETITOR PAGE
+# STREAMLIT MAIN FUNCTION
 # ============================
-def get_indogold():
-    d = fetch_json(URL_INDOGOLD)
-    return {
-        "jual": d.get("jual"),
-        "beli": d.get("beli"),
-        "last_update": d.get("last_update")
-    }
+def run_price_elasticity():
 
+    st.subheader("📈 Price Elasticity Modeling (AI)")
 
-def get_hrta():
-    d = fetch_json(URL_HRTA)
-    return {
-        "jual": d.get("jual"),
-        "beli": d.get("beli"),
-        "last_update": d.get("last_update")
-    }
+    # fetch data
+    indogold = fetch_json(URL_INDOGOLD)
+    hrta = fetch_json(URL_HRTA)
+    g24 = fetch_json(URL_GALERI24)
+    spot = fetch_json(URL_SPOT)
 
-
-def get_galeri24():
-    d = fetch_json(URL_GALERI24)
-    return {
-        "jual": d.get("jual"),
-        "beli": d.get("beli"),
-        "last_update": d.get("last_update")
-    }
-
-
-# ============================
-# MAIN FUNCTION UNTUK APP.PY
-# ============================
-def run_price_elasticity(spot_per_gram):
-
-    st.subheader("📉 Price Elasticity Analysis")
-
-    st.write(f"Spot Gold (IDR per gram): **Rp {spot_per_gram:,.0f}**")
-
-    # Ambil data kompetitor – gunakan SCRAPER YANG SAMA
-    indogold = get_indogold()
-    hartadinata = get_hrta()
-    galeri24 = get_galeri24()
-
-    competitors = {
-        "IndoGold": indogold["jual"],
-        "Hartadinata": hartadinata["jual"],
-        "Galeri 24": galeri24["jual"]
-    }
-
-    # ============================
-    # PREMIUM VS SPOT
-    # ============================
-    st.write("### Premium vs Spot")
-
-    for name, price in competitors.items():
-        premium = calculate_premium(price, spot_per_gram)
-        if premium is not None:
-            st.write(f"- **{name}**: {premium*100:.2f}%")
-        else:
-            st.write(f"- **{name}**: N/A")
-
-    # ============================
-    # INPUT USER
-    # ============================
-    st.write("### Input Harga Kamu")
-    my_price = st.number_input("Harga Kamu (Rp)", min_value=0, value=1000000)
-
-    # Hitung average competitor
-    valid_prices = [p for p in competitors.values() if p]
-    if not valid_prices:
-        st.error("Tidak ada data competitor valid.")
+    if "gram" not in spot:
+        st.error("Gagal mengambil harga spot emas")
         return
 
-    avg_comp = sum(valid_prices) / len(valid_prices)
-    rec_price = recommend_price(my_price, avg_comp)
+    spot_price = spot["gram"]
 
-    st.write("### Rekomendasi AI")
-    st.write(f"- Rata-rata Competitor: Rp {avg_comp:,.0f}")
-    st.write(f"- Harga Kamu: Rp {my_price:,.0f}")
-    st.success(f"Rekomendasi AI: **Rp {rec_price:,.0f}**")
+    st.metric("Harga Spot per Gram", f"Rp {spot_price:,}")
+
+    st.divider()
+
+    # competitor section
+    st.write("### 🔹 Competitor Prices")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.write("### IndoGold")
+        st.metric("Jual", f"Rp {indogold.get('jual', 0):,}")
+        st.metric("Beli", f"Rp {indogold.get('beli', 0):,}")
+
+    with col2:
+        st.write("### Hartadinata")
+        st.metric("Jual", f"Rp {hrta.get('jual', 0):,}")
+        st.metric("Beli", f"Rp {hrta.get('beli', 0):,}")
+
+    with col3:
+        st.write("### Galeri 24")
+        st.metric("Jual", f"Rp {g24.get('jual', 0):,}")
+        st.metric("Beli", f"Rp {g24.get('beli', 0):,}")
+
+    competitor_avg = (
+        indogold.get("jual", 0) +
+        hrta.get("jual", 0) +
+        g24.get("jual", 0)
+    ) / 3
+
+    st.divider()
+    st.metric("Rata-rata Harga Competitor", f"Rp {competitor_avg:,.0f}")
+
+    st.divider()
+
+    st.write("### 🔹 Input Harga Kamu")
+    my_price = st.number_input("Harga Jual Kamu (Rp)", value=2300000)
+
+    recommended = recommend_price(my_price, competitor_avg)
+
+    st.write("### 🔹 AI Recommendation")
+    st.metric("Harga Rekomendasi AI", f"Rp {recommended:,}")
+
+    elasticity_score = min(1, abs(my_price - competitor_avg) / competitor_avg)
+
+    st.caption(f"Elasticity Score: {elasticity_score:.3f} (0 = aman, 1 = sensitif)")
+
+    st.divider()
+
+    st.write("### 🔹 Premium vs Spot")
+
+    prem_ig = calculate_premium(indogold.get("jual", 0), spot_price)
+    prem_hr = calculate_premium(hrta.get("jual", 0), spot_price)
+    prem_g24 = calculate_premium(g24.get("jual", 0), spot_price)
+
+    st.write(f"- IndoGold: **{prem_ig*100:.2f}%**")
+    st.write(f"- Hartadinata: **{prem_hr*100:.2f}%**")
+    st.write(f"- Galeri 24: **{prem_g24*100:.2f}%**")
+
+
 
