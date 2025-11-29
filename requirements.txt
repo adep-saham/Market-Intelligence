@@ -5,6 +5,9 @@ cloudscraper
 google-generativeai
 streamlit
 pandas
+numpy
+plotly
+
 
 
 
