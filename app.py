@@ -290,18 +290,26 @@ elif menu == "Competitor":
     st.write("### Input Harga Kamu")
     my_price = st.number_input("Harga Kamu (Rp)", min_value=0, value=2300000)
 
-    valid_prices = [p for p in competitors.values() if p is not None]
-    if valid_prices:
-        avg_comp = sum(valid_prices) / len(valid_prices)
-        rec_price = my_price + (avg_comp - my_price) * 0.3
+    # ===========================================================
+    # AI PRICE RECOMMENDATION BY COPILOT
+    # ===========================================================
+    st.write("---")
+    st.subheader("🤖 Rekomendasi Harga (Copilot AI)")
 
-        st.write(f"- Rata-rata Competitor: Rp {avg_comp:,.0f}")
-        st.success(f"💡 Rekomendasi AI: **Rp {rec_price:,.0f}**")
-    else:
-        st.error("Tidak ada data competitor valid.")
+    if st.button("Generate with Copilot AI"):
+        from pricing_ai import copilot_price_recommendation
 
+        ai_text = copilot_price_recommendation(
+            spot_per_gram_idr,
+            competitors["IndoGold"],
+            competitors["Hartadinata"],
+            competitors["Galeri 24"],
+            my_price
+        )
 
-        
+        # tampilkan AI response
+        st.success(ai_text)
+      
 
 # ===========================================================
 # FORECAST PAGE
@@ -330,6 +338,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
