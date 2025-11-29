@@ -314,12 +314,46 @@ elif menu == "Competitor":
       
 
 # ===========================================================
-# FORECAST PAGE
+# CUSTOMER & PRODUCT INTELLIGENCE PAGE
 # ===========================================================
-elif menu == "Forecast":
-    st.title("🔮 Forecast Demand Harian")
-    st.line_chart(forecast_df["forecast_qty"], use_container_width=True)
-    st.write("📌 *Model menggunakan regresi linear.*")
+elif menu == "Customer & Product Intelligence":
+
+    st.title("Segmentasi Pelanggan LM, Forecast Demand, Prioritas Produk Utama")
+    st.write("Analitik terpadu untuk memahami pelanggan, memprediksi permintaan, dan menentukan prioritas produk utama.")
+
+    st.write("---")
+
+    col1, col2, col3 = st.columns(3)
+
+    # ==========================================
+    # Segmentasi Pelanggan LM
+    # ==========================================
+    with col1:
+        st.markdown("### Segmentasi Pelanggan LM")
+        st.image("https://i.imgur.com/xg0XKpB.png", width=130)
+        st.write("Analisis segmentasi pelanggan berdasarkan pola transaksi dan preferensi produk.")
+        if st.button("Buka Segmentasi Pelanggan LM"):
+            st.info("🔧 Fitur Segmentasi Pelanggan LM sedang dalam pengembangan.")
+
+    # ==========================================
+    # Forecast Demand
+    # ==========================================
+    with col2:
+        st.markdown("### Forecast Demand")
+        st.image("https://i.imgur.com/Z5pM7sb.png", width=130)
+        st.write("Model prediksi permintaan emas untuk mendukung perencanaan persediaan.")
+        if st.button("Buka Forecast Demand"):
+            st.info("🔧 Fitur Forecast Demand sedang dalam pengembangan.")
+
+    # ==========================================
+    # Prioritas Produk Utama
+    # ==========================================
+    with col3:
+        st.markdown("### Prioritas Produk Utama")
+        st.image("https://i.imgur.com/oRL8jIk.png", width=130)
+        st.write("Penentuan prioritas produk berdasarkan performa penjualan & margin.")
+        if st.button("Buka Prioritas Produk Utama"):
+            st.info("🔧 Fitur Prioritas Produk Utama sedang dalam pengembangan.")
 
 # ===========================================================
 # EWS PAGE
@@ -340,6 +374,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
