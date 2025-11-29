@@ -21,7 +21,7 @@ from competitor_scraper import get_indogold_price, get_hartadinata_price, get_ga
 from forecast_demand import forecast_demand_page
 from prioritas_produk import prioritas_produk_page
 from segmentasi import segmentasi_pelanggan_lm
-from ews_module import ews_page
+from ews_module import ews_pro
 
 
 # ===========================================================
@@ -361,7 +361,22 @@ elif menu == "Customer & Product Intelligence":
 # EWS PAGE
 # ===========================================================
 elif menu == "EWS":
-    ews_page(g, comp, traffic)
+    st.title("🔎 Hasil Analisis EWS Pro")
+
+    alerts = ews_pro(global_df, competitor_df, traffic_df)
+
+    for a in alerts:
+        if a["severity"] == "high":
+            st.error(f"🔴 **{a['indicator']} — HIGH ALERT**")
+        elif a["severity"] == "moderate":
+            st.warning(f"🟡 {a['indicator']} — Moderate Warning")
+        else:
+            st.success(f"🟢 {a['indicator']} — Stable")
+
+        st.write(f"**Penyebab:** {a['reason']}")
+        st.write(f"**Rekomendasi:** {a['recommendation']}")
+        st.write("---")
+
 
 
 # ===========================================================
@@ -372,6 +387,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
