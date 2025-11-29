@@ -252,6 +252,53 @@ elif menu == "Competitor":
         st.metric("Harga Beli", f"Rp {int(galeri24['beli']):,}" if galeri24 else "N/A")
         st.caption(f"Update: {galeri24['last_update']}" if galeri24 else "Update: —")
 
+    # ===========================================================
+    # PRICE ELASTICITY (INLINE SECTION)
+    # ===========================================================
+
+    st.write("---")
+    st.title("🏷 Price Elasticity")
+
+    # Hitung spot gold IDR per gram
+    gold_usd = kitco.get("mid", 0)
+    usdidr = fetch_usdidr()
+    gold_per_gram_usd = gold_usd / 31.1034768
+    spot_per_gram_idr = gold_per_gram_usd * usdidr
+
+    st.metric("Spot Gold (IDR/gram)", f"Rp {spot_per_gram_idr:,.0f}")
+
+    st.write("### Premium vs Spot")
+
+    competitors = {
+        "IndoGold": indogold["jual"] if indogold else None,
+        "Hartadinata": hartadinata["jual"] if hartadinata else None,
+        "Galeri 24": galeri24["jual"] if galeri24 else None
+    }
+
+    def calc_premium(price, spot):
+        if not price or not spot:
+            return None
+        return (price / spot) - 1
+
+    for name, price in competitors.items():
+        premium = calc_premium(price, spot_per_gram_idr)
+        if premium is None:
+            st.write(f"- {name}: N/A")
+        else:
+            st.write(f"- {name}: **{premium*100:.2f}%**")
+
+    st.write("### Input Harga Kamu")
+    my_price = st.number_input("Harga Kamu (Rp)", min_value=0, value=2300000)
+
+    valid_prices = [p for p in competitors.values() if p is not None]
+    if valid_prices:
+        avg_comp = sum(valid_prices) / len(valid_prices)
+        rec_price = my_price + (avg_comp - my_price) * 0.3
+
+        st.write(f"- Rata-rata Competitor: Rp {avg_comp:,.0f}")
+        st.success(f"💡 Rekomendasi AI: **Rp {rec_price:,.0f}**")
+    else:
+        st.error("Tidak ada data competitor valid.")
 
 
         
@@ -283,6 +330,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
