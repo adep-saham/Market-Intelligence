@@ -1,43 +1,35 @@
 import requests
 
-BASE = "https://lively-wind-03ad.best-adeprasetyo.workers.dev"  # ganti sesuai worker kamu
+URL_INDOGOLD = "https://old-river-ece0.best-adeprasetyo.workers.dev/indogold"
+URL_HRTA = "https://old-river-ece0.best-adeprasetyo.workers.dev/hartadinata"
+URL_GALERI24 = "https://old-river-ece0.best-adeprasetyo.workers.dev/galeri24"
 
+def _fetch_json(url):
+    try:
+        return requests.get(url, timeout=10).json()
+    except:
+        return {}
 
 def get_indogold_price():
-    try:
-        r = requests.get(f"{BASE}/indogold", timeout=10)
-        d = r.json()
-        return {
-            "jual": d["jual"],
-            "beli": d["beli"],
-            "last_update": d.get("last_update", "—")
-        }
-    except:
-        return None
-
+    d = _fetch_json(URL_INDOGOLD)
+    return {
+        "jual": d.get("jual"),
+        "beli": d.get("beli"),
+        "last_update": d.get("last_update")
+    }
 
 def get_hartadinata_price():
-    try:
-        r = requests.get(f"{BASE}/hartadinata", timeout=10)
-        d = r.json()
-        return {
-            "jual": d["jual"],
-            "beli": d["beli"],
-            "last_update": d.get("last_update", "—")
-        }
-    except:
-        return None
-
+    d = _fetch_json(URL_HRTA)
+    return {
+        "jual": d.get("jual"),
+        "beli": d.get("beli"),
+        "last_update": d.get("last_update")
+    }
 
 def get_galeri24_price():
-    try:
-        r = requests.get(f"{BASE}/galeri24", timeout=10)
-        d = r.json()
-        return {
-            "jual": d["jual"],
-            "beli": d["beli"],
-            "last_update": d.get("last_update", "—")
-        }
-    except:
-        return None
-
+    d = _fetch_json(URL_GALERI24)
+    return {
+        "jual": d.get("jual"),
+        "beli": d.get("beli"),
+        "last_update": d.get("last_update")
+    }
