@@ -5,8 +5,7 @@ import os
 genai.configure(api_key=os.getenv("AIzaSyBRSGLbIvqV0Tc6njysqI6QxYo95LjKnoM"))
 
 def gemini_price_recommendation(spot, indo, harta, g24, my_price):
-    model_name = "models/gemini-2.5-flash"  # MODEL VALID DI PROJECT ANDA
-
+    model_name = "models/gemini-flash-latest"
     prompt = f"""
 Anda adalah AI Pricing Analyst Emas Logam Mulia.
 
@@ -39,3 +38,4 @@ ALASAN:
     response = model.generate_content(prompt)
 
     return response.text
+
