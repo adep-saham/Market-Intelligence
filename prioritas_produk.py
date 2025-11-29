@@ -4,7 +4,7 @@ import numpy as np
 
 def prioritas_produk_page():
 
-    st.subheader("🏅 Ranking Prioritas Produk — Advanced Version")
+    st.subheader("🏅 Ranking Prioritas Produk")
 
     st.caption("Model prioritas ini menggunakan perhitungan berbobot dengan normalisasi otomatis untuk menghasilkan skor yang lebih akurat.")
 
@@ -78,5 +78,6 @@ def prioritas_produk_page():
     st.bar_chart(df_sorted.set_index("Produk")["PPS"])
 
     st.info("💡 Anda dapat menyesuaikan bobot untuk melihat bagaimana perubahan strategi mempengaruhi prioritas produk.")
+
 
 
