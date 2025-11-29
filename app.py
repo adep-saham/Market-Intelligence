@@ -368,6 +368,20 @@ elif menu == "Customer & Product Intelligence":
 elif menu == "EWS":
     st.title("🔍 Hasil Analisis EWS Pro")
 
+     # ==========================================
+    # DETEKSI KOLOM TRAFFIC YANG VALID
+    # ==========================================
+    col_visits = None  # default agar tidak NameError
+
+    traffic_cols = [c.lower() for c in traffic.columns]
+
+    if "visits" in traffic_cols:
+        col_visits = traffic.columns[traffic_cols.index("visits")]
+    elif "visit" in traffic_cols:
+        col_visits = traffic.columns[traffic_cols.index("visit")]
+    elif "traffic" in traffic_cols:
+        col_visits = traffic.columns[traffic_cols.index("traffic")]
+    
     alerts = ews_pro(g, comp, traffic)
 
     if not alerts:
@@ -414,6 +428,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
