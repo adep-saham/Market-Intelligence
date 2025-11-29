@@ -362,21 +362,22 @@ elif menu == "Customer & Product Intelligence":
 # ===========================================================
 
 elif menu == "EWS":
-        st.title("🔎 Hasil Analisis EWS Pro")
-    
-        alerts = ews_pro(global_df, competitor_df, traffic_df)
-    
-        for a in alerts:
-            if a["severity"] == "high":
-                st.error(f"🔴 **{a['indicator']} — HIGH ALERT**")
-            elif a["severity"] == "moderate":
-                st.warning(f"🟡 {a['indicator']} — Moderate Warning")
-            else:
-                st.success(f"🟢 {a['indicator']} — Stable")
-    
-            st.write(f"**Penyebab:** {a['reason']}")
-            st.write(f"**Rekomendasi:** {a['recommendation']}")
-            st.write("---")    
+    st.title("🔎 Hasil Analisis EWS Pro")
+
+    alerts = ews_pro(g, comp, traffic)
+
+    for a in alerts:
+        if a["severity"] == "high":
+            st.error(f"🔴 **{a['indicator']} — HIGH ALERT**")
+        elif a["severity"] == "moderate":
+            st.warning(f"🟡 {a['indicator']} — Moderate Warning")
+        else:
+            st.success(f"🟢 {a['indicator']} — Stable")
+
+        st.write(f"**Penyebab:** {a['reason']}")
+        st.write(f"**Rekomendasi:** {a['recommendation']}")
+        st.write("---")
+
 
 
 
@@ -388,6 +389,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
