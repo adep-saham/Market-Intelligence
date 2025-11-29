@@ -392,14 +392,19 @@ elif menu == "EWS":
         else:
             st.write(f"Selisih harga kompetitor Rp {avg_gap:,.0f} (masih di bawah ambang).")
     
-        # 3. TRAFFIC TREND
-        traffic_change = traffic["visits"].pct_change().iloc[-1] * 100
-        if abs(traffic_change) < 5:
-            st.info(f"🟢 **Traffic Stabil** — perubahan kunjungan hanya {traffic_change:.2f}%.")
+        # ============================
+        # 3. TRAFFIC TREND CHECK
+        # ============================
+        if col_visits is None:
+            st.warning("⚠ Tidak dapat menganalisis traffic — kolom visits tidak ditemukan.")
         else:
-            st.write(f"Perubahan traffic {traffic_change:.2f}% (masih aman).")
-    
-        st.write("---")
+            traffic_change = traffic[col_visits].pct_change().iloc[-1] * 100
+        
+            if abs(traffic_change) < 5:
+                st.info(f"🟢 **Traffic Stabil** — perubahan kunjungan hanya {traffic_change:.2f}%.")
+            else:
+                st.write(f"Traffic berubah {traffic_change:.2f}% (masih aman).")
+
 
 
 # ===========================================================
@@ -410,6 +415,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
