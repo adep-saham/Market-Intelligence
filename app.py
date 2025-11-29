@@ -342,13 +342,10 @@ elif menu == "Customer & Product Intelligence":
     # ==========================================
     # Forecast Demand
     # ==========================================
-    with col2:
-        st.markdown("### Forecast Demand")
-        st.image("https://i.imgur.com/Z5pM7sb.png", width=130)
-        st.write("Model prediksi permintaan emas untuk mendukung perencanaan persediaan.")
-        if st.button("Buka Forecast Demand"):
-            st.info("🔧 Fitur Forecast Demand sedang dalam pengembangan.")
-
+    from forecast_demand import forecast_demand_page
+    st.write("---")
+    forecast_demand_page()   
+    
     # ==========================================
     # Prioritas Produk Utama
     # ==========================================
@@ -378,6 +375,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
