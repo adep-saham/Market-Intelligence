@@ -349,13 +349,10 @@ elif menu == "Customer & Product Intelligence":
     # ==========================================
     # Prioritas Produk Utama
     # ==========================================
-    with col3:
-        st.markdown("### Prioritas Produk Utama")
-        st.image("https://i.imgur.com/oRL8jIk.png", width=130)
-        st.write("Penentuan prioritas produk berdasarkan performa penjualan & margin.")
-        if st.button("Buka Prioritas Produk Utama"):
-            st.info("🔧 Fitur Prioritas Produk Utama sedang dalam pengembangan.")
-
+    from prioritas_produk import prioritas_produk_page
+    st.write("---")
+    prioritas_produk_page()
+   
 # ===========================================================
 # EWS PAGE
 # ===========================================================
@@ -375,6 +372,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
