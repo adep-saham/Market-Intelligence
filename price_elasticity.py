@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 
 # ============================
-# API ENDPOINTS
+# API ENDPOINTS (SAMA PERSIS DENGAN competitor_scraper)
 # ============================
 URL_INDOGOLD = "https://old-river-ece0.best-adeprasetyo.workers.dev/indogold"
 URL_HRTA = "https://old-river-ece0.best-adeprasetyo.workers.dev/hartadinata"
@@ -20,7 +20,7 @@ def fetch_json(url):
 
 
 def calculate_premium(price, spot_gram):
-    if price is None or spot_gram is None or spot_gram <= 0:
+    if price is None or spot_gram <= 0:
         return None
     return (price / spot_gram) - 1
 
@@ -31,7 +31,7 @@ def recommend_price(my_price, competitor_avg, elasticity=0.3):
 
 
 # ============================
-# SCRAPERS (SAMA DENGAN app.py)
+# SCRAPERS (HARUS SAMA DENGAN competitor_scraper)
 # ============================
 def get_indogold():
     d = fetch_json(URL_INDOGOLD)
@@ -56,7 +56,7 @@ def run_price_elasticity(spot_per_gram):
     st.subheader("📉 Price Elasticity Analysis")
     st.write(f"Spot Gold (IDR per gram): **Rp {spot_per_gram:,.0f}**")
 
-    # Ambil data kompetitor
+    # AMBIL DATA DENGAN SCRAPER BENAR
     indogold = get_indogold()
     hartadinata = get_hartadinata()
     galeri24 = get_galeri24()
@@ -64,20 +64,20 @@ def run_price_elasticity(spot_per_gram):
     competitors = {
         "IndoGold": indogold["jual"],
         "Hartadinata": hartadinata["jual"],
-        "Galeri 24": galeri24["jual"]
+        "Galeri 24": galeri24["jual"],
     }
 
     # ============================
-    # PREMIUM VS SPOT
+    # PREMIUM SECTION
     # ============================
     st.write("### Premium vs Spot")
 
     for name, price in competitors.items():
         premium = calculate_premium(price, spot_per_gram)
-        if premium is not None:
-            st.write(f"- **{name}**: {premium*100:.2f}%")
+        if premium is None:
+            st.write(f"- {name}: N/A")
         else:
-            st.write(f"- **{name}**: N/A")
+            st.write(f"- {name}: **{premium*100:.2f}%**")
 
     # ============================
     # INPUT USER
@@ -85,7 +85,6 @@ def run_price_elasticity(spot_per_gram):
     st.write("### Input Harga Kamu")
     my_price = st.number_input("Harga Kamu (Rp)", min_value=0, value=1000000)
 
-    # Hitung average competitor
     valid_prices = [p for p in competitors.values() if p]
     if not valid_prices:
         st.error("Tidak ada data competitor valid.")
@@ -97,4 +96,4 @@ def run_price_elasticity(spot_per_gram):
     st.write("### Rekomendasi AI")
     st.write(f"- Rata-rata Competitor: Rp {avg_comp:,.0f}")
     st.write(f"- Harga Kamu: Rp {my_price:,.0f}")
-    st.success(f"Rekomendasi AI: **Rp {rec_price:,.0f}**")
+    st.success(f"Rekomendasi Harga: **Rp {rec_price:,.0f}**")
