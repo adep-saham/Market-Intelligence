@@ -337,9 +337,9 @@ elif menu == "Customer & Product Intelligence":
     # ==========================================
     # Segmentasi Pelanggan LM
     # ==========================================
-    
-    segmentasi_pelanggan_lm()
     st.write("---")
+    segmentasi_pelanggan_lm()
+   
 
     # ==========================================
     # Forecast Demand
@@ -374,6 +374,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
