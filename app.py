@@ -105,8 +105,15 @@ st.markdown(premium_css, unsafe_allow_html=True)
 # ===========================================================
 menu = st.sidebar.selectbox(
     "📌 Menu",
-    ["Dashboard", "Competitor", "Forecast", "EWS", "Pricing"]
+    [
+        "Dashboard",
+        "Competitor",
+        "Customer & Product Intelligence",
+        "EWS",
+        "Pricing"
+    ]
 )
+
 
 # ===========================================================
 # LOAD DATA
@@ -374,6 +381,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
