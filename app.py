@@ -371,35 +371,35 @@ elif menu == "EWS":
     alerts = ews_pro(g, comp, traffic)
 
     if not alerts:
-    st.success("Semua indikator stabil — tidak ada Early Warning.")
-
-    st.subheader("📊 Mengapa dianggap stabil?")
-
-    # 1. GLOBAL PRICE CHECK
-    gold_change = g["price"].pct_change().iloc[-1] * 100
-    if abs(gold_change) < 1:
-        st.info(f"🟢 **Harga Global Stabil** — perubahan harian hanya {gold_change:.2f}%.")
-    else:
-        st.write(f"Perubahan harga global {gold_change:.2f}% (di bawah batas Early Warning).")
-
-    # 2. COMPETITOR PRICE GAP
-    gap_df = comp.copy()
-    gap_df["gap"] = abs(gap_df["price"] - g["price"].iloc[-1])
-    avg_gap = gap_df["gap"].mean()
-
-    if avg_gap < 3000:
-        st.info(f"🟢 **Gap Harga Kompetitor Stabil** — rata-rata selisih hanya Rp {avg_gap:,.0f}.")
-    else:
-        st.write(f"Selisih harga kompetitor Rp {avg_gap:,.0f} (masih di bawah ambang).")
-
-    # 3. TRAFFIC TREND
-    traffic_change = traffic["visits"].pct_change().iloc[-1] * 100
-    if abs(traffic_change) < 5:
-        st.info(f"🟢 **Traffic Stabil** — perubahan kunjungan hanya {traffic_change:.2f}%.")
-    else:
-        st.write(f"Perubahan traffic {traffic_change:.2f}% (masih aman).")
-
-    st.write("---")
+        st.success("Semua indikator stabil — tidak ada Early Warning.")
+    
+        st.subheader("📊 Mengapa dianggap stabil?")
+    
+        # 1. GLOBAL PRICE CHECK
+        gold_change = g["price"].pct_change().iloc[-1] * 100
+        if abs(gold_change) < 1:
+            st.info(f"🟢 **Harga Global Stabil** — perubahan harian hanya {gold_change:.2f}%.")
+        else:
+            st.write(f"Perubahan harga global {gold_change:.2f}% (di bawah batas Early Warning).")
+    
+        # 2. COMPETITOR PRICE GAP
+        gap_df = comp.copy()
+        gap_df["gap"] = abs(gap_df["price"] - g["price"].iloc[-1])
+        avg_gap = gap_df["gap"].mean()
+    
+        if avg_gap < 3000:
+            st.info(f"🟢 **Gap Harga Kompetitor Stabil** — rata-rata selisih hanya Rp {avg_gap:,.0f}.")
+        else:
+            st.write(f"Selisih harga kompetitor Rp {avg_gap:,.0f} (masih di bawah ambang).")
+    
+        # 3. TRAFFIC TREND
+        traffic_change = traffic["visits"].pct_change().iloc[-1] * 100
+        if abs(traffic_change) < 5:
+            st.info(f"🟢 **Traffic Stabil** — perubahan kunjungan hanya {traffic_change:.2f}%.")
+        else:
+            st.write(f"Perubahan traffic {traffic_change:.2f}% (masih aman).")
+    
+        st.write("---")
 
 
 # ===========================================================
@@ -410,6 +410,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
