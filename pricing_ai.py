@@ -1,16 +1,16 @@
-# pricing_ai.py
-from openai import OpenAI
+import google.generativeai as genai
 import os
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Configure API key
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-def gpt_price_recommendation(spot, indo, harta, g24, my_price):
+def gemini_price_recommendation(spot, indo, harta, g24, my_price):
     prompt = f"""
 Anda adalah AI Pricing Analyst Emas Logam Mulia.
 
-Gunakan data berikut untuk memberikan harga rekomendasi dan analisis:
+Gunakan data berikut:
 
-Spot Gold (IDR/gram): {spot}
+Spot Gold (IDR per gram): {spot}
 
 Harga Kompetitor:
 - IndoGold: {indo}
@@ -19,23 +19,21 @@ Harga Kompetitor:
 
 Harga Jual ANTAM saat ini: {my_price}
 
-Tugas:
+Tugas Anda:
 1. Hitung premium masing-masing kompetitor.
-2. Berikan analisis pasar (ringkas).
-3. Berikan *SATU ANGKA rekomendasi harga jual* dalam Rupiah.
-4. Format output TEKS saja, contoh:
+2. Analisis tren pasar (ringkas).
+3. Berikan *SATU harga rekomendasi AI* (angka bulat Rupiah tanpa desimal).
+4. Sertakan alasan bisnis (maks 3 poin).
+5. Format WAJIB seperti berikut:
 
-REKOMENDASI: Rp x.xxx.xxx
-ALASAN: <analisis ringkas>
+REKOMENDASI: Rp <angka>
+ALASAN:
+- <alasan1>
+- <alasan2>
+- <alasan3>
 """
 
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": "Anda adalah engine AI pricing ANTAM Logam Mulia."},
-            {"role": "user", "content": prompt}
-        ]
-    )
+    model = genai.GenerativeModel("gemini-1.5-flash")
+    response = model.generate_content(prompt)
 
-    return response.choices[0].message["content"]
-
+    return response.text
