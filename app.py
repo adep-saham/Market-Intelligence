@@ -21,6 +21,8 @@ from competitor_scraper import get_indogold_price, get_hartadinata_price, get_ga
 from forecast_demand import forecast_demand_page
 from prioritas_produk import prioritas_produk_page
 from segmentasi import segmentasi_pelanggan_lm
+from ews import ews_page
+
 
 # ===========================================================
 # UI SETUP
@@ -359,12 +361,8 @@ elif menu == "Customer & Product Intelligence":
 # EWS PAGE
 # ===========================================================
 elif menu == "EWS":
-    st.title("⚠ Early Warning System")
-    if alerts:
-        for a in alerts:
-            st.error(a)
-    else:
-        st.success("Tidak ada alert. Semua stabil.")
+    ews_page(g, comp, traffic)
+
 
 # ===========================================================
 # PRICING PAGE
@@ -374,6 +372,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
