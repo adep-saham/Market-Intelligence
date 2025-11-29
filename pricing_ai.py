@@ -2,7 +2,7 @@ import google.generativeai as genai
 import os
 
 # Configure API key
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+genai.configure(api_key=os.getenv("AIzaSyDU1rL7phIjZ83Joh7xn-6HE1HZ4PDvkvE"))
 
 def gemini_price_recommendation(spot, indo, harta, g24, my_price):
     prompt = f"""
@@ -37,3 +37,4 @@ ALASAN:
     response = model.generate_content(prompt)
 
     return response.text
+
