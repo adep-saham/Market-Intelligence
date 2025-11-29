@@ -18,9 +18,6 @@ from mi_engine import (
 )
 
 from competitor_scraper import get_indogold_price, get_hartadinata_price, get_galeri24_price
-from price_elasticity import run_price_elasticity
-
-
 
 
 # ===========================================================
@@ -121,14 +118,6 @@ traffic = load_traffic()
 
 kitco = fetch_gold_price()
 usdidr = fetch_usdidr()
-# ===========================================================
-# GLOBAL GOLD VARIABLES (AGAR BISA DIPAKAI SEMUA HALAMAN)
-# ===========================================================
-gold_usd = kitco.get("mid", 0)
-gold_per_gram_usd = gold_usd / 31.1034768
-gold_per_gram_idr = gold_per_gram_usd * usdidr
-
-
 
 lm_price = g["price"].iloc[-1]
 gap = detect_price_gap(lm_price, comp)
@@ -225,10 +214,6 @@ if menu == "Dashboard":
 # COMPETITOR PAGE
 # ===========================================================
 
-# ===========================================================
-# COMPETITOR PAGE
-# ===========================================================
-
 elif menu == "Competitor":
     st.title("🏷 Competitor & Pricing Intelligence")
 
@@ -248,7 +233,7 @@ elif menu == "Competitor":
         st.metric("Harga Jual", f"Rp {indogold['jual']:,}" if indogold else "N/A")
         st.metric("Harga Beli", f"Rp {indogold['beli']:,}" if indogold else "N/A")
         st.caption("Update: —")
-
+    
     # ============================
     # HARTADINATA (EMASKU)
     # ============================
@@ -257,7 +242,7 @@ elif menu == "Competitor":
         st.metric("Harga Jual", f"Rp {hartadinata['jual']:,}" if hartadinata else "N/A")
         st.metric("Harga Beli", f"Rp {hartadinata['beli']:,}" if hartadinata else "N/A")
         st.caption(f"Update: {hartadinata['last_update']}" if hartadinata else "Update: —")
-
+    
     # ============================
     # GALERI 24 (Pegadaian)
     # ============================
@@ -267,18 +252,9 @@ elif menu == "Competitor":
         st.metric("Harga Beli", f"Rp {int(galeri24['beli']):,}" if galeri24 else "N/A")
         st.caption(f"Update: {galeri24['last_update']}" if galeri24 else "Update: —")
 
-    st.markdown("---")
-
-    # ===========================================================
-    #  SPOT GOLD UNTUK ELASTICITY (IDR/GRAM)
-    # ===========================================================
-    # GUNAKAN NILAI GLOBAL DARI KITCO YANG SUDAH PASTI ADA
-    spot_per_gram = gold_per_gram_idr  # float IDR/gram
-
-    # Jalankan modul price elasticity
-    run_price_elasticity(spot_per_gram)
 
 
+        
 
 # ===========================================================
 # FORECAST PAGE
@@ -307,22 +283,6 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
