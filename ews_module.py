@@ -1,79 +1,127 @@
-import streamlit as st
 import pandas as pd
 
-# ==========================================
-# CARI KOLOM TRAFFIC SECARA OTOMATIS
-# ==========================================
-def detect_traffic_column(df):
-    possible_cols = ["visits", "visit", "traffic", "pengunjung", "count", "value"]
-    for col in possible_cols:
-        if col in df.columns:
-            return col
-    return None
+# ================================
+# EWS PRO — Analytic Rules
+# ================================
+def analyze_global_price(global_df):
+    """Analisis pergerakan harga global (gold price)."""
+    try:
+        today = global_df["Close"].iloc[-1]
+        yesterday = global_df["Close"].iloc[-2]
+        change_pct = ((today - yesterday) / yesterday) * 100
+
+        if change_pct > 1.5:
+            return {
+                "indicator": "Gold Price Global",
+                "severity": "high",
+                "change": change_pct,
+                "reason": f"Harga emas global naik signifikan {change_pct:.2f}%.",
+                "recommendation": "Pantau dampak ke harga jual LM hari ini."
+            }
+        elif change_pct < -1.2:
+            return {
+                "indicator": "Gold Price Global",
+                "severity": "moderate",
+                "change": change_pct,
+                "reason": f"Harga emas global turun {change_pct:.2f}%.",
+                "recommendation": "Evaluasi strategi harga jika penurunan berlanjut."
+            }
+        else:
+            return {
+                "indicator": "Gold Price Global",
+                "severity": "stable",
+                "change": change_pct,
+                "reason": "Pergerakan harga global stabil.",
+                "recommendation": "-"
+            }
+    except:
+        return None
 
 
-# ==========================================
-# LOGIC UTAMA EWS
-# ==========================================
-def ews_check(global_df, competitor_df, traffic_df):
+def analyze_competitor_price(comp_df):
+    """Analisis perubahan harga kompetitor."""
+    try:
+        comp_df["avg_price"] = comp_df.mean(axis=1)
+        today = comp_df["avg_price"].iloc[-1]
+        yesterday = comp_df["avg_price"].iloc[-2]
+        change_pct = ((today - yesterday) / yesterday) * 100
+
+        if change_pct <= -2:
+            return {
+                "indicator": "Harga Kompetitor",
+                "severity": "high",
+                "change": change_pct,
+                "reason": f"Kompetitor menurunkan harga {change_pct:.2f}%. Indikasi price war.",
+                "recommendation": "Pertimbangkan penyesuaian harga atau bundling promo."
+            }
+        elif change_pct <= -1:
+            return {
+                "indicator": "Harga Kompetitor",
+                "severity": "moderate",
+                "change": change_pct,
+                "reason": f"Harga kompetitor turun {change_pct:.2f}%.",
+                "recommendation": "Pantau apakah ada tren penurunan lanjutan."
+            }
+        else:
+            return {
+                "indicator": "Harga Kompetitor",
+                "severity": "stable",
+                "change": change_pct,
+                "reason": "Harga kompetitor stabil.",
+                "recommendation": "-"
+            }
+    except:
+        return None
+
+
+def analyze_traffic(traffic_df):
+    """Analisis penurunan traffic website/apps."""
+    try:
+        today = traffic_df["Visits"].iloc[-1]
+        avg_week = traffic_df["Visits"].tail(7).mean()
+        change_pct = ((today - avg_week) / avg_week) * 100
+
+        if change_pct <= -20:
+            return {
+                "indicator": "Traffic",
+                "severity": "high",
+                "change": change_pct,
+                "reason": f"Traffic turun tajam {change_pct:.2f}%.",
+                "recommendation": "Aktifkan push notif / promo digital."
+            }
+        elif change_pct <= -10:
+            return {
+                "indicator": "Traffic",
+                "severity": "moderate",
+                "change": change_pct,
+                "reason": f"Traffic turun {change_pct:.2f}%.",
+                "recommendation": "Pertimbangkan aktivitas marketing ringan."
+            }
+        else:
+            return {
+                "indicator": "Traffic",
+                "severity": "stable",
+                "change": change_pct,
+                "reason": "Traffic stabil.",
+                "recommendation": "-"
+            }
+    except:
+        return None
+
+
+# ================================
+# MAIN FUNCTION (untuk app.py)
+# ================================
+def ews_pro(global_df, competitor_df, traffic_df):
     alerts = []
 
-    # -------- TRAFFIC CHECK ----------
-    traffic_col = detect_traffic_column(traffic_df)
+    a = analyze_global_price(global_df)
+    if a: alerts.append(a)
 
-    if traffic_col:
-        if len(traffic_df) >= 7:
-            today = traffic_df[traffic_col].iloc[-1]
-            last_week_avg = traffic_df[traffic_col].iloc[-7:].mean()
+    b = analyze_competitor_price(competitor_df)
+    if b: alerts.append(b)
 
-            if today < last_week_avg * 0.75:
-                alerts.append(("Traffic turun >25% dibanding minggu lalu", "danger"))
-            elif today < last_week_avg * 0.90:
-                alerts.append(("Traffic menurun minggu ini", "warning"))
-    else:
-        alerts.append(("Kolom traffic tidak ditemukan", "warning"))
-
-    # -------- WORLD GOLD PRICE --------
-    if len(global_df) >= 2:
-        last = global_df["price"].iloc[-1]
-        prev = global_df["price"].iloc[-2]
-        change = (last - prev) / prev * 100
-
-        if change > 1.5:
-            alerts.append((f"Harga emas dunia naik tajam {change:.2f}%", "danger"))
-        elif change < -1.5:
-            alerts.append((f"Harga emas dunia turun tajam {change:.2f}%", "danger"))
-        elif abs(change) > 0.6:
-            alerts.append((f"Harga emas bergerak signifikan {change:.2f}%", "warning"))
-
-    # -------- COMPETITOR PRICE GAP --------
-    if "gap" in competitor_df.columns:
-        min_gap = competitor_df["gap"].min()
-
-        if min_gap < -1500:
-            alerts.append(("Gap kompetitor sangat negatif (indikasi price war)", "danger"))
-        elif min_gap < -500:
-            alerts.append(("Gap kompetitor menurun (potensi price pressure)", "warning"))
+    c = analyze_traffic(traffic_df)
+    if c: alerts.append(c)
 
     return alerts
-
-
-# ==========================================
-# HALAMAN UTAMA
-# ==========================================
-def ews_page(global_df, competitor_df, traffic_df):
-    st.header("🔍 Hasil Analisis EWS")
-
-    alerts = ews_check(global_df, competitor_df, traffic_df)
-
-    if not alerts:
-        st.success("Semua indikator stabil — tidak ada Early Warning.")
-        return
-
-    for msg, level in alerts:
-        if level == "danger":
-            st.error(msg)
-        elif level == "warning":
-            st.warning(msg)
-        else:
-            st.info(msg)
