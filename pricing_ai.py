@@ -30,7 +30,7 @@ ALASAN: <analisis ringkas>
 """
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": "Anda adalah engine AI pricing ANTAM Logam Mulia."},
             {"role": "user", "content": prompt}
@@ -38,3 +38,4 @@ ALASAN: <analisis ringkas>
     )
 
     return response.choices[0].message["content"]
+
