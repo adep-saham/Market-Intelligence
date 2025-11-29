@@ -55,15 +55,21 @@ def prioritas_produk_page():
     # ----------------------------------------------------------
     st.write("### 🥇 Ranking Prioritas Produk")
 
-    st.dataframe(
-        df[["Produk", "Volume", "Margin", "Growth", "Popularity", "PPS"]]
+    style = (df[["Produk", "Volume", "Margin", "Growth", "Popularity", "PPS"]]
         .style.format({
             "Margin": "{:.2%}",
             "Growth": "{:.2%}",
             "PPS": "{:.3f}"
-        }),
-        use_container_width=True
+        })
+        .background_gradient(subset=["Volume"], cmap="Blues")
+        .background_gradient(subset=["Margin"], cmap="Greens")
+        .background_gradient(subset=["Growth"], cmap="Purples")
+        .background_gradient(subset=["Popularity"], cmap="Oranges")
+        .background_gradient(subset=["PPS"], cmap="Reds")
     )
+
+st.dataframe(style, use_container_width=True)
+
 
     # ----------------------------------------------------------
     # 4. Visualisasi
@@ -84,4 +90,5 @@ def prioritas_produk_page():
     st.success(f"Produk dengan prioritas tertinggi saat ini adalah **{top_product}** berdasarkan PPS.")
     st.info(f"Produk dengan pertumbuhan permintaan tertinggi adalah **{top_growth}**.")
     st.warning(f"Produk dengan volatilitas harga terendah (stabil) adalah **{lowest_volatil}**.")
+
 
