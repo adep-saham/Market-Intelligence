@@ -361,10 +361,14 @@ elif menu == "Customer & Product Intelligence":
 # EWS PAGE
 # ===========================================================
 
-elif menu == "EWS":
-    st.title("🔎 Hasil Analisis EWS Pro")
+# ==========================================
+# EWS PAGE
+# ==========================================
 
-   alerts = ews_pro(g, comp, traffic)
+elif menu == "EWS":
+    st.title("🔍 Hasil Analisis EWS Pro")
+
+    alerts = ews_pro(g, comp, traffic)
 
     if not alerts:
         st.success("Semua indikator stabil — tidak ada Early Warning.")
@@ -373,15 +377,13 @@ elif menu == "EWS":
             if a["severity"] == "high":
                 st.error(f"🔴 **{a['indicator']} — HIGH ALERT**")
             elif a["severity"] == "moderate":
-                st.warning(f"🟡 {a['indicator']} — Moderate Warning")
+                st.warning(f"🟠 **{a['indicator']} — Moderate Warning**")
             else:
-                st.info(f"🟢 {a['indicator']} — Stable")
-    
+                st.info(f"🟢 **{a['indicator']} — Stable**")
+
             st.write(f"**Penyebab:** {a['reason']}")
             st.write(f"**Rekomendasi:** {a['recommendation']}")
             st.write("---")
-
-
 
 
 # ===========================================================
@@ -392,6 +394,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
