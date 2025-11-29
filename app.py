@@ -335,12 +335,9 @@ elif menu == "Customer & Product Intelligence":
     # ==========================================
     # Segmentasi Pelanggan LM
     # ==========================================
-    with col1:
-        st.markdown("### Segmentasi Pelanggan LM")
-        st.image("https://i.imgur.com/xg0XKpB.png", width=130)
-        st.write("Analisis segmentasi pelanggan berdasarkan pola transaksi dan preferensi produk.")
-        if st.button("Buka Segmentasi Pelanggan LM"):
-            st.info("🔧 Fitur Segmentasi Pelanggan LM sedang dalam pengembangan.")
+    from segmentasi import segmentasi_pelanggan_lm
+    segmentasi_pelanggan_lm()
+    st.write("---")
 
     # ==========================================
     # Forecast Demand
@@ -381,6 +378,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
