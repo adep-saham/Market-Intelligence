@@ -172,21 +172,31 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         render_top50("Top 50 Kota Customer", kota_count, color="teal")
     else:
         st.info("Tidak ada data kota valid.")
-    
-    
+           
     # ==========================================
-    # 3️⃣ DISTRIBUSI TAHUN KELAHIRAN
+    # 3️⃣ DISTRIBUSI TAHUN KELAHIRAN (AMAN TANPA ERROR)
     # ==========================================
     st.subheader("🎂 Distribusi Tahun Kelahiran (Valid per Customer)")
     
     df_tahun = df_pelanggan[["Customer_ID", "Tanggal_Lahir"]].copy()
-    df_tahun["Tanggal_Lahir"] = pd.to_datetime(df_tahun["Tanggal_Lahir"], errors="coerce")
-    df_tahun["Tahun_Lahir"] = df_tahun["Tanggal_Lahir"].dt.year
-    df_tahun = df_tahun.dropna(subset=["Tahun_Lahir"])
-    df_tahun = df_tahun.groupby("Customer_ID")["Tahun_Lahir"].first().astype(int)
     
-    if len(df_tahun):
-        tahun_count = df_tahun.value_counts().sort_index().tail(50).to_dict()
+    # Konversi ke datetime
+    df_tahun["Tanggal_Lahir"] = pd.to_datetime(df_tahun["Tanggal_Lahir"], errors="coerce")
+    
+    # Ambil tahun (bisa menghasilkan NaN)
+    df_tahun["Tahun_Lahir"] = df_tahun["Tanggal_Lahir"].dt.year
+    
+    # Hapus seluruh baris invalid
+    df_tahun = df_tahun.dropna(subset=["Tahun_Lahir"])
+    
+    # Konversi aman → integer (setelah dropna)
+    df_tahun["Tahun_Lahir"] = df_tahun["Tahun_Lahir"].astype(int)
+    
+    # Ambil tahun valid per customer
+    df_tahun_per_customer = df_tahun.groupby("Customer_ID")["Tahun_Lahir"].first()
+    
+    if len(df_tahun_per_customer):
+        tahun_count = df_tahun_per_customer.value_counts().sort_index().tail(50).to_dict()
     
         fig, ax = plt.subplots(figsize=(12, 6))
         ax.bar(tahun_count.keys(), tahun_count.values(), color="salmon")
@@ -198,6 +208,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.pyplot(fig)
     else:
         st.info("Tidak ada data tahun lahir valid.")
+
     
     
     # ==========================================
@@ -310,6 +321,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
