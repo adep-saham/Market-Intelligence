@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-
+import plotly.graph_objects as go
 from mi_engine import (
     load_global_price,
     load_competitor,
@@ -220,21 +220,31 @@ if menu == "Dashboard":
 
     st.markdown('<div class="section-title">📈 Tren Harga Global</div>', unsafe_allow_html=True)
 
-    # ============================
-    #  GRAFIK GLOBAL — 1/3 layar
-    # ============================
+   
 
-    st.markdown(
-        """
-        <div style="width:33%; min-width:350px; float:left; padding-right:20px;">
-        """,
-        unsafe_allow_html=True
+    # === Grafik menggunakan Plotly ===
+    fig = go.Figure()
+    
+    fig.add_trace(go.Scatter(
+        x=g["date"],
+        y=g["price"],
+        mode="lines",
+        line=dict(color="#1f77b4", width=3)
+    ))
+    
+    fig.update_layout(
+        title="",
+        height=260,
+        width=450,   # << ukuran grafik 1/3 layar
+        margin=dict(l=10, r=10, t=10, b=10),
+        xaxis=dict(title=""),
+        yaxis=dict(title="")
     )
-    
-    fig = st.line_chart(g.set_index("date")["price"], use_container_width=True)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("<div style='clear:both;'></div>", unsafe_allow_html=True)
+
+st.markdown("<div style='width:33%; float:left;'>", unsafe_allow_html=True)
+st.plotly_chart(fig, use_container_width=False)
+st.markdown("</div><div style='clear:both;'></div>", unsafe_allow_html=True)
+
 
     
     st.line_chart(g.set_index("date")["price"], use_container_width=True)
@@ -448,6 +458,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
