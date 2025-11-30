@@ -216,6 +216,10 @@ if menu == "Dashboard":
         """, unsafe_allow_html=True)
 
     # JANGAN HILANGKAN TUTUP IF DI ATAS SEBELUM MASUK ke HALAMAN LAIN
+    
+
+    st.markdown('<div class="section-title">📈 Tren Harga Global</div>', unsafe_allow_html=True)
+
     # ============================
     #  GRAFIK GLOBAL — 1/3 layar
     # ============================
@@ -232,7 +236,7 @@ if menu == "Dashboard":
     st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("<div style='clear:both;'></div>", unsafe_allow_html=True)
 
-    st.markdown('<div class="section-title">📈 Tren Harga Global</div>', unsafe_allow_html=True)
+    
     st.line_chart(g.set_index("date")["price"], use_container_width=True)
     st.markdown('<div class="section-title">🛒 Gap Kompetitor</div>', unsafe_allow_html=True)
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
@@ -444,6 +448,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
