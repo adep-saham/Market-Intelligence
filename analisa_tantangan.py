@@ -48,17 +48,31 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     # ============================
     st.header("1️⃣ Trend Harga vs Volume Penjualan")
     
-    df_daily = df_trans[["Tanggal", "Total_Nilai", "Qty"]].groupby("Tanggal").sum().reset_index()
-    df_merge = df_daily.merge(df_harga, on="Tanggal", how="left")
+    # Cari kolom Quantity yang benar
+    qty_candidates = ["Qty", "qty", "Jumlah", "jumlah", "Quantity", "quantity", 
+                      "Jumlah dalam pcs", "QTY", "PCS", "Pcs"]
     
-    # DETEKSI K0LOM HARGA
+    kolom_qty = None
+    for c in df_trans.columns:
+        if c.strip() in qty_candidates:
+            kolom_qty = c
+            break
+    
+    if kolom_qty is None:
+        st.error(f"❌ Tidak menemukan kolom Quantity. Kolom tersedia: {df_trans.columns.tolist()}")
+        st.stop()
+    
+    # groupby turbo dengan kolom yang benar
+    df_daily = df_trans.groupby("Tanggal").agg(
+        Total_Jual=("Total_Nilai", "sum"),
+        Total_Qty=(kolom_qty, "sum")
+    ).reset_index()
+    
+    df_merge = df_daily.merge(df_harga, on="Tanggal", how="left")
+
     harga_candidates = [
-        "Harga_Jual_Antam",
-        "Harga Jual Antam",
-        "Harga Jual",
-        "Harga Jual (Rp)",
-        "Harga_Jual",
-        "HargaJualAntam"
+        "Harga_Jual_Antam", "Harga Jual Antam", "Harga Jual",
+        "Harga Jual (Rp)", "Harga_Jual", "HargaJualAntam"
     ]
     
     kolom_harga = None
@@ -68,18 +82,18 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
             break
     
     if kolom_harga is None:
-        st.error(f"❌ Tidak menemukan kolom harga Antam. Kolom tersedia: {df_merge.columns.tolist()}")
+        st.error(f"❌ Tidak menemukan kolom harga emas. Kolom tersedia: {df_merge.columns.tolist()}")
         st.stop()
-    
-    # DROP NA
+
     df_plot = df_merge.dropna(subset=[kolom_harga, "Total_Qty"])
-    
-    # SAMPLING TURBO
     df_plot = df_plot.sample(min(3000, len(df_plot)))
     
-    # PLOT
-    fig = px.line(df_plot, x="Tanggal", y=[kolom_harga, "Total_Qty"],
-                  title="Harga Emas vs Volume Penjualan (Turbo Mode)")
+    fig = px.line(
+        df_plot,
+        x="Tanggal",
+        y=[kolom_harga, "Total_Qty"],
+        title="Harga Emas vs Volume Penjualan (Turbo Mode)"
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 
@@ -147,6 +161,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
