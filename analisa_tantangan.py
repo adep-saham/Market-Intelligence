@@ -47,16 +47,23 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     # 1️⃣ TREND PENJUALAN (OPTIMIZED)
     # ============================
     st.header("1️⃣ Trend Harga vs Volume Penjualan")
-
+    
     # Turbo groupby
     df_daily = df_trans[["Tanggal", "Total_Nilai", "Qty"]].groupby("Tanggal").sum().reset_index()
     df_merge = df_daily.merge(df_harga, on="Tanggal", how="left")
-
+    
+    # Hapus baris yang NaN agar graph tidak error
+    df_plot = df_merge.dropna(subset=["Harga_Jual_Antam", "Total_Qty"])
+    
     # TURBO: downsampling untuk percepat grafik
-    df_plot = df_merge.sample(min(3000, len(df_merge)))
-
-    fig = px.line(df_plot, x="Tanggal", y=["Harga_Jual_Antam", "Total_Qty"],
-                  title="Harga Emas vs Volume Penjualan (Turbo Mode)")
+    df_plot = df_plot.sample(min(3000, len(df_plot)))
+    
+    fig = px.line(
+        df_plot,
+        x="Tanggal",
+        y=["Harga_Jual_Antam", "Total_Qty"],
+        title="Harga Emas vs Volume Penjualan (Turbo Mode)"
+    )
     st.plotly_chart(fig, use_container_width=True)
 
     # ============================
@@ -123,5 +130,6 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
