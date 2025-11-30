@@ -108,70 +108,91 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     st.pyplot(fig)
     
     # ==========================================================
-    # DEMOGRAFI PELANGGAN (VERSI KECIL 1/3 LAYAR)
+    # DEMOGRAFI PELANGGAN – FINAL VERSION (NO PDP)
     # ==========================================================
     
-    st.markdown("## 🧑‍🤝‍🧑 Demografi Pelanggan")
+    import matplotlib.pyplot as plt
+    import pandas as pd
     
-    # ============================================
-    # CLEANING — HANYA AMBIL DATA VALID CUSTOMER
-    # ============================================
+    # ============================
+    # 1. Normalisasi Data Pelanggan
+    # ============================
+    
     df_valid = df_pelanggan.copy()
     
-    # Bersihkan "data kosong"
-    df_valid = df_valid.replace("data kosong", None)
+    # Semua kolom diubah ke string & dibersihkan
+    for col in df_valid.columns:
+        df_valid[col] = df_valid[col].astype(str).str.strip().str.upper()
     
-    # Ambil Tahun Lahir
-    df_valid["Tahun_Lahir"] = pd.to_datetime(df_valid["Tanggal_Lahir"], errors="coerce").dt.year
+    # Buang nilai tidak valid
+    df_valid = df_valid.replace(
+        {"NAN": None, "NONE": None, "NULL": None, "DATA KOSONG": None, "": None}
+    )
     
-    # Ambil Provinsi valid
-    prov_series = df_valid.dropna(subset=["Provinsi"]).groupby("Provinsi")["Customer_ID"].count().sort_values(ascending=False).head(50)
-    
-    # Ambil Kota valid
-    kota_series = df_valid.dropna(subset=["Kota"]).groupby("Kota")["Customer_ID"].count().sort_values(ascending=False).head(50)
-    
-    # Ambil Tahun Lahir valid
-    tahun_series = df_valid.dropna(subset=["Tahun_Lahir"]).groupby("Tahun_Lahir")["Customer_ID"].count().sort_values(ascending=False).head(50)
-    
-      
-    
-    # ==========================================================
-    # FUNGSI MEMBUAT GRAFIK MINI (1/3 LAYAR)
-    # ==========================================================
-    def plot_mini_bar(title, series):
-        fig, ax = plt.subplots(figsize=(5, 3))  # 1/3 layar
-    
-        ax.bar(series.index, series.values, color="#008b8b")
-    
-        ax.set_title(title, fontsize=10)
-        ax.set_ylabel("Jumlah", fontsize=8)
-    
-        plt.xticks(rotation=45, ha="right", fontsize=7)
-        plt.yticks(fontsize=7)
-    
-        ax.grid(axis="y", linestyle="--", alpha=0.3)
-        plt.tight_layout()
-    
-        return fig
+    # Tahun lahir (aman)
+    df_valid["Tahun_Lahir"] = pd.to_datetime(
+        df_valid["Tanggal_Lahir"], errors="coerce"
+    ).dt.year
     
     
-    # ==========================================================
-    # TAMPILKAN DALAM 3 KOLOM PER BARIS
-    # ==========================================================
+    # ================================================
+    # 2. Grafik Distribusi Provinsi (Top 50 Per Customer)
+    # ================================================
     
-    col1, col2, col3 = st.columns(3)
+    prov_series = (
+        df_valid.dropna(subset=["PROVINSI"])
+        .groupby("PROVINSI")["CUSTOMER_ID"]
+        .count()
+        .sort_values(ascending=False)
+        .head(50)
+    )
     
-    with col1:
-        st.markdown("### 🗺️ Top 50 Provinsi Customer")
-        st.pyplot(plot_mini_bar("Top 50 Provinsi Customer", prov_series))
+    fig, ax = plt.subplots(figsize=(10, 3))  # 1/3 layar
+    ax.bar(prov_series.index, prov_series.values, color="skyblue")
+    ax.set_title("Top 50 Provinsi Customer")
+    ax.set_ylabel("Jumlah")
+    plt.xticks(rotation=90, fontsize=6)
+    st.pyplot(fig)
     
-    with col2:
-        st.markdown("### 🏙️ Top 50 Kota Customer")
-        st.pyplot(plot_mini_bar("Top 50 Kota Customer", kota_series))
     
-    with col3:
-        st.markdown("### 📅 Distribusi Tahun Lahir Customer")
-        st.pyplot(plot_mini_bar("Top 50 Tahun Lahir Customer", tahun_series))
+    # =============================================
+    # 3. Grafik Distribusi Kota (Top 50 Per Customer)
+    # =============================================
+    
+    kota_series = (
+        df_valid.dropna(subset=["KOTA"])
+        .groupby("KOTA")["CUSTOMER_ID"]
+        .count()
+        .sort_values(ascending=False)
+        .head(50)
+    )
+    
+    fig, ax = plt.subplots(figsize=(10, 3))  # 1/3 layar
+    ax.bar(kota_series.index, kota_series.values, color="teal")
+    ax.set_title("Top 50 Kota Customer")
+    ax.set_ylabel("Jumlah")
+    plt.xticks(rotation=90, fontsize=6)
+    st.pyplot(fig)
+    
+    
+    # ================================
+    # 4. Distribusi Tahun Kelahiran
+    # ================================
+    
+    tahun_series = (
+        df_valid.dropna(subset=["Tahun_Lahir"])
+        .groupby("Tahun_Lahir")["CUSTOMER_ID"]
+        .count()
+        .sort_index()
+    )
+    
+    fig, ax = plt.subplots(figsize=(10, 3))  # 1/3 layar
+    ax.bar(tahun_series.index.astype(str), tahun_series.values, color="orange")
+    ax.set_title("Distribusi Tahun Kelahiran Customer")
+    ax.set_ylabel("Jumlah")
+    plt.xticks(rotation=90, fontsize=6)
+    st.pyplot(fig)
+
     
     
   
@@ -271,6 +292,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
