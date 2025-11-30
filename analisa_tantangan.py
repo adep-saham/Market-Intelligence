@@ -4,8 +4,6 @@ import plotly.express as px
 
 def run_analisa(df_harga, df_trans, df_pelanggan):
 
-   def run_analisa(df_harga, df_trans, df_pelanggan):
-
     # ============================
     # NORMALISASI K0L0M HARGA EMAS
     # ============================
@@ -125,4 +123,5 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
