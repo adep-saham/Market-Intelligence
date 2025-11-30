@@ -109,54 +109,43 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
 
 
     # ============================
-    # 2️⃣ DEMOGRAFI PELANGGAN
+    # 2️⃣ DEMOGRAFI PELANGGAN (FIXED)
     # ============================
     
     st.header("2️⃣ Demografi Pelanggan")
     
-    # ---- Hitung UMUR dari df_pelanggan ----
+    # --- pastikan Tanggal_Lahir selalu datetime ---
     if "Tanggal_Lahir" in df_pelanggan.columns:
+        df_pelanggan["Tanggal_Lahir"] = pd.to_datetime(df_pelanggan["Tanggal_Lahir"], errors="coerce")
+        
+        # hitung umur
         today = pd.Timestamp("2024-12-31")
         df_pelanggan["Umur"] = ((today - df_pelanggan["Tanggal_Lahir"]).dt.days // 365)
     
-        # merge Umur ke df_trans
+        # merge umur ke df_trans
         df_trans = df_trans.merge(
             df_pelanggan[["Customer_ID", "Umur"]],
             on="Customer_ID",
             how="left"
         )
     
-    # ---- Plot Distribusi Umur ----
+    # --- histogram umur ---
     if "Umur" in df_trans.columns:
-        fig2 = px.histogram(
-            df_trans.dropna(subset=["Umur"]).sample(min(5000, len(df_trans))),
-            x="Umur",
-            nbins=20,
-            title="Distribusi Umur Pelanggan"
-        )
-        st.plotly_chart(fig2, use_container_width=True)
+        df_plot_age = df_trans.dropna(subset=["Umur"])
+        
+        if len(df_plot_age) > 0:
+            fig2 = px.histogram(
+                df_plot_age.sample(min(5000, len(df_plot_age))),
+                x="Umur",
+                nbins=20,
+                title="Distribusi Umur Pelanggan"
+            )
+            st.plotly_chart(fig2, use_container_width=True)
+        else:
+            st.info("Tidak ada data umur valid untuk ditampilkan.")
     else:
-        st.info("Kolom umur tidak tersedia di dataset.")
-    
-    # ---- Merge Provinsi jika ada --- 
-    if "Provinsi" not in df_trans.columns and "Provinsi" in df_pelanggan.columns:
-        df_trans = df_trans.merge(
-            df_pelanggan[["Customer_ID","Provinsi"]],
-            on="Customer_ID",
-            how="left"
-        )
-    
-    # ---- Grafik Provinsi ----
-    if "Provinsi" in df_trans.columns:
-        omzet = df_trans.groupby("Provinsi")["Total_Nilai"].sum().reset_index()
-        fig3 = px.bar(
-            omzet,
-            x="Provinsi", y="Total_Nilai",
-            title="Omzet per Provinsi"
-        )
-        st.plotly_chart(fig3, use_container_width=True)
-    else:
-        st.info("Kolom provinsi tidak tersedia di dataset pelanggan.")
+        st.info("Data tanggal lahir / umur tidak tersedia.")
+
 
 
     # ============================
@@ -208,6 +197,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
