@@ -234,18 +234,46 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     st.dataframe(top10)
 
         
-    # ============================
-    # 4️⃣ PRODUK TERLARIS
-    # ============================
-    st.header("4️⃣ Produk / Jasa Terlaris")
-
+    # ================================
+    # 🟦 4️⃣ PRODUK / JASA TERLARIS — TOP 10
+    # ================================
+    st.header("🟦 Produk / Jasa Terlaris (Top 10)")
+    
     if "Produk" in df_trans.columns:
-        prod = df_trans.groupby("Produk")["Total_Nilai"].sum().reset_index()
-        fig5 = px.bar(prod, x="Produk", y="Total_Nilai",
-                      title="Omzet per Produk/Jasa")
-        st.plotly_chart(fig5, use_container_width=True)
+    
+        # Hitung omzet berdasarkan produk
+        prod = (
+            df_trans.groupby("Produk")["Total_Nilai"]
+            .sum()
+            .reset_index()
+            .sort_values(by="Total_Nilai", ascending=False)
+            .head(10)       # 🔥 Ambil TOP 10
+        )
+    
+        # Matplotlib Plot
+        fig, ax = plt.subplots(figsize=(10, 4))  # 🔥 1/3 layar
+    
+        ax.barh(prod["Produk"], prod["Total_Nilai"], color="steelblue")
+        ax.set_xlabel("Total Nilai (Rp)")
+        ax.set_title("Top 10 Produk / Jasa Terlaris")
+    
+        # Balik agar ranking tertinggi di atas
+        ax.invert_yaxis()
+    
+        # Format angka agar mudah dibaca
+        ax.xaxis.set_major_formatter(
+            plt.matplotlib.ticker.FuncFormatter(lambda x, p: f"{int(x/1e9)}B")
+        )
+    
+        plt.tight_layout()
+        st.pyplot(fig)
+    
+    else:
+        st.warning("Kolom 'Produk' tidak ditemukan dalam data transaksi.")
+
 
     st.success("Analisa selesai ✔")
+
 
 
 
