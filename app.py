@@ -244,10 +244,8 @@ if menu == "Dashboard":
     st.markdown("<div style='width:33%; float:left;'>", unsafe_allow_html=True)
     st.plotly_chart(fig, use_container_width=False)
     st.markdown("</div><div style='clear:both;'></div>", unsafe_allow_html=True)
-
-
+ 
     
-    st.line_chart(g.set_index("date")["price"], use_container_width=True)
     st.markdown('<div class="section-title">🛒 Gap Kompetitor</div>', unsafe_allow_html=True)
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
 
@@ -458,6 +456,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
