@@ -1,5 +1,4 @@
 beautifulsoup4
-lxml
 requests
 cloudscraper
 google-generativeai
@@ -7,6 +6,7 @@ streamlit
 pandas
 numpy
 plotly
+
 
 
 
