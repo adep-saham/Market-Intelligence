@@ -31,60 +31,63 @@ from analisa_tantangan import run_analisa
 # =====================================
 # FUNGSI LOADER XLSX HARUS ADA DI SINI
 # =====================================
-def load_xlsx(uploaded_file):
+def convert_number(x):
+    if not isinstance(x, str):
+        return x
+
+    x = x.strip()
+
+    # Jika hanya huruf → bukan angka
+    if re.match(r'^[A-Za-z ]+$', x):
+        return x
+
+    # Format 1.234.567,89 → 1234567.89
+    if re.match(r'^\d[\d\.]*,\d+$', x):
+        x = x.replace('.', '').replace(',', '.')
+        try:
+            return float(x)
+        except:
+            return x
+
+    # Format 1.234.567 → 1234567
+    if re.match(r'^\d[\d\.]+$', x):
+        try:
+            return float(x.replace('.', ''))
+        except:
+            return x
+
+    return x
+
+
+# ============================
+# FINAL LOADER EXCEL (AMAN)
+# ============================
+def load_xlsx(file):
     try:
-        content = uploaded_file.read()
-        z = zipfile.ZipFile(io.BytesIO(content))
+        # Baca awal tanpa header
+        df_raw = pd.read_excel(file, header=None)
 
-        sheet_files = [f for f in z.namelist() if f.startswith("xl/worksheets/sheet")]
-        sheet_files.sort()
-        sheet = sheet_files[0]
+        # Cari baris header paling valid
+        header_row = df_raw.applymap(lambda x: isinstance(x, str)).sum(axis=1).idxmax()
 
-        xml_content = z.read(sheet)
-        root = ET.fromstring(xml_content)
+        # Baca ulang dengan header final
+        df = pd.read_excel(file, header=header_row)
 
-        shared_strings = []
-        if "xl/sharedStrings.xml" in z.namelist():
-            ss_xml = z.read("xl/sharedStrings.xml")
-            ss_root = ET.fromstring(ss_xml)
-            namespace = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
-            for si in ss_root.findall(f"{namespace}si"):
-                t = si.find(f"{namespace}t")
-                shared_strings.append(t.text if t is not None else "")
+        # Hapus kolom "Unnamed"
+        df = df.loc[:, ~df.columns.str.contains("Unnamed")]
 
-        namespace = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
-        rows = []
-        max_cols = 0
-        for row in root.findall(f".//{namespace}row"):
-            values = []
-            for c in row.findall(f"{namespace}c"):
-                v = c.find(f"{namespace}v")
-                if v is not None:
-                    if c.get("t") == "s":
-                        idx = int(v.text)
-                        val = shared_strings[idx] if idx < len(shared_strings) else ""
-                    else:
-                        val = v.text
-                else:
-                    val = ""
-                values.append(val)
+        # Isi semua sel kosong dengan "data kosong"
+        df = df.fillna("data kosong")
 
-            max_cols = max(max_cols, len(values))
-            rows.append(values)
+        # Konversi angka format Indonesia → float
+        for col in df.columns:
+            if df[col].dtype == object:
+                df[col] = df[col].apply(convert_number)
 
-        clean_rows = []
-        for r in rows:
-            if len(r) < max_cols:
-                r = r + [""] * (max_cols - len(r))
-            clean_rows.append(r)
-
-        df = pd.DataFrame(clean_rows)
-        df.columns = df.iloc[0].fillna("")
-        df = df[1:].reset_index(drop=True)
         return df
 
     except Exception as e:
-        st.error(f"❌ Gagal membaca file Excel: {e}")
+        st.error(f"❌ Error membaca file: {e}")
         return pd.DataFrame()
 
 # ===========================================================
@@ -554,6 +557,7 @@ elif menu == "Analisa Tantangan Manajemen":
             else:
                 # Jalankan analisa
                 run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
