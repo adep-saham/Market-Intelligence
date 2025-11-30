@@ -235,35 +235,30 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
 
         
     # ================================
-    # 🟦 4️⃣ PRODUK / JASA TERLARIS — TOP 10
+    # 🟦 4️⃣ PRODUK / JASA TERLARIS — BERDASARKAN FREKUENSI (TOP 10)
     # ================================
-    st.header("🟦 Produk / Jasa Terlaris (Top 10)")
+    st.header("🟦 Produk / Jasa Terlaris (Top 10 Berdasarkan Frekuensi Pembelian)")
     
     if "Produk" in df_trans.columns:
     
-        # Hitung omzet berdasarkan produk
+        # Hitung frekuensi pembelian berdasarkan produk
         prod = (
-            df_trans.groupby("Produk")["Total_Nilai"]
-            .sum()
-            .reset_index()
-            .sort_values(by="Total_Nilai", ascending=False)
-            .head(10)       # 🔥 Ambil TOP 10
+            df_trans.groupby("Produk")["Produk"]
+            .count()
+            .reset_index(name="Jumlah_Frekuensi")
+            .sort_values(by="Jumlah_Frekuensi", ascending=False)
+            .head(10)     # 🔥 Ambil TOP 10
         )
     
-        # Matplotlib Plot
+        # Plot menggunakan Matplotlib
         fig, ax = plt.subplots(figsize=(10, 4))  # 🔥 1/3 layar
     
-        ax.barh(prod["Produk"], prod["Total_Nilai"], color="steelblue")
-        ax.set_xlabel("Total Nilai (Rp)")
-        ax.set_title("Top 10 Produk / Jasa Terlaris")
+        ax.barh(prod["Produk"], prod["Jumlah_Frekuensi"], color="steelblue")
+        ax.set_xlabel("Frekuensi Pembelian")
+        ax.set_title("Top 10 Produk / Jasa Terlaris (Frekuensi Pembelian)")
     
-        # Balik agar ranking tertinggi di atas
+        # Balik agar peringkat tertinggi muncul paling atas
         ax.invert_yaxis()
-    
-        # Format angka agar mudah dibaca
-        ax.xaxis.set_major_formatter(
-            plt.matplotlib.ticker.FuncFormatter(lambda x, p: f"{int(x/1e9)}B")
-        )
     
         plt.tight_layout()
         st.pyplot(fig)
@@ -272,7 +267,9 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.warning("Kolom 'Produk' tidak ditemukan dalam data transaksi.")
 
 
+
     st.success("Analisa selesai ✔")
+
 
 
 
