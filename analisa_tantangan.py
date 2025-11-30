@@ -181,15 +181,21 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     # ============================
     if "Lokasi Pendaftaran" in pel.columns:
         st.subheader("📝 Distribusi Lokasi Pendaftaran (Valid per Customer)")
-    
+
         lok = pel[["Customer_ID", "Lokasi Pendaftaran"]].dropna(subset=["Lokasi Pendaftaran"])
         lok_count = lok["Lokasi Pendaftaran"].value_counts().reset_index()
         lok_count.columns = ["Lokasi Pendaftaran", "Jumlah"]
-    
+
         if len(lok_count) > 0:
             fig = px.bar(
                 lok_count, x="Lokasi Pendaftaran", y="Jumlah",
-                title="Distribusi Lokasi Pendaftaran Berdasarkan Data Va
+                title="Distribusi Lokasi Pendaftaran Berdasarkan Data Valid",
+                text="Jumlah", color="Jumlah"
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Tidak ada data Lokasi Pendaftaran valid.")
+
 
 
 
@@ -290,6 +296,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
