@@ -112,102 +112,84 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     st.write("Kolom pelanggan:", list(df_pelanggan.columns))
 
     # ============================
-    # 2️⃣ DEMOGRAFI PELANGGAN (SAFE MODE)
+    # 🧍 DEMOGRAFI PELANGGAN (Per Kolom Data Valid)
     # ============================
-    st.header("2️⃣ Demografi Pelanggan")
     
-    # -----------------------------
-    # 2A. Distribusi Provinsi (SAFE)
-    # -----------------------------
-    if "Provinsi" in df_pelanggan.columns:
+    st.header("🧍 Demografi Pelanggan")
     
-        # Normalisasi provinsi
-        prov = (
-            df_pelanggan["Provinsi"]
-            .astype(str)
-            .str.strip()
-            .str.lower()
-            .replace(["data kosong", "kosong", "-", "", "nan"], pd.NA)
-            .dropna()
+    pel = df_pelanggan.copy()
+    
+    # Fungsi untuk membersihkan data “data kosong”
+    def clean_col(col):
+        return (
+            col.fillna("")                   # Hilangkan NaN
+               .replace(["data kosong", "Data Kosong", "DATA KOSONG", ""], None)
         )
     
-        if prov.empty:
-            st.warning("⚠ Tidak ada data provinsi valid untuk ditampilkan.")
-        else:
-            prov_count = prov.value_counts().reset_index()
-            prov_count.columns = ["Provinsi", "Jumlah"]
+    # Membersihkan kolom yang digunakan
+    kolom_demografi = ["Provinsi", "Kota", "Lokasi Pendaftaran", "Tempat Lahir", "Tanggal_Lahir"]
     
-            st.subheader("📌 Distribusi Provinsi Pelanggan")
-            fig_prov = px.bar(
-                prov_count,
-                x="Provinsi",
-                y="Jumlah",
-                text="Jumlah",
-                title="Sebaran Pelanggan Berdasarkan Provinsi",
+    for k in kolom_demografi:
+        if k in pel.columns:
+            pel[k] = clean_col(pel[k])
+    
+    
+    # ============================
+    # 📍 PROVINSI
+    # ============================
+    if "Provinsi" in pel.columns:
+        st.subheader("📍 Distribusi Provinsi (Valid per Customer)")
+        
+        prov = pel[["Customer_ID", "Provinsi"]].dropna(subset=["Provinsi"])
+        prov_count = prov["Provinsi"].value_counts().reset_index()
+        prov_count.columns = ["Provinsi", "Jumlah"]
+    
+        if len(prov_count) > 0:
+            fig = px.bar(
+                prov_count, x="Provinsi", y="Jumlah",
+                title="Distribusi Provinsi Berdasarkan Data Valid",
+                text="Jumlah", color="Jumlah"
             )
-            fig_prov.update_layout(xaxis_tickangle=-45)
-            st.plotly_chart(fig_prov, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Tidak ada data Provinsi valid.")
     
-    else:
-        st.info("Kolom Provinsi tidak ditemukan.")
-
     
-    # -----------------------------
-    # 2B. Distribusi Kota
-    # -----------------------------
-    if "Kota" in df_pelanggan.columns:
-        kota_count = (
-            df_pelanggan["Kota"]
-            .replace(["data kosong", "-", ""], pd.NA)
-            .dropna()
-            .value_counts()
-            .head(20)                 # hanya tampilkan 20 besar agar rapi
-            .reset_index()
-        )
+    # ============================
+    # 🏙️ KOTA
+    # ============================
+    if "Kota" in pel.columns:
+        st.subheader("🏙️ Distribusi Kota (Valid per Customer)")
+    
+        kota = pel[["Customer_ID", "Kota"]].dropna(subset=["Kota"])
+        kota_count = kota["Kota"].value_counts().reset_index()
         kota_count.columns = ["Kota", "Jumlah"]
     
-        st.subheader("📌 Top 20 Kota Pelanggan")
-        fig_kota = px.bar(
-            kota_count,
-            x="Kota",
-            y="Jumlah",
-            text="Jumlah",
-            title="Sebaran Pelanggan Berdasarkan Kota"
-        )
-        fig_kota.update_layout(xaxis_tickangle=-45)
-        st.plotly_chart(fig_kota, use_container_width=True)
-    else:
-        st.info("Kolom Kota tidak ditemukan.")
+        if len(kota_count) > 0:
+            fig = px.bar(
+                kota_count, x="Kota", y="Jumlah",
+                title="Distribusi Kota Berdasarkan Data Valid",
+                text="Jumlah", color="Jumlah"
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Tidak ada data Kota valid.")
     
-    # -----------------------------
-    # 2C. Distribusi Tempat Lahir
-    # -----------------------------
-    if "Tempat Lahir" in df_pelanggan.columns:
-        tempat_lahir = (
-            df_pelanggan["Tempat Lahir"]
-            .replace(["data kosong", "-", ""], pd.NA)
-            .dropna()
-            .value_counts()
-            .head(20)
-            .reset_index()
-        )
-        tempat_lahir.columns = ["Tempat Lahir", "Jumlah"]
     
-        st.subheader("📌 Top 20 Tempat Lahir Pelanggan")
-        fig_lahir = px.bar(
-            tempat_lahir,
-            x="Tempat Lahir",
-            y="Jumlah",
-            text="Jumlah",
-            title="Sebaran Tempat Lahir Pelanggan"
-        )
-        fig_lahir.update_layout(xaxis_tickangle=-45)
-        st.plotly_chart(fig_lahir, use_container_width=True)
-    else:
-        st.info("Kolom Tempat Lahir tidak ditemukan.")
-
-
-
+    # ============================
+    # 📝 LOKASI PENDAFTARAN
+    # ============================
+    if "Lokasi Pendaftaran" in pel.columns:
+        st.subheader("📝 Distribusi Lokasi Pendaftaran (Valid per Customer)")
+    
+        lok = pel[["Customer_ID", "Lokasi Pendaftaran"]].dropna(subset=["Lokasi Pendaftaran"])
+        lok_count = lok["Lokasi Pendaftaran"].value_counts().reset_index()
+        lok_count.columns = ["Lokasi Pendaftaran", "Jumlah"]
+    
+        if len(lok_count) > 0:
+            fig = px.bar(
+                lok_count, x="Lokasi Pendaftaran", y="Jumlah",
+                title="Distribusi Lokasi Pendaftaran Berdasarkan Data Va
 
 
 
@@ -308,6 +290,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
