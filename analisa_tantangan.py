@@ -106,11 +106,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     
     # Tampilkan di Streamlit
     st.pyplot(fig)
-    # Debug untuk cek data pelanggan
-    st.write(df_pelanggan.head())
-    st.write(df_pelanggan.dtypes)
-    st.write("Kolom pelanggan:", list(df_pelanggan.columns))
-
+    
     # ============================
     # 🧍 DEMOGRAFI PELANGGAN (Per Kolom Data Valid)
     # ============================
@@ -133,26 +129,41 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         if k in pel.columns:
             pel[k] = clean_col(pel[k])
     
-    
     # ============================
-    # 📍 PROVINSI
+    # 🗺️ DISTRIBUSI PROVINSI
     # ============================
     if "Provinsi" in pel.columns:
-        st.subheader("📍 Distribusi Provinsi (Valid per Customer)")
-        
-        prov = pel[["Customer_ID", "Provinsi"]].dropna(subset=["Provinsi"])
+        st.subheader("🗺️ Distribusi Provinsi (Valid per Customer)")
+
+        # Ambil hanya baris yang bukan 'data kosong', '', None, atau NaN
+        prov = pel[["Customer_ID", "Provinsi"]].copy()
+        prov["Provinsi"] = prov["Provinsi"].replace(
+            ["data kosong", "", "0", 0], pd.NA
+        )
+
+        prov = prov.dropna(subset=["Provinsi"])
+
+        # Hitung distribusi
         prov_count = prov["Provinsi"].value_counts().reset_index()
         prov_count.columns = ["Provinsi", "Jumlah"]
-    
+
         if len(prov_count) > 0:
-            fig = px.bar(
-                prov_count, x="Provinsi", y="Jumlah",
-                title="Distribusi Provinsi Berdasarkan Data Valid",
-                text="Jumlah", color="Jumlah"
+            fig_prov = px.bar(
+                prov_count,
+                x="Provinsi",
+                y="Jumlah",
+                text="Jumlah",
+                color="Jumlah",
+                title="Distribusi Provinsi Berdasarkan Data Valid"
             )
-            st.plotly_chart(fig, use_container_width=True)
+            fig_prov.update_traces(textposition="outside")
+            st.plotly_chart(fig_prov, use_container_width=True)
+
         else:
             st.info("Tidak ada data Provinsi valid.")
+ 
+        
+
     
     
     # ============================
@@ -296,6 +307,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
