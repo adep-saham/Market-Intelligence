@@ -133,9 +133,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     # Ambil Tahun Lahir valid
     tahun_series = df_valid.dropna(subset=["Tahun_Lahir"]).groupby("Tahun_Lahir")["Customer_ID"].count().sort_values(ascending=False).head(50)
     
-    # Ambil Jenis PDP valid
-    pdp_series = df_valid.dropna(subset=["Telah Menyetujui PDP"]).groupby("Telah Menyetujui PDP")["Customer_ID"].count().sort_values(ascending=False)
-    
+      
     
     # ==========================================================
     # FUNGSI MEMBUAT GRAFIK MINI (1/3 LAYAR)
@@ -176,19 +174,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.pyplot(plot_mini_bar("Top 50 Tahun Lahir Customer", tahun_series))
     
     
-    # ==========================================================
-    # BARIS 2 — PDP
-    # ==========================================================
-    
-    col4, _, _ = st.columns(3)
-    
-    with col4:
-        st.markdown("### 🔐 Distribusi Status PDP")
-        st.pyplot(plot_mini_bar("Distribusi PDP Customer", pdp_series))
-
-
-
-
+  
     # ============================
     # 3️⃣ RFM (PERCENTILE SCORING 0–100)
     # ============================
@@ -285,6 +271,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
