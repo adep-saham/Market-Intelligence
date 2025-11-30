@@ -47,65 +47,106 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
 
 
     # ============================
-    # 1️⃣ TREND PENJUALAN – DUAL AXIS SIMPLE & CLEAN
+    # 1️⃣ TREND HARGA & VOLUME (DUAL AXIS SIMPLE & CLEAN)
     # ============================
     
-    st.header("1️⃣ Trend Harga & Volume (Dual Axis – Simple & Clean)")
+    st.header("1️⃣ Trend Harga & Volume (Dual Axis – Simple)")
     
-    # --- Pastikan tanggal valid & urut
-    df_merge["Tanggal"] = pd.to_datetime(df_merge["Tanggal"], errors="coerce")
-    df_merge = df_merge.dropna(subset=[kolom_harga, "Total_Qty"])
+    # -----------------------------
+    # Step 1: Pastikan tanggal valid
+    # -----------------------------
+    df_trans["Tanggal"] = pd.to_datetime(df_trans["Tanggal"], errors="coerce")
+    df_harga["Tanggal"] = pd.to_datetime(df_harga["Tanggal"], errors="coerce")
+    
+    # -----------------------------
+    # Step 2: Deteksi kolom Qty
+    # -----------------------------
+    qty_candidates = ["Qty", "qty", "Jumlah", "jumlah", "Quantity", "quantity",
+                      "Jumlah dalam pcs", "QTY", "PCS", "Pcs"]
+    
+    kolom_qty = next((c for c in df_trans.columns if c.strip() in qty_candidates), None)
+    
+    if kolom_qty is None:
+        st.error("❌ Tidak menemukan kolom Qty di data transaksi.")
+        st.stop()
+    
+    # -----------------------------
+    # Step 3: Buat agregasi HARlAN
+    # -----------------------------
+    df_daily = df_trans.groupby("Tanggal").agg(
+        Total_Qty=(kolom_qty, "sum"),
+        Total_Jual=("Total_Nilai", "sum")
+    ).reset_index()
+    
+    # -----------------------------
+    # Step 4: Merge dengan harga emas
+    # -----------------------------
+    df_merge = df_daily.merge(df_harga, on="Tanggal", how="left")
+    
+    # -----------------------------
+    # Step 5: Deteksi kolom Harga Emas
+    # -----------------------------
+    harga_candidates = [
+        "Harga_Jual_Antam", "Harga Jual Antam", "Harga Jual",
+        "Harga Jual (Rp)", "Harga_Jual", "HargaJualAntam"
+    ]
+    
+    kolom_harga = next((c for c in df_merge.columns if c.strip() in harga_candidates), None)
+    
+    if kolom_harga is None:
+        st.error(f"❌ Tidak menemukan kolom harga emas. Kolom tersedia: {df_merge.columns.tolist()}")
+        st.stop()
+    
+    # -----------------------------
+    # Step 6: Bersihkan & urutkan
+    # -----------------------------
+    df_merge = df_merge.dropna(subset=["Total_Qty", kolom_harga])
     df_merge = df_merge.sort_values("Tanggal")
     
-    # =============================
-    # 📊 DUAL AXIS CHART
-    # =============================
-    
+    # -----------------------------
+    # Step 7: Buat Dual Axis Chart Simple
+    # -----------------------------
     fig = go.Figure()
     
-    # ➤ GARIS HARGA EMAS – Axis kiri
-    fig.add_trace(
-        go.Scatter(
-            x=df_merge["Tanggal"],
-            y=df_merge[kolom_harga],
-            name="Harga Emas Antam (Rp)",
-            line=dict(color="#1f77b4", width=3)
-        )
-    )
+    # --- Garis Harga (Left Axis)
+    fig.add_trace(go.Scatter(
+        x=df_merge["Tanggal"],
+        y=df_merge[kolom_harga],
+        name="Harga Emas Antam (Rp)",
+        line=dict(color="#1f77b4", width=3)
+    ))
     
-    # ➤ GARIS VOLUME PENJUALAN – Axis kanan
-    fig.add_trace(
-        go.Scatter(
-            x=df_merge["Tanggal"],
-            y=df_merge["Total_Qty"],
-            name="Volume Penjualan (Qty)",
-            yaxis="y2",
-            line=dict(color="#ff7f0e", width=3)
-        )
-    )
+    # --- Garis Qty (Right Axis)
+    fig.add_trace(go.Scatter(
+        x=df_merge["Tanggal"],
+        y=df_merge["Total_Qty"],
+        name="Total Qty",
+        yaxis="y2",
+        line=dict(color="#ff7f0e", width=3)
+    ))
     
     fig.update_layout(
-        title="Harga Emas vs Volume Penjualan (Dual Axis)",
+        title="Harga Emas vs Volume Penjualan (Dual Axis – Simple)",
         xaxis=dict(title="Tanggal"),
     
-        # Axis kiri — Harga Emas
+        # Axis kiri
         yaxis=dict(
             title="Harga Emas (Rp)",
             titlefont=dict(color="#1f77b4"),
             tickfont=dict(color="#1f77b4")
         ),
     
-        # Axis kanan — Qty
+        # Axis kanan
         yaxis2=dict(
             title="Volume Penjualan (Qty)",
-            titlefont=dict(color="#ff7f0e"),
-            tickfont=dict(color="#ff7f0e"),
             overlaying="y",
-            side="right"
+            side="right",
+            titlefont=dict(color="#ff7f0e"),
+            tickfont=dict(color="#ff7f0e")
         ),
     
-        hovermode="x unified",
-        template="simple_white"
+        template="simple_white",
+        hovermode="x unified"
     )
     
     st.plotly_chart(fig, use_container_width=True)
@@ -176,6 +217,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
