@@ -539,49 +539,50 @@ elif menu == "Analisa Tantangan Manajemen":
         # Load data Excel (tanpa mi_engine)
         # =============================
 
-    # ============================
-# TOMBOL ANALISA
-# ============================
-if st.button("🚀 Mulai Analisa"):
+        # ============================
+        # TOMBOL ANALISA
+        # ============================
+        if st.button("🚀 Mulai Analisa"):
+        
+            # ========== VALIDASI FILE ==========
+            if harga_file is None:
+                st.error("❌ File harga belum diupload.")
+                st.stop()
+        
+            if transaksi_file is None:
+                st.error("❌ File transaksi belum diupload.")
+                st.stop()
+        
+            if pelanggan_file is None:
+                st.error("❌ File pelanggan belum diupload.")
+                st.stop()
+        
+            # ========== LOAD FILE ==========
+            df_harga = load_xlsx_cached(harga_file)
+            df_trans = load_xlsx_cached(transaksi_file)
+            df_pelanggan = load_xlsx_cached(pelanggan_file)
+        
+            # ========== DEBUG ==========
+            st.write("Ukuran Data Harga:", df_harga.shape)
+            st.write("Ukuran Data Transaksi:", df_trans.shape)
+            st.write("Ukuran Data Pelanggan:", df_pelanggan.shape)
+        
+            # ========== VALIDASI DATAFRAME ==========
+            if df_harga.empty:
+                st.error("❌ Data Harga kosong atau format tidak terbaca.")
+                st.stop()
+        
+            if df_trans.empty:
+                st.error("❌ Data Transaksi kosong atau format tidak terbaca.")
+                st.stop()
+        
+            if df_pelanggan.empty:
+                st.error("❌ Data Pelanggan kosong atau format tidak terbaca.")
+                st.stop()
+        
+            # ========== JALANKAN ANALISA ==========
+            run_analisa(df_harga, df_trans, df_pelanggan)
 
-    # ========== VALIDASI FILE ==========
-    if harga_file is None:
-        st.error("❌ File harga belum diupload.")
-        st.stop()
-
-    if transaksi_file is None:
-        st.error("❌ File transaksi belum diupload.")
-        st.stop()
-
-    if pelanggan_file is None:
-        st.error("❌ File pelanggan belum diupload.")
-        st.stop()
-
-    # ========== LOAD FILE ==========
-    df_harga = load_xlsx_cached(harga_file)
-    df_trans = load_xlsx_cached(transaksi_file)
-    df_pelanggan = load_xlsx_cached(pelanggan_file)
-
-    # ========== DEBUG ==========
-    st.write("Ukuran Data Harga:", df_harga.shape)
-    st.write("Ukuran Data Transaksi:", df_trans.shape)
-    st.write("Ukuran Data Pelanggan:", df_pelanggan.shape)
-
-    # ========== VALIDASI DATAFRAME ==========
-    if df_harga.empty:
-        st.error("❌ Data Harga kosong atau format tidak terbaca.")
-        st.stop()
-
-    if df_trans.empty:
-        st.error("❌ Data Transaksi kosong atau format tidak terbaca.")
-        st.stop()
-
-    if df_pelanggan.empty:
-        st.error("❌ Data Pelanggan kosong atau format tidak terbaca.")
-        st.stop()
-
-    # ========== JALANKAN ANALISA ==========
-    run_analisa(df_harga, df_trans, df_pelanggan)
 
 
 
