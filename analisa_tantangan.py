@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 import numpy as np
 import plotly.graph_objects as go  # <--- WAJIB ADA
-
+import matplotlib.pyplot as plt
 
 def run_analisa(df_harga, df_trans, df_pelanggan):
 
@@ -47,69 +47,65 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
 
 
     # ============================
-    # 1️⃣ Trend Harga & Volume (Dual Axis - Ultra Simple)
+    # 1️⃣ Trend Harga & Volume (Matplotlib Dual Axis - Clean)
     # ============================
     
-    st.header("1️⃣ Trend Harga & Volume (Dual Axis – Ultra Simple)")
+    st.header("1️⃣ Trend Harga & Volume (Dual Axis – Matplotlib Version)")
     
-    # --- Bersihkan & urutkan data
+    import matplotlib.pyplot as plt
+    
+    # Pastikan tanggal valid
     df_trans["Tanggal"] = pd.to_datetime(df_trans["Tanggal"], errors="coerce")
     df_harga["Tanggal"] = pd.to_datetime(df_harga["Tanggal"], errors="coerce")
     
-    qty_candidates = ["Qty","jumlah","Jumlah","Quantity","Qty","QTY","PCS","Pcs"]
+    # Cari kolom Qty
+    qty_candidates = ["Qty", "qty", "Jumlah", "jumlah", "Quantity", "quantity",
+                      "Jumlah dalam pcs", "QTY", "PCS", "Pcs"]
     kolom_qty = next((c for c in df_trans.columns if c.strip() in qty_candidates), None)
     
+    # Agregasi harian
     df_daily = df_trans.groupby("Tanggal").agg(
         Total_Qty=(kolom_qty, "sum"),
         Total_Jual=("Total_Nilai", "sum")
     ).reset_index()
     
+    # Merge harga harian
+    harga_candidates = ["Harga_Jual_Antam", "Harga Jual Antam", "Harga_Jual", "Harga Jual"]
+    kolom_harga = next((c for c in df_harga.columns if c.strip() in harga_candidates), None)
+    
     df_merge = df_daily.merge(df_harga, on="Tanggal", how="left")
-    
-    harga_candidates = ["Harga_Jual_Antam","Harga Jual Antam","Harga Jual","Harga_Jual"]
-    kolom_harga = next((c for c in df_merge.columns if c.strip() in harga_candidates), None)
-    
-    df_merge = df_merge.dropna(subset=[kolom_harga, "Total_Qty"])
+    df_merge = df_merge.dropna(subset=["Total_Qty", kolom_harga])
     df_merge = df_merge.sort_values("Tanggal")
     
-    # --- Dual Axis Chart (Ultra Simple)
-    fig = go.Figure()
+    # ============================
+    # Matplotlib Dual Axis
+    # ============================
     
-    # Harga Emas (Left Axis)
-    fig.add_trace(go.Scatter(
-        x=df_merge["Tanggal"],
-        y=df_merge[kolom_harga],
-        name="Harga Emas",
-        line=dict(color="blue", width=2)
-    ))
+    fig, ax = plt.subplots(figsize=(15, 5))
+    ax2 = ax.twinx()
     
-    # Volume Qty (Right Axis)
-    fig.add_trace(go.Scatter(
-        x=df_merge["Tanggal"],
-        y=df_merge["Total_Qty"],
-        name="Total Qty",
-        yaxis="y2",
-        line=dict(color="orange", width=2)
-    ))
+    # Plot harga emas (kiri)
+    ax.plot(df_merge["Tanggal"], df_merge[kolom_harga], color="blue", linewidth=2, label="Harga Emas")
     
-    fig.update_layout(
-        title="Harga Emas vs Volume Penjualan (Dual Axis – Ultra Simple)",
-        xaxis=dict(title="Tanggal"),
+    # Plot qty (kanan)
+    ax2.plot(df_merge["Tanggal"], df_merge["Total_Qty"], color="orange", linewidth=2, label="Total Qty")
     
-        yaxis=dict(
-            title="Harga Emas (Rp)",
-            color="blue"
-        ),
+    # Label axis
+    ax.set_xlabel("Tanggal")
+    ax.set_ylabel("Harga Emas (Rp)", color="blue")
+    ax2.set_ylabel("Total Qty", color="orange")
     
-        yaxis2=dict(
-            title="Volume (Qty)",
-            overlaying="y",
-            side="right",
-            color="orange"
-        )
-    )
+    ax.tick_params(axis='y', labelcolor="blue")
+    ax2.tick_params(axis='y', labelcolor="orange")
     
-    st.plotly_chart(fig, use_container_width=True)
+    # Judul
+    plt.title("Harga Emas vs Volume Penjualan (Dual Axis – Matplotlib)")
+    
+    # Improve layout
+    fig.tight_layout()
+    
+    # Tampilkan di Streamlit
+    st.pyplot(fig)
 
 
 
@@ -178,6 +174,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
