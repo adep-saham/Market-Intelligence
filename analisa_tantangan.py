@@ -5,77 +5,52 @@ import plotly.express as px
 def run_analisa(df_harga, df_trans, df_pelanggan):
 
     # ============================
-    # NORMALISASI KOLOM
+    # NORMALISASI K0L0M HARGA EMAS
     # ============================
-
-    # Harga emas
     df_harga = df_harga.rename(columns={
         "Date": "Tanggal",
         "Harga Jual Antam": "Harga_Jual_Antam",
         "Harga Buyback": "Harga_Buyback"
     })
 
-    # Transaksi: normalisasi kolom umum
+    # ============================
+    # NORMALISASI DATA TRANSAKSI
+    # ============================
     df_trans = df_trans.rename(columns={
         "ID Customer": "Customer_ID",
-        "Jumlah (pcs)": "Qty",
-        "Tanggal": "Tanggal",
-        "Keterangan Barang/Jasa": "Produk",
-        "Berat (kg)": "Berat"
+        "Jumlah dalam pcs": "Qty",
+        "Keterangan Barang atau Jasa": "Produk",
+        "Berat dalam Kg": "Berat",
+        "Total Harga dalam Rupiah": "Total_Harga",
+        "Tanggal": "Tanggal"
     })
 
-    # Pelanggan
+    # Pastikan kolom tanggal valid
+    df_trans["Tanggal"] = pd.to_datetime(df_trans["Tanggal"], errors="coerce")
+
+    # Nilai transaksi = Total Harga dalam Rupiah
+    df_trans["Total_Nilai"] = df_trans["Total_Harga"]
+
+    # ============================
+    # NORMALISASI DATA PELANGGAN
+    # ============================
     df_pelanggan = df_pelanggan.rename(columns={
         "ID Customer": "Customer_ID",
         "Tanggal Lahir": "Tanggal_Lahir"
     })
 
-    # ============================
-    # DETEKSI K0LOM HARGA OTOMATIS
-    # ============================
-
-    harga_candidates = [
-        "Harga_Jual",
-        "Total Harga (Rupiah)",
-        "Total_Harga",
-        "TotalHarga",
-        "harga_jual",
-        "harga",
-    ]
-
-    kolom_harga = None
-    for c in df_trans.columns:
-        if c.strip() in harga_candidates:
-            kolom_harga = c
-            break
-
-    # Jika tetap tidak ketemu → error yang rapi
-    if kolom_harga is None:
-        st.error(f"❌ Tidak menemukan kolom harga di data transaksi. Kolom tersedia: {df_trans.columns.tolist()}")
-        st.stop()
-
-    # Standardisasi
-    df_trans.rename(columns={kolom_harga: "Harga_Jual"}, inplace=True)
-
-    # ============================
-    # CLEANING
-    # ============================
-
-    df_harga["Tanggal"] = pd.to_datetime(df_harga["Tanggal"], errors="coerce")
-    df_trans["Tanggal"] = pd.to_datetime(df_trans["Tanggal"], errors="coerce")
-
-    df_trans["Total_Nilai"] = df_trans["Harga_Jual"]
-
     if "Tanggal_Lahir" in df_pelanggan.columns:
         df_pelanggan["Tanggal_Lahir"] = pd.to_datetime(df_pelanggan["Tanggal_Lahir"], errors="coerce")
-        df_pelanggan["Umur"] = (pd.Timestamp("2024-12-31") - df_pelanggan["Tanggal_Lahir"]).dt.days // 365
+        df_pelanggan["Umur"] = (
+            pd.Timestamp("2024-12-31") - df_pelanggan["Tanggal_Lahir"]
+        ).dt.days // 365
 
+    # Merge transaksi + pelanggan
     df_trans = df_trans.merge(df_pelanggan, on="Customer_ID", how="left")
 
     # ============================
-    # TREND PENJUALAN
+    # 1. TREND HARGA VS PENJUALAN
     # ============================
-
     st.header("1️⃣ Trend Harga vs Volume Penjualan")
 
     df_daily = df_trans.groupby("Tanggal").agg(
@@ -94,25 +69,23 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     st.plotly_chart(fig, use_container_width=True)
 
     # ============================
-    # DEMOGRAFI
+    # 2. DEMOGRAFI PELANGGAN
     # ============================
     st.header("2️⃣ Demografi Pelanggan")
 
     if "Umur" in df_trans.columns:
-        fig2 = px.histogram(df_trans, x="Umur", nbins=20)
+        fig2 = px.histogram(df_trans, x="Umur", nbins=20, title="Distribusi Umur Pelanggan")
         st.plotly_chart(fig2, use_container_width=True)
 
     if "Provinsi" in df_trans.columns:
-        fig3 = px.bar(
-            df_trans.groupby("Provinsi")["Total_Nilai"].sum().reset_index(),
-            x="Provinsi", y="Total_Nilai"
-        )
+        omzet = df_trans.groupby("Provinsi")["Total_Nilai"].sum().reset_index()
+        fig3 = px.bar(omzet, x="Provinsi", y="Total_Nilai", title="Omzet per Provinsi")
         st.plotly_chart(fig3, use_container_width=True)
 
     # ============================
-    # RFM
+    # 3. RFM ANALYTICS
     # ============================
-    st.header("3️⃣ RFM")
+    st.header("3️⃣ RFM (Recency, Frequency, Monetary)")
 
     rfm = df_trans.groupby("Customer_ID").agg(
         Frequency=("Tanggal", "count"),
@@ -124,16 +97,22 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
 
     st.dataframe(rfm.head())
 
+    fig4 = px.scatter(rfm, x="Frequency", y="Monetary", size="Monetary",
+                      title="Scatter Frequency vs Monetary")
+    st.plotly_chart(fig4, use_container_width=True)
+
     # ============================
-    # PRODUK TERLARIS
+    # 4. PRODUK TERLARIS
     # ============================
-    st.header("4️⃣ Produk Terlaris")
+    st.header("4️⃣ Produk / Jasa Terlaris")
 
     if "Produk" in df_trans.columns:
-        df_prod = df_trans.groupby("Produk")["Total_Nilai"].sum().reset_index()
-        fig5 = px.bar(df_prod, x="Produk", y="Total_Nilai")
+        prod = df_trans.groupby("Produk")["Total_Nilai"].sum().reset_index()
+        fig5 = px.bar(prod, x="Produk", y="Total_Nilai", title="Omzet per Produk/Jasa")
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔")
+
+
 
 
