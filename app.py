@@ -477,9 +477,9 @@ elif menu == "Analisa Tantangan Manajemen":
             tmp.write(file.read())
             tmp.flush()
 
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as csv_tmp:
-                Xlsx2csv(tmp.name).convert(csv_tmp.name)
-                return pd.read_csv(csv_tmp.name)
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as csv_tmp:
+                    Xlsx2csv(tmp.name).convert(csv_tmp.name)
+                    return pd.read_csv(csv_tmp.name)
 
         df_harga = load_excel(harga_file)
         df_trans = load_excel(transaksi_file)
@@ -487,6 +487,7 @@ elif menu == "Analisa Tantangan Manajemen":
 
         # Run analysis
         run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
