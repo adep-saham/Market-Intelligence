@@ -219,32 +219,43 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     rfm["Recency"] = (today - rfm["Last_Tanggal"]).dt.days
     
     # ============================
-    # STRICT RFM SCORING
+    # STRICT RFM SCORING — SAFE (NO ERROR)
     # ============================
     
-    # Recency (lebih kecil lebih bagus)
+    # 1️⃣ Pastikan Recency selalu angka (isi NaT → Recency 999)
+    rfm["Recency"] = rfm["Recency"].fillna(9999)
+    
+    # 2️⃣ Pastikan Frequency dan Monetary tidak kosong
+    rfm["Frequency"] = rfm["Frequency"].fillna(0)
+    rfm["Monetary"] = rfm["Monetary"].fillna(0)
+    
+    # 3️⃣ BINS YANG MENUTUP SEMUA NILAI (SAFE)
+    # Recency: semakin kecil semakin bagus
     rfm["R_Score"] = pd.cut(
         rfm["Recency"],
-        bins=[-1, 7, 30, 90, 180, 99999],
-        labels=[5, 4, 3, 2, 1]
+        bins=[-1, 7, 30, 90, 180, 999999999],     # semua nilai tercakup
+        labels=[5, 4, 3, 2, 1],
+        include_lowest=True
     ).astype(int)
     
-    # Frequency (lebih besar lebih bagus)
+    # Frequency
     rfm["F_Score"] = pd.cut(
         rfm["Frequency"],
-        bins=[-1, 4, 10, 20, 50, 999999],
-        labels=[1, 2, 3, 4, 5]
+        bins=[-1, 4, 10, 20, 50, 999999999],       # batas atas sangat besar
+        labels=[1, 2, 3, 4, 5],
+        include_lowest=True
     ).astype(int)
     
-    # Monetary (lebih besar lebih bagus)
+    # Monetary
     rfm["M_Score"] = pd.cut(
         rfm["Monetary"],
-        bins=[-1, 100_000_000, 250_000_000, 500_000_000, 1_000_000_000, 999999999999],
-        labels=[1, 2, 3, 4, 5]
+        bins=[-1, 100_000_000, 250_000_000, 500_000_000, 1_000_000_000, 999999999999999],
+        labels=[1, 2, 3, 4, 5],
+        include_lowest=True
     ).astype(int)
     
-    # Total RFM Score
     rfm["RFM_Score"] = rfm["R_Score"] + rfm["F_Score"] + rfm["M_Score"]
+
     
     # ============================
     # 3B. TOP 10 CUSTOMER TERBAIK
@@ -294,6 +305,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
