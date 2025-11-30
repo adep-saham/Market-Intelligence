@@ -465,13 +465,20 @@ elif menu == "Analisa Tantangan Manajemen":
     if harga_file and transaksi_file and pelanggan_file:
         st.success("✔ Semua file sudah diupload. Siap dianalisa.")
         
-        # Load data
-        df_harga = load_price_data(harga_file)
-        df_trans = load_transaction_data(transaksi_file)
-        df_pelanggan = load_customer_data(pelanggan_file)
+        # =============================
+        # Load data Excel (tanpa mi_engine)
+        # =============================
+        
+        def load_excel(file):
+            return pd.read_excel(file)
+
+        df_harga = load_excel(harga_file)
+        df_trans = load_excel(transaksi_file)
+        df_pelanggan = load_excel(pelanggan_file)
 
         # Run analysis
         run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
