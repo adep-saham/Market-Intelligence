@@ -475,47 +475,47 @@ elif menu == "Analisa Tantangan Manajemen":
         # =============================
 
         def read_xlsx_without_openpyxl(uploaded_file):
-        # Convert uploaded file → bytes
-        file_bytes = uploaded_file.read()
-        z = zipfile.ZipFile(io.BytesIO(file_bytes))
-    
-        # Ambil sheet pertama
-        sheet_name = [s for s in z.namelist() if s.startswith('xl/worksheets/sheet1')][0]
-    
-        xml_content = z.read(sheet_name)
-        root = ET.fromstring(xml_content)
-    
-        # Extract shared strings
-        shared_strings = []
-        if 'xl/sharedStrings.xml' in z.namelist():
-            ss_xml = z.read('xl/sharedStrings.xml')
-            ss_root = ET.fromstring(ss_xml)
-            for si in ss_root:
-                t = si.find("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}t")
-                shared_strings.append(t.text if t is not None else "")
-    
-        # Extract rows
-        rows = []
-        for row in root.findall(".//{http://schemas.openxmlformats.org/spreadsheetml/2006/main}row"):
-            values = []
-            for c in row.findall("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}c"):
-                value = c.find("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}v")
-                if value is not None:
-                    if c.attrib.get("t") == "s":  # shared string
-                        values.append(shared_strings[int(value.text)])
+            # Convert uploaded file → bytes
+            file_bytes = uploaded_file.read()
+            z = zipfile.ZipFile(io.BytesIO(file_bytes))
+        
+            # Ambil sheet pertama
+            sheet_name = [s for s in z.namelist() if s.startswith('xl/worksheets/sheet1')][0]
+        
+            xml_content = z.read(sheet_name)
+            root = ET.fromstring(xml_content)
+        
+            # Extract shared strings
+            shared_strings = []
+            if 'xl/sharedStrings.xml' in z.namelist():
+                ss_xml = z.read('xl/sharedStrings.xml')
+                ss_root = ET.fromstring(ss_xml)
+                for si in ss_root:
+                    t = si.find("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}t")
+                    shared_strings.append(t.text if t is not None else "")
+        
+            # Extract rows
+            rows = []
+            for row in root.findall(".//{http://schemas.openxmlformats.org/spreadsheetml/2006/main}row"):
+                values = []
+                for c in row.findall("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}c"):
+                    value = c.find("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}v")
+                    if value is not None:
+                        if c.attrib.get("t") == "s":  # shared string
+                            values.append(shared_strings[int(value.text)])
+                        else:
+                            values.append(value.text)
                     else:
-                        values.append(value.text)
-                else:
-                    values.append("")
-            rows.append(values)
-    
-        df = pd.DataFrame(rows)
-        # Assume first row = header
-        df.columns = df.iloc[0]
-        df = df[1:]
-        df = df.reset_index(drop=True)
-    
-        return df
+                        values.append("")
+                rows.append(values)
+        
+            df = pd.DataFrame(rows)
+            # Assume first row = header
+            df.columns = df.iloc[0]
+            df = df[1:]
+            df = df.reset_index(drop=True)
+        
+            return df
 
         df_harga = read_xlsx_without_openpyxl(harga_file)
         df_trans = read_xlsx_without_openpyxl(transaksi_file)
@@ -524,6 +524,7 @@ elif menu == "Analisa Tantangan Manajemen":
 
         # Run analysis
         run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
