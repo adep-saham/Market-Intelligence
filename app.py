@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+import io
 from mi_engine import (
     load_global_price,
     load_competitor,
@@ -470,7 +471,7 @@ elif menu == "Analisa Tantangan Manajemen":
         # =============================
         
         def load_excel(file):
-            return pd.read_excel(file)
+            return pd.read_excel(io.BytesIO(file.read()))
 
         df_harga = load_excel(harga_file)
         df_trans = load_excel(transaksi_file)
@@ -478,6 +479,7 @@ elif menu == "Analisa Tantangan Manajemen":
 
         # Run analysis
         run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
