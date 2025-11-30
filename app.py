@@ -28,6 +28,64 @@ from segmentasi import segmentasi_pelanggan_lm
 from ews_module import ews_pro
 from analisa_tantangan import run_analisa
 
+# =====================================
+# FUNGSI LOADER XLSX HARUS ADA DI SINI
+# =====================================
+def load_xlsx(uploaded_file):
+    try:
+        content = uploaded_file.read()
+        z = zipfile.ZipFile(io.BytesIO(content))
+
+        sheet_files = [f for f in z.namelist() if f.startswith("xl/worksheets/sheet")]
+        sheet_files.sort()
+        sheet = sheet_files[0]
+
+        xml_content = z.read(sheet)
+        root = ET.fromstring(xml_content)
+
+        shared_strings = []
+        if "xl/sharedStrings.xml" in z.namelist():
+            ss_xml = z.read("xl/sharedStrings.xml")
+            ss_root = ET.fromstring(ss_xml)
+            namespace = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
+            for si in ss_root.findall(f"{namespace}si"):
+                t = si.find(f"{namespace}t")
+                shared_strings.append(t.text if t is not None else "")
+
+        namespace = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
+        rows = []
+        max_cols = 0
+        for row in root.findall(f".//{namespace}row"):
+            values = []
+            for c in row.findall(f"{namespace}c"):
+                v = c.find(f"{namespace}v")
+                if v is not None:
+                    if c.get("t") == "s":
+                        idx = int(v.text)
+                        val = shared_strings[idx] if idx < len(shared_strings) else ""
+                    else:
+                        val = v.text
+                else:
+                    val = ""
+                values.append(val)
+
+            max_cols = max(max_cols, len(values))
+            rows.append(values)
+
+        clean_rows = []
+        for r in rows:
+            if len(r) < max_cols:
+                r = r + [""] * (max_cols - len(r))
+            clean_rows.append(r)
+
+        df = pd.DataFrame(clean_rows)
+        df.columns = df.iloc[0].fillna("")
+        df = df[1:].reset_index(drop=True)
+        return df
+
+    except Exception as e:
+        st.error(f"❌ Gagal membaca file Excel: {e}")
+        return pd.DataFrame()
 
 # ===========================================================
 # UI SETUP
@@ -456,66 +514,7 @@ elif menu == "EWS":
 # ====================================================
 # 4. MENU BARU: ANALISA TANTANGAN MANAJEMEN
 # ====================================================
-
-# =====================================
-# FUNGSI LOADER XLSX HARUS ADA DI SINI
-# =====================================
-def load_xlsx(uploaded_file):
-    try:
-        content = uploaded_file.read()
-        z = zipfile.ZipFile(io.BytesIO(content))
-
-        sheet_files = [f for f in z.namelist() if f.startswith("xl/worksheets/sheet")]
-        sheet_files.sort()
-        sheet = sheet_files[0]
-
-        xml_content = z.read(sheet)
-        root = ET.fromstring(xml_content)
-
-        shared_strings = []
-        if "xl/sharedStrings.xml" in z.namelist():
-            ss_xml = z.read("xl/sharedStrings.xml")
-            ss_root = ET.fromstring(ss_xml)
-            namespace = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
-            for si in ss_root.findall(f"{namespace}si"):
-                t = si.find(f"{namespace}t")
-                shared_strings.append(t.text if t is not None else "")
-
-        namespace = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
-        rows = []
-        max_cols = 0
-        for row in root.findall(f".//{namespace}row"):
-            values = []
-            for c in row.findall(f"{namespace}c"):
-                v = c.find(f"{namespace}v")
-                if v is not None:
-                    if c.get("t") == "s":
-                        idx = int(v.text)
-                        val = shared_strings[idx] if idx < len(shared_strings) else ""
-                    else:
-                        val = v.text
-                else:
-                    val = ""
-                values.append(val)
-
-            max_cols = max(max_cols, len(values))
-            rows.append(values)
-
-        clean_rows = []
-        for r in rows:
-            if len(r) < max_cols:
-                r = r + [""] * (max_cols - len(r))
-            clean_rows.append(r)
-
-        df = pd.DataFrame(clean_rows)
-        df.columns = df.iloc[0].fillna("")
-        df = df[1:].reset_index(drop=True)
-        return df
-
-    except Exception as e:
-        st.error(f"❌ Gagal membaca file Excel: {e}")
-        return pd.DataFrame()
-        
+       
 elif menu == "Analisa Tantangan Manajemen":
 
     st.title("Analisa Tantangan dari Manajemen")
@@ -555,6 +554,7 @@ elif menu == "Analisa Tantangan Manajemen":
             else:
                 # Jalankan analisa
                 run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
