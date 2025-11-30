@@ -5,7 +5,6 @@ import io
 import tempfile
 import zipfile
 import xml.etree.ElementTree as ET
-from xlsx2csv import Xlsx2csv
 from mi_engine import (
     load_global_price,
     load_competitor,
@@ -524,6 +523,7 @@ elif menu == "Analisa Tantangan Manajemen":
 
         # Run analysis
         run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
