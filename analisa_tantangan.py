@@ -233,67 +233,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     st.subheader("🏆 Top 10 Customer Terbaik (Percentile Mode 0–100)")
     st.dataframe(top10)
 
-    # ================================
-    # TOP 100 STRICT RFM
-    # ================================
-    if "RFM_Weighted" in rfm_strict.columns:
-        rfm_strict = rfm_strict.sort_values("RFM_Weighted", ascending=False)
-        top100 = rfm_strict.head(100).copy()
-    else:
-        st.warning("⚠️ RFM_Weighted tidak ditemukan. Scatter plot dilewati.")
-        top100 = pd.DataFrame()  # fallback aman
-    
-    # ================================
-    # SCATTER PLOT MATPLOTLIB
-    # ================================
-    st.subheader("📈 Scatter Plot (Matplotlib) — Frequency vs Monetary (Top 100 Strict RFM)")
-    
-    if not top100.empty:
-    
-        df_scatter = top100.copy()
-    
-        # Pastikan numeric
-        df_scatter["Frequency"] = pd.to_numeric(df_scatter["Frequency"], errors="coerce")
-        df_scatter["Monetary"] = pd.to_numeric(df_scatter["Monetary"], errors="coerce")
-    
-        # Bersihkan data invalid
-        df_scatter = df_scatter.dropna(subset=["Frequency", "Monetary"])
-        df_scatter = df_scatter[(df_scatter["Frequency"] > 0) & (df_scatter["Monetary"] > 0)]
-    
-        import matplotlib.pyplot as plt
-    
-        # Ukuran figur 1/3 layar
-        fig, ax = plt.subplots(figsize=(7, 4))
-    
-        # Scatter
-        ax.scatter(
-            df_scatter["Frequency"],
-            df_scatter["Monetary"],
-            alpha=0.7,
-            s=60,
-            edgecolor="black",
-            linewidth=0.5,
-            color="#1f77b4"
-        )
-    
-        # Log scale agar tidak menumpuk
-        ax.set_xscale("log")
-        ax.set_yscale("log")
-    
-        ax.set_title("Scatter Plot — Frequency vs Monetary (Top 100 Strict RFM)")
-        ax.set_xlabel("Frequency (log)")
-        ax.set_ylabel("Monetary (log)")
-    
-        ax.grid(True, alpha=0.3, linestyle="--")
-    
-        st.pyplot(fig)
-    
-    else:
-        st.info("Tidak tersedia data Top 100 untuk scatter plot.")
-
-
-
-    
+        
     # ============================
     # 4️⃣ PRODUK TERLARIS
     # ============================
@@ -306,6 +246,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
