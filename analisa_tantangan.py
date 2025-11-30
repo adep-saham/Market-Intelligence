@@ -4,6 +4,12 @@ import plotly.express as px
 
 def run_analisa(df_harga, df_trans, df_pelanggan):
 
+    # =============================
+    # TURBO 1: OPTIMASI TIPE DATA
+    # =============================
+    df_trans["Customer_ID"] = df_trans["Customer_ID"].astype("category")
+    df_pelanggan["Customer_ID"] = df_pelanggan["Customer_ID"].astype("category")
+
     # ============================
     # NORMALISASI K0L0M HARGA EMAS
     # ============================
@@ -25,10 +31,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         "Tanggal": "Tanggal"
     })
 
-    # Pastikan kolom tanggal valid
     df_trans["Tanggal"] = pd.to_datetime(df_trans["Tanggal"], errors="coerce")
-
-    # Nilai transaksi = Total Harga dalam Rupiah
     df_trans["Total_Nilai"] = df_trans["Total_Harga"]
 
     # ============================
@@ -45,36 +48,37 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
             pd.Timestamp("2024-12-31") - df_pelanggan["Tanggal_Lahir"]
         ).dt.days // 365
 
-    # Merge transaksi + pelanggan
+    # =============================
+    # TURBO 2: MERGE CEPAT (DROP DUPES)
+    # =============================
+    df_pelanggan = df_pelanggan.drop_duplicates(subset=["Customer_ID"])
+
     df_trans = df_trans.merge(df_pelanggan, on="Customer_ID", how="left")
 
     # ============================
-    # 1. TREND HARGA VS PENJUALAN
+    # 1️⃣ TREND PENJUALAN (OPTIMIZED)
     # ============================
     st.header("1️⃣ Trend Harga vs Volume Penjualan")
 
-    df_daily = df_trans.groupby("Tanggal").agg(
-        Total_Jual=("Total_Nilai", "sum"),
-        Total_Qty=("Qty", "sum")
-    ).reset_index()
-
+    # Turbo groupby
+    df_daily = df_trans[["Tanggal", "Total_Nilai", "Qty"]].groupby("Tanggal").sum().reset_index()
     df_merge = df_daily.merge(df_harga, on="Tanggal", how="left")
 
-    fig = px.line(
-        df_merge,
-        x="Tanggal",
-        y=["Harga_Jual_Antam", "Total_Qty"],
-        title="Harga Emas vs Volume Penjualan"
-    )
+    # TURBO: downsampling untuk percepat grafik
+    df_plot = df_merge.sample(min(3000, len(df_merge)))
+
+    fig = px.line(df_plot, x="Tanggal", y=["Harga_Jual_Antam", "Total_Qty"],
+                  title="Harga Emas vs Volume Penjualan (Turbo Mode)")
     st.plotly_chart(fig, use_container_width=True)
 
     # ============================
-    # 2. DEMOGRAFI PELANGGAN
+    # 2️⃣ DEMOGRAFI PELANGGAN
     # ============================
     st.header("2️⃣ Demografi Pelanggan")
 
     if "Umur" in df_trans.columns:
-        fig2 = px.histogram(df_trans, x="Umur", nbins=20, title="Distribusi Umur Pelanggan")
+        fig2 = px.histogram(df_trans.sample(min(5000, len(df_trans))), x="Umur",
+                            nbins=20, title="Distribusi Umur Pelanggan (Turbo)")
         st.plotly_chart(fig2, use_container_width=True)
 
     if "Provinsi" in df_trans.columns:
@@ -83,51 +87,51 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig3, use_container_width=True)
 
     # ============================
-    # 3A. HITUNG RFM DASAR
+    # 3️⃣ RFM (OPTIMIZED)
     # ============================
 
+    # TURBO 3: Groupby cepat
     rfm = df_trans.groupby("Customer_ID").agg(
         Frequency=("Tanggal", "count"),
         Monetary=("Total_Nilai", "sum"),
         Last_Tanggal=("Tanggal", "max")
     ).reset_index()
-    
-    # Recency = selisih hari dari 2024-12-31
+
     rfm["Recency"] = (pd.Timestamp("2024-12-31") - rfm["Last_Tanggal"]).dt.days
 
-    # ============================
-    # 3B. RFM SCORING (1–5 Scale)
-    # ============================
-    
-    rfm["R_Score"] = pd.qcut(rfm["Recency"].rank(method="first", ascending=True), 5, labels=[5,4,3,2,1]).astype(int)
-    rfm["F_Score"] = pd.qcut(rfm["Frequency"].rank(method="first", ascending=False), 5, labels=[5,4,3,2,1]).astype(int)
-    rfm["M_Score"] = pd.qcut(rfm["Monetary"].rank(method="first", ascending=False), 5, labels=[5,4,3,2,1]).astype(int)
-    
+    # TURBO 4: scoring cepat (cut, bukan qcut)
+    rfm["R_Score"] = pd.cut(rfm["Recency"], bins=5, labels=[5,4,3,2,1]).astype(int)
+    rfm["F_Score"] = pd.cut(rfm["Frequency"], bins=5, labels=[1,2,3,4,5]).astype(int)
+    rfm["M_Score"] = pd.cut(rfm["Monetary"], bins=5, labels=[1,2,3,4,5]).astype(int)
+
     rfm["RFM_Score"] = rfm["R_Score"] + rfm["F_Score"] + rfm["M_Score"]
 
-    
-    # ============================
-    # 3C. TOP 10 CUSTOMER TERBAIK
-    # ============================
-    
+    st.header("3️⃣ RFM (Recency, Frequency, Monetary)")
+
     top10 = rfm.sort_values("RFM_Score", ascending=False).head(10)
-    st.subheader("🏆 Top 10 Customer Terbaik Berdasarkan RFM Score")
+
+    st.subheader("🏆 Top 10 Customer Terbaik (Turbo Mode)")
     st.dataframe(top10)
 
+    # Scatter cepat (sampel)
+    fig_scatter = px.scatter(
+        rfm.sample(min(5000, len(rfm))),
+        x="Frequency",
+        y="Monetary",
+        size="Monetary",
+        title="Scatter Frequency vs Monetary (Turbo)"
+    )
+    st.plotly_chart(fig_scatter, use_container_width=True)
+
     # ============================
-    # 4. PRODUK TERLARIS
+    # 4️⃣ PRODUK TERLARIS
     # ============================
     st.header("4️⃣ Produk / Jasa Terlaris")
 
     if "Produk" in df_trans.columns:
         prod = df_trans.groupby("Produk")["Total_Nilai"].sum().reset_index()
-        fig5 = px.bar(prod, x="Produk", y="Total_Nilai", title="Omzet per Produk/Jasa")
+        fig5 = px.bar(prod, x="Produk", y="Total_Nilai",
+                      title="Omzet per Produk/Jasa")
         st.plotly_chart(fig5, use_container_width=True)
 
-    st.success("Analisa selesai ✔")
-
-
-
-
-
-
+    st.success("Analisa selesai ✔ (Turbo Mode)")
