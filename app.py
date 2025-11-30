@@ -474,8 +474,8 @@ elif menu == "Analisa Tantangan Manajemen":
         
         def load_excel(file):
             with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
-            tmp.write(file.read())
-            tmp.flush()
+                tmp.write(file.read())
+                tmp.flush()
 
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as csv_tmp:
                     Xlsx2csv(tmp.name).convert(csv_tmp.name)
@@ -487,6 +487,7 @@ elif menu == "Analisa Tantangan Manajemen":
 
         # Run analysis
         run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
