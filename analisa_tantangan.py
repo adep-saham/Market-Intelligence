@@ -107,110 +107,110 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     # Tampilkan di Streamlit
     st.pyplot(fig)
     
-    # ============================
-    # 🧍 DEMOGRAFI PELANGGAN (Per Kolom Data Valid)
-    # ============================
+    # =============================
+    #   🟦 DEMOGRAFI PELANGGAN
+    # =============================
+    st.header("👥 Demografi Pelanggan")
     
-    st.header("🧍 Demografi Pelanggan")
+    import matplotlib.pyplot as plt
     
-    pel = df_pelanggan.copy()
-    
-    # Fungsi untuk membersihkan data “data kosong”
-    def clean_col(col):
-        return (
-            col.fillna("")                   # Hilangkan NaN
-               .replace(["data kosong", "Data Kosong", "DATA KOSONG", ""], None)
-        )
-    
-    # Membersihkan kolom yang digunakan
-    kolom_demografi = ["Provinsi", "Kota", "Lokasi Pendaftaran", "Tempat Lahir", "Tanggal_Lahir"]
-    
-    for k in kolom_demografi:
-        if k in pel.columns:
-            pel[k] = clean_col(pel[k])
-    
-    # ============================
-    # 🗺️ DISTRIBUSI PROVINSI (Top 50 — Matplotlib Clean)
-    # ============================
-    
-    if "Provinsi" in pel.columns:
-        st.subheader("🗺️ Distribusi Provinsi (Top 50 — Valid per Customer)")
-    
-        import matplotlib.pyplot as plt
-    
-        # bersihkan data
-        prov = pel[["Customer_ID", "Provinsi"]].copy()
-        prov["Provinsi"] = prov["Provinsi"].replace(
-            ["data kosong", "", "0", "-", None], pd.NA
-        )
-        prov = prov.dropna(subset=["Provinsi"])
-    
-        prov_count = prov["Provinsi"].value_counts()
-    
-        if len(prov_count) > 0:
-    
-            # Ambil top 50
-            prov_top = prov_count.head(50)
-            fig, ax = plt.subplots(figsize=(10, 12))
-    
-            # Horizontal bar chart
-            ax.barh(prov_top.index[::-1], prov_top.values[::-1], color="skyblue")
-            ax.set_title("Top 50 Provinsi berdasarkan Jumlah Customer Valid", fontsize=14)
-            ax.set_xlabel("Jumlah", fontsize=12)
-            ax.set_ylabel("Provinsi", fontsize=12)
-            ax.grid(axis="x", linestyle="--", alpha=0.5)
-    
-            # biar tulisan tidak nabrak
-            plt.tight_layout()
-    
-            st.pyplot(fig)
-    
-        else:
-            st.info("Tidak ada data Provinsi valid.")
-
-    
-    # ============================
-    # 🏙️ KOTA
-    # ============================
-    if "Kota" in pel.columns:
-        st.subheader("🏙️ Distribusi Kota (Valid per Customer)")
-    
-        kota = pel[["Customer_ID", "Kota"]].dropna(subset=["Kota"])
-        kota_count = kota["Kota"].value_counts().reset_index()
-        kota_count.columns = ["Kota", "Jumlah"]
-    
-        if len(kota_count) > 0:
-            fig = px.bar(
-                kota_count, x="Kota", y="Jumlah",
-                title="Distribusi Kota Berdasarkan Data Valid",
-                text="Jumlah", color="Jumlah"
-            )
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.info("Tidak ada data Kota valid.")
+    # ==========================================
+    # Fungsi universal: ambil nilai valid per customer
+    # ==========================================
+    def get_valid(df, kolom):
+        if kolom not in df.columns:
+            return pd.DataFrame(columns=["Customer_ID", kolom])
+        
+        df2 = df[["Customer_ID", kolom]].copy()
+        df2[kolom] = df2[kolom].astype(str).str.strip()
+        
+        invalid = ["", "nan", "None", "data kosong", "Data Kosong", "0", "0.0"]
+        df2 = df2[~df2[kolom].isin(invalid)]
+        
+        df2 = df2.groupby("Customer_ID")[kolom].first().reset_index()
+        return df2
     
     
-    # ============================
-    # 📝 LOKASI PENDAFTARAN
-    # ============================
-    if "Lokasi Pendaftaran" in pel.columns:
-        st.subheader("📝 Distribusi Lokasi Pendaftaran (Valid per Customer)")
-
-        lok = pel[["Customer_ID", "Lokasi Pendaftaran"]].dropna(subset=["Lokasi Pendaftaran"])
-        lok_count = lok["Lokasi Pendaftaran"].value_counts().reset_index()
-        lok_count.columns = ["Lokasi Pendaftaran", "Jumlah"]
-
-        if len(lok_count) > 0:
-            fig = px.bar(
-                lok_count, x="Lokasi Pendaftaran", y="Jumlah",
-                title="Distribusi Lokasi Pendaftaran Berdasarkan Data Valid",
-                text="Jumlah", color="Jumlah"
-            )
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.info("Tidak ada data Lokasi Pendaftaran valid.")
-
-
+    # ==========================================
+    # Fungsi: Render Top 50 bar chart (Matplotlib)
+    # ==========================================
+    def render_top50(title, data_dict, color="skyblue"):
+        labels = list(data_dict.keys())
+        values = list(data_dict.values())
+    
+        fig, ax = plt.subplots(figsize=(12, 6))
+        ax.bar(labels, values, color=color)
+        ax.set_title(title, fontsize=14)
+        ax.set_ylabel("Jumlah", fontsize=12)
+        ax.tick_params(axis='x', rotation=90)
+        ax.grid(axis="y", linestyle="--", alpha=0.4)
+        plt.tight_layout()
+        st.pyplot(fig)
+    
+    
+    # ==========================================
+    # 1️⃣ DISTRIBUSI PROVINSI
+    # ==========================================
+    st.subheader("📍 Distribusi Provinsi (Valid per Customer)")
+    
+    df_prov = get_valid(df_pelanggan, "Provinsi")
+    if len(df_prov):
+        prov_count = df_prov["Provinsi"].value_counts().head(50).to_dict()
+        render_top50("Top 50 Provinsi Customer", prov_count, color="cornflowerblue")
+    else:
+        st.info("Tidak ada data provinsi valid.")
+    
+    
+    # ==========================================
+    # 2️⃣ DISTRIBUSI KOTA
+    # ==========================================
+    st.subheader("🏙️ Distribusi Kota (Valid per Customer)")
+    
+    df_kota = get_valid(df_pelanggan, "Kota")
+    if len(df_kota):
+        kota_count = df_kota["Kota"].value_counts().head(50).to_dict()
+        render_top50("Top 50 Kota Customer", kota_count, color="teal")
+    else:
+        st.info("Tidak ada data kota valid.")
+    
+    
+    # ==========================================
+    # 3️⃣ DISTRIBUSI TAHUN KELAHIRAN
+    # ==========================================
+    st.subheader("🎂 Distribusi Tahun Kelahiran (Valid per Customer)")
+    
+    df_tahun = df_pelanggan[["Customer_ID", "Tanggal_Lahir"]].copy()
+    df_tahun["Tanggal_Lahir"] = pd.to_datetime(df_tahun["Tanggal_Lahir"], errors="coerce")
+    df_tahun["Tahun_Lahir"] = df_tahun["Tanggal_Lahir"].dt.year
+    df_tahun = df_tahun.dropna(subset=["Tahun_Lahir"])
+    df_tahun = df_tahun.groupby("Customer_ID")["Tahun_Lahir"].first().astype(int)
+    
+    if len(df_tahun):
+        tahun_count = df_tahun.value_counts().sort_index().tail(50).to_dict()
+    
+        fig, ax = plt.subplots(figsize=(12, 6))
+        ax.bar(tahun_count.keys(), tahun_count.values(), color="salmon")
+        ax.set_title("Top 50 Tahun Kelahiran Customer", fontsize=14)
+        ax.set_xlabel("Tahun Kelahiran")
+        ax.set_ylabel("Jumlah Customer")
+        ax.grid(axis="y", linestyle="--", alpha=0.4)
+        plt.tight_layout()
+        st.pyplot(fig)
+    else:
+        st.info("Tidak ada data tahun lahir valid.")
+    
+    
+    # ==========================================
+    # 4️⃣ DISTRIBUSI LOKASI PENDAFTARAN (OPSIONAL)
+    # ==========================================
+    st.subheader("📝 Distribusi Lokasi Pendaftaran (Valid per Customer)")
+    
+    df_reg = get_valid(df_pelanggan, "Lokasi Pendaftaran")
+    if len(df_reg):
+        reg_count = df_reg["Lokasi Pendaftaran"].value_counts().head(50).to_dict()
+        render_top50("Top 50 Lokasi Pendaftaran Customer", reg_count, color="orange")
+    else:
+        st.info("Tidak ada data lokasi pendaftaran valid.")
 
 
 
@@ -310,6 +310,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
