@@ -539,9 +539,9 @@ elif menu == "Analisa Tantangan Manajemen":
     # Tombol analisa
         if st.button("🚀 Mulai Analisa"):
             # Muat file dengan loader terbaru
-            df_harga = load_xlsx(harga_file)
-            df_trans = load_xlsx(transaksi_file)
-            df_pelanggan = load_xlsx(pelanggan_file)
+            df_harga = normalize_columns(df_harga)
+            df_trans = normalize_columns(df_trans)
+            df_pelanggan = normalize_columns(df_pelanggan)
 
             # Debug optional
             st.write("Ukuran Data Harga:", df_harga.shape)
@@ -556,8 +556,39 @@ elif menu == "Analisa Tantangan Manajemen":
             elif df_pelanggan.empty:
                 st.error("❌ Data Pelanggan kosong atau format tidak terbaca.")
             else:
+                
+                def normalize_columns(df):
+                    mapping = {
+                        "tanggal": "Tanggal",
+                        "date": "Tanggal",
+                        "day": "Hari",
+                        "harga jual antam": "Harga_Jual",
+                        "harga buyback": "Harga_Buyback",
+                        "harga pokok persediaan (rp/kg)": "HPP",
+                        "volume inventory (kg)": "Volume",
+                        "nilai tukar rp/usd": "Kurs",
+                        "ihsg": "IHSG",
+                        "harga lme troyz/ usd": "LME_Troy",
+                        "harga lme kg/rp": "LME_Kg",
+                        "harga lme/gram": "LME_Gram",
+                        "jumlah kasus covid": "Kasus",
+                    }
+                
+                    df_new = df.copy()
+                    cols = df_new.columns
+                
+                    for col in cols:
+                        key = col.strip().lower()
+                        if key in mapping:
+                            df_new.rename(columns={col: mapping[key]}, inplace=True)
+                
+                    return df_new
+
                 # Jalankan analisa
                 run_analisa(df_harga, df_trans, df_pelanggan)
+                st.write("Kolom Harga:", df_harga.columns.tolist())
+
+
 
 
 
