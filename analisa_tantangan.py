@@ -198,45 +198,50 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     else:
         st.info("Kolom Provinsi tidak ditemukan dalam data pelanggan.")
 
-
-
-
     # ============================
-    # 3️⃣ RFM (OPTIMIZED)
+    # 3️⃣ RFM (FIXED VERSION)
     # ============================
-
-    # TURBO 3: Groupby cepat
-    rfm = df_trans.groupby("Customer_ID").agg(
-        Frequency=("Tanggal", "count"),
-        Monetary=("Total_Nilai", "sum"),
-        Last_Tanggal=("Tanggal", "max")
-    ).reset_index()
-
-    rfm["Recency"] = (pd.Timestamp("2024-12-31") - rfm["Last_Tanggal"]).dt.days
-
-    # TURBO 4: scoring cepat (cut, bukan qcut)
-    rfm["R_Score"] = pd.cut(rfm["Recency"], bins=5, labels=[5,4,3,2,1]).astype(int)
-    rfm["F_Score"] = pd.cut(rfm["Frequency"], bins=5, labels=[1,2,3,4,5]).astype(int)
-    rfm["M_Score"] = pd.cut(rfm["Monetary"], bins=5, labels=[1,2,3,4,5]).astype(int)
-
-    rfm["RFM_Score"] = rfm["R_Score"] + rfm["F_Score"] + rfm["M_Score"]
-
+    
     st.header("3️⃣ RFM (Recency, Frequency, Monetary)")
-
+    
+    # 1️⃣ Buang duplikasi real transaksi supaya frequency benar
+    df_trans_clean = df_trans.drop_duplicates(subset=["Customer_ID", "Tanggal", "Total_Nilai"])
+    
+    # 2️⃣ Hitung RFM dengan definisi baku
+    rfm = df_trans_clean.groupby("Customer_ID").agg(
+        Frequency=("Tanggal", "count"),              # jumlah transaksi (bukan qty!)
+        Monetary=("Total_Nilai", "sum"),             # total belanja
+        Last_Tanggal=("Tanggal", "max")              # transaksi terakhir
+    ).reset_index()
+    
+    # 3️⃣ Recency dari posisi "hari ini"
+    today = pd.Timestamp("2024-12-31")
+    rfm["Recency"] = (today - rfm["Last_Tanggal"]).dt.days
+    
+    # 4️⃣ Score (pakai qcut, paling stabil)
+    rfm["R_Score"] = pd.qcut(rfm["Recency"].rank(method="first"), 5, labels=[5,4,3,2,1]).astype(int)
+    rfm["F_Score"] = pd.qcut(rfm["Frequency"].rank(method="first"), 5, labels=[1,2,3,4,5]).astype(int)
+    rfm["M_Score"] = pd.qcut(rfm["Monetary"].rank(method="first"), 5, labels=[1,2,3,4,5]).astype(int)
+    
+    rfm["RFM_Score"] = rfm["R_Score"] + rfm["F_Score"] + rfm["M_Score"]
+    
+    # 5️⃣ TOP 10 Customer
     top10 = rfm.sort_values("RFM_Score", ascending=False).head(10)
-
-    st.subheader("🏆 Top 10 Customer Terbaik (Turbo Mode)")
+    st.subheader("🏆 Top 10 Customer Terbaik (Fixed & Stable)")
     st.dataframe(top10)
-
-    # Scatter cepat (sampel)
+    
+    # 6️⃣ SCATTER (Fix: No Random Sample)
+    rfm_plot = rfm.copy()      # tidak pakai sample
     fig_scatter = px.scatter(
-        rfm.sample(min(5000, len(rfm))),
+        rfm_plot,
         x="Frequency",
         y="Monetary",
         size="Monetary",
-        title="Scatter Frequency vs Monetary (Turbo)"
+        title="Scatter Frequency vs Monetary (Fixed & Stable)",
+        hover_data=["Customer_ID", "RFM_Score"]
     )
     st.plotly_chart(fig_scatter, use_container_width=True)
+
 
     # ============================
     # 4️⃣ PRODUK TERLARIS
@@ -250,6 +255,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
