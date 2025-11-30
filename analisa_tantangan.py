@@ -107,121 +107,85 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     # Tampilkan di Streamlit
     st.pyplot(fig)
     
-    # =============================
-    #   🟦 DEMOGRAFI PELANGGAN
-    # =============================
-    st.header("👥 Demografi Pelanggan")
+    # ==========================================================
+    # DEMOGRAFI PELANGGAN (VERSI KECIL 1/3 LAYAR)
+    # ==========================================================
     
-    import matplotlib.pyplot as plt
+    st.markdown("## 🧑‍🤝‍🧑 Demografi Pelanggan")
     
-    # ==========================================
-    # Fungsi universal: ambil nilai valid per customer
-    # ==========================================
-    def get_valid(df, kolom):
-        if kolom not in df.columns:
-            return pd.DataFrame(columns=["Customer_ID", kolom])
-        
-        df2 = df[["Customer_ID", kolom]].copy()
-        df2[kolom] = df2[kolom].astype(str).str.strip()
-        
-        invalid = ["", "nan", "None", "data kosong", "Data Kosong", "0", "0.0"]
-        df2 = df2[~df2[kolom].isin(invalid)]
-        
-        df2 = df2.groupby("Customer_ID")[kolom].first().reset_index()
-        return df2
+    # ============================================
+    # CLEANING — HANYA AMBIL DATA VALID CUSTOMER
+    # ============================================
+    df_valid = df_pelanggan.copy()
+    
+    # Bersihkan "data kosong"
+    df_valid = df_valid.replace("data kosong", None)
+    
+    # Ambil Tahun Lahir
+    df_valid["Tahun_Lahir"] = pd.to_datetime(df_valid["Tanggal_Lahir"], errors="coerce").dt.year
+    
+    # Ambil Provinsi valid
+    prov_series = df_valid.dropna(subset=["Provinsi"]).groupby("Provinsi")["Customer_ID"].count().sort_values(ascending=False).head(50)
+    
+    # Ambil Kota valid
+    kota_series = df_valid.dropna(subset=["Kota"]).groupby("Kota")["Customer_ID"].count().sort_values(ascending=False).head(50)
+    
+    # Ambil Tahun Lahir valid
+    tahun_series = df_valid.dropna(subset=["Tahun_Lahir"]).groupby("Tahun_Lahir")["Customer_ID"].count().sort_values(ascending=False).head(50)
+    
+    # Ambil Jenis PDP valid
+    pdp_series = df_valid.dropna(subset=["Telah Menyetujui PDP"]).groupby("Telah Menyetujui PDP")["Customer_ID"].count().sort_values(ascending=False)
     
     
-    # ==========================================
-    # Fungsi: Render Top 50 bar chart (Matplotlib)
-    # ==========================================
-    def render_top50(title, data_dict, color="skyblue"):
-        labels = list(data_dict.keys())
-        values = list(data_dict.values())
+    # ==========================================================
+    # FUNGSI MEMBUAT GRAFIK MINI (1/3 LAYAR)
+    # ==========================================================
+    def plot_mini_bar(title, series):
+        fig, ax = plt.subplots(figsize=(5, 3))  # 1/3 layar
     
-        fig, ax = plt.subplots(figsize=(12, 6))
-        ax.bar(labels, values, color=color)
-        ax.set_title(title, fontsize=14)
-        ax.set_ylabel("Jumlah", fontsize=12)
-        ax.tick_params(axis='x', rotation=90)
-        ax.grid(axis="y", linestyle="--", alpha=0.4)
+        ax.bar(series.index, series.values, color="#008b8b")
+    
+        ax.set_title(title, fontsize=10)
+        ax.set_ylabel("Jumlah", fontsize=8)
+    
+        plt.xticks(rotation=45, ha="right", fontsize=7)
+        plt.yticks(fontsize=7)
+    
+        ax.grid(axis="y", linestyle="--", alpha=0.3)
         plt.tight_layout()
-        st.pyplot(fig)
+    
+        return fig
     
     
-    # ==========================================
-    # 1️⃣ DISTRIBUSI PROVINSI
-    # ==========================================
-    st.subheader("📍 Distribusi Provinsi (Valid per Customer)")
+    # ==========================================================
+    # TAMPILKAN DALAM 3 KOLOM PER BARIS
+    # ==========================================================
     
-    df_prov = get_valid(df_pelanggan, "Provinsi")
-    if len(df_prov):
-        prov_count = df_prov["Provinsi"].value_counts().head(50).to_dict()
-        render_top50("Top 50 Provinsi Customer", prov_count, color="cornflowerblue")
-    else:
-        st.info("Tidak ada data provinsi valid.")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("### 🗺️ Top 50 Provinsi Customer")
+        st.pyplot(plot_mini_bar("Top 50 Provinsi Customer", prov_series))
+    
+    with col2:
+        st.markdown("### 🏙️ Top 50 Kota Customer")
+        st.pyplot(plot_mini_bar("Top 50 Kota Customer", kota_series))
+    
+    with col3:
+        st.markdown("### 📅 Distribusi Tahun Lahir Customer")
+        st.pyplot(plot_mini_bar("Top 50 Tahun Lahir Customer", tahun_series))
     
     
-    # ==========================================
-    # 2️⃣ DISTRIBUSI KOTA
-    # ==========================================
-    st.subheader("🏙️ Distribusi Kota (Valid per Customer)")
+    # ==========================================================
+    # BARIS 2 — PDP
+    # ==========================================================
     
-    df_kota = get_valid(df_pelanggan, "Kota")
-    if len(df_kota):
-        kota_count = df_kota["Kota"].value_counts().head(50).to_dict()
-        render_top50("Top 50 Kota Customer", kota_count, color="teal")
-    else:
-        st.info("Tidak ada data kota valid.")
-           
-    # ==========================================
-    # 3️⃣ DISTRIBUSI TAHUN KELAHIRAN (AMAN TANPA ERROR)
-    # ==========================================
-    st.subheader("🎂 Distribusi Tahun Kelahiran (Valid per Customer)")
+    col4, _, _ = st.columns(3)
     
-    df_tahun = df_pelanggan[["Customer_ID", "Tanggal_Lahir"]].copy()
-    
-    # Konversi ke datetime
-    df_tahun["Tanggal_Lahir"] = pd.to_datetime(df_tahun["Tanggal_Lahir"], errors="coerce")
-    
-    # Ambil tahun (bisa menghasilkan NaN)
-    df_tahun["Tahun_Lahir"] = df_tahun["Tanggal_Lahir"].dt.year
-    
-    # Hapus seluruh baris invalid
-    df_tahun = df_tahun.dropna(subset=["Tahun_Lahir"])
-    
-    # Konversi aman → integer (setelah dropna)
-    df_tahun["Tahun_Lahir"] = df_tahun["Tahun_Lahir"].astype(int)
-    
-    # Ambil tahun valid per customer
-    df_tahun_per_customer = df_tahun.groupby("Customer_ID")["Tahun_Lahir"].first()
-    
-    if len(df_tahun_per_customer):
-        tahun_count = df_tahun_per_customer.value_counts().sort_index().tail(50).to_dict()
-    
-        fig, ax = plt.subplots(figsize=(12, 6))
-        ax.bar(tahun_count.keys(), tahun_count.values(), color="salmon")
-        ax.set_title("Top 50 Tahun Kelahiran Customer", fontsize=14)
-        ax.set_xlabel("Tahun Kelahiran")
-        ax.set_ylabel("Jumlah Customer")
-        ax.grid(axis="y", linestyle="--", alpha=0.4)
-        plt.tight_layout()
-        st.pyplot(fig)
-    else:
-        st.info("Tidak ada data tahun lahir valid.")
+    with col4:
+        st.markdown("### 🔐 Distribusi Status PDP")
+        st.pyplot(plot_mini_bar("Distribusi PDP Customer", pdp_series))
 
-    
-    
-    # ==========================================
-    # 4️⃣ DISTRIBUSI LOKASI PENDAFTARAN (OPSIONAL)
-    # ==========================================
-    st.subheader("📝 Distribusi Lokasi Pendaftaran (Valid per Customer)")
-    
-    df_reg = get_valid(df_pelanggan, "Lokasi Pendaftaran")
-    if len(df_reg):
-        reg_count = df_reg["Lokasi Pendaftaran"].value_counts().head(50).to_dict()
-        render_top50("Top 50 Lokasi Pendaftaran Customer", reg_count, color="orange")
-    else:
-        st.info("Tidak ada data lokasi pendaftaran valid.")
 
 
 
@@ -321,6 +285,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
