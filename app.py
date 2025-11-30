@@ -522,7 +522,7 @@ elif menu == "EWS":
 # 4. MENU BARU: ANALISA TANTANGAN MANAJEMEN
 # ====================================================
        
-elif menu == "Analisa Tantangan dari Manajemen":
+elif menu == "Analisa Tantangan Manajemen":
 
     st.title("Analisa Tantangan dari Manajemen")
     st.write("Analisa otomatis menggunakan 3 dataset 2024: Harga Emas, Pelanggan & Transaksi.")
@@ -582,6 +582,7 @@ elif menu == "Analisa Tantangan dari Manajemen":
         
             # ========== JALANKAN ANALISA ==========
             run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
