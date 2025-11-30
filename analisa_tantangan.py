@@ -108,22 +108,56 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     st.pyplot(fig)
 
 
-
-
     # ============================
     # 2️⃣ DEMOGRAFI PELANGGAN
     # ============================
+    
     st.header("2️⃣ Demografi Pelanggan")
-
+    
+    # ---- Hitung UMUR dari df_pelanggan ----
+    if "Tanggal_Lahir" in df_pelanggan.columns:
+        today = pd.Timestamp("2024-12-31")
+        df_pelanggan["Umur"] = ((today - df_pelanggan["Tanggal_Lahir"]).dt.days // 365)
+    
+        # merge Umur ke df_trans
+        df_trans = df_trans.merge(
+            df_pelanggan[["Customer_ID", "Umur"]],
+            on="Customer_ID",
+            how="left"
+        )
+    
+    # ---- Plot Distribusi Umur ----
     if "Umur" in df_trans.columns:
-        fig2 = px.histogram(df_trans.sample(min(5000, len(df_trans))), x="Umur",
-                            nbins=20, title="Distribusi Umur Pelanggan (Turbo)")
+        fig2 = px.histogram(
+            df_trans.dropna(subset=["Umur"]).sample(min(5000, len(df_trans))),
+            x="Umur",
+            nbins=20,
+            title="Distribusi Umur Pelanggan"
+        )
         st.plotly_chart(fig2, use_container_width=True)
-
+    else:
+        st.info("Kolom umur tidak tersedia di dataset.")
+    
+    # ---- Merge Provinsi jika ada --- 
+    if "Provinsi" not in df_trans.columns and "Provinsi" in df_pelanggan.columns:
+        df_trans = df_trans.merge(
+            df_pelanggan[["Customer_ID","Provinsi"]],
+            on="Customer_ID",
+            how="left"
+        )
+    
+    # ---- Grafik Provinsi ----
     if "Provinsi" in df_trans.columns:
         omzet = df_trans.groupby("Provinsi")["Total_Nilai"].sum().reset_index()
-        fig3 = px.bar(omzet, x="Provinsi", y="Total_Nilai", title="Omzet per Provinsi")
+        fig3 = px.bar(
+            omzet,
+            x="Provinsi", y="Total_Nilai",
+            title="Omzet per Provinsi"
+        )
         st.plotly_chart(fig3, use_container_width=True)
+    else:
+        st.info("Kolom provinsi tidak tersedia di dataset pelanggan.")
+
 
     # ============================
     # 3️⃣ RFM (OPTIMIZED)
@@ -174,6 +208,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
