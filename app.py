@@ -241,9 +241,9 @@ if menu == "Dashboard":
         yaxis=dict(title="")
     )
 
-st.markdown("<div style='width:33%; float:left;'>", unsafe_allow_html=True)
-st.plotly_chart(fig, use_container_width=False)
-st.markdown("</div><div style='clear:both;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='width:33%; float:left;'>", unsafe_allow_html=True)
+    st.plotly_chart(fig, use_container_width=False)
+    st.markdown("</div><div style='clear:both;'></div>", unsafe_allow_html=True)
 
 
     
@@ -458,6 +458,7 @@ elif menu == "Pricing":
     st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
     st.markdown("### 📌 Gap Kompetitor")
     st.dataframe(gap.sort_values("gap"), use_container_width=True)
+
 
 
 
