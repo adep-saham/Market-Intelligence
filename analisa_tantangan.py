@@ -109,8 +109,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     # Debug untuk cek data pelanggan
     st.write(df_pelanggan.head())
     st.write(df_pelanggan.dtypes)
-    st.write("Kolom pelanggan:", df_pelanggan.columns)
-
+    
     # ===============================
     # 2️⃣ DEMOGRAFI PELANGGAN (SAFE MODE)
     # ===============================
@@ -235,6 +234,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
