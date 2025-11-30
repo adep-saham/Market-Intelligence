@@ -115,26 +115,24 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     # ===============================
     st.header("2️⃣ Demografi Pelanggan")
     
-    # --- Normalisasi teks "data kosong" menjadi NaN ---
+    # Bersihkan nilai teks yang salah
     df_pelanggan = df_pelanggan.replace("data kosong", pd.NA)
     
-    # --- Pastikan Tanggal_Lahir valid ---
+    # Pastikan tanggal lahir valid
     df_pelanggan["Tanggal_Lahir"] = pd.to_datetime(
         df_pelanggan["Tanggal_Lahir"],
-        errors="coerce"  # invalid → NaT
+        errors="coerce"   # invalid → NaT
     )
     
-    # --- Hitung umur (jika tanggal valid) ---
+    # Hitung umur (float)
     df_pelanggan["Umur"] = (
         (pd.Timestamp("2024-12-31") - df_pelanggan["Tanggal_Lahir"]).dt.days / 365
-    ).round(1)
+    )
     
-    # Jangan paksa umur menjadi integer — biarkan float agar tidak error
-    # Jika umur NaN → buang dari perhitungan grafik
+    # Drop umur yang tidak valid
     df_umur = df_pelanggan.dropna(subset=["Umur"])
     
-    
-    # --- HISTOGRAM UMUR ---
+    # Hanya jalankan histogram jika ada data valid
     if len(df_umur) > 0:
         fig2 = px.histogram(
             df_umur,
@@ -144,10 +142,10 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         )
         st.plotly_chart(fig2, use_container_width=True)
     else:
-        st.info("Tidak ada data umur yang valid untuk ditampilkan.")
+        st.info("Tidak ada data umur valid untuk ditampilkan.")
     
     
-    # --- BAR CHART PROVINSI ---
+    # Grafik sebaran pelanggan per provinsi
     if "Provinsi" in df_pelanggan.columns:
         df_prov = df_pelanggan.dropna(subset=["Provinsi"])
     
@@ -156,14 +154,15 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
                 df_prov["Provinsi"].value_counts().reset_index(),
                 x="index",
                 y="Provinsi",
-                labels={"index": "Provinsi", "Provinsi": "Jumlah"},
+                labels={"index": "Provinsi", "Provinsi": "Jumlah Pelanggan"},
                 title="Sebaran Pelanggan per Provinsi"
             )
             st.plotly_chart(fig3, use_container_width=True)
         else:
-            st.info("Tidak ada data provinsi yang valid.")
+            st.info("Tidak ada data provinsi valid.")
     else:
         st.info("Kolom Provinsi tidak ditemukan.")
+
 
 
 
@@ -264,6 +263,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
