@@ -99,7 +99,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     ax2.tick_params(axis='y', labelcolor="orange")
     
     # Judul
-    plt.title("Harga Emas vs Volume Penjualan (Dual Axis – Matplotlib)")
+    plt.title("Harga Emas vs Volume Penjualan")
     
     # Improve layout
     fig.tight_layout()
@@ -245,7 +245,8 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
                       title="Omzet per Produk/Jasa")
         st.plotly_chart(fig5, use_container_width=True)
 
-    st.success("Analisa selesai ✔ (Turbo Mode)")
+    st.success("Analisa selesai ✔")
+
 
 
 
