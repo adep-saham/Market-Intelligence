@@ -50,7 +50,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     # 1️⃣ Trend Harga & Volume (Matplotlib Dual Axis - Clean)
     # ============================
     
-    st.header("1️⃣ Trend Harga & Volume (Dual Axis – Matplotlib Version)")
+    st.header("1️⃣ Trend Harga & Volume ")
     
     import matplotlib.pyplot as plt
     
@@ -269,6 +269,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
 
 
     st.success("Analisa selesai ✔")
+
 
 
 
