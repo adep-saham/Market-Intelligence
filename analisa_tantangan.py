@@ -109,24 +109,30 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     # Debug untuk cek data pelanggan
     st.write(df_pelanggan.head())
     st.write(df_pelanggan.dtypes)
-    
+    st.write("Kolom pelanggan:", list(df_pelanggan.columns))
+
     # ===============================
-    # 2️⃣ DEMOGRAFI PELANGGAN (SAFE MODE)
+    # DEMOGRAFI PELANGGAN (SAFE MODE)
     # ===============================
     st.header("2️⃣ Demografi Pelanggan")
     
-    # 1. Bersihkan noise
+    # Copy dataframe agar tidak rusak
     df_p = df_pelanggan.copy()
     
+    # Cek valid
+    if not isinstance(df_p, pd.DataFrame):
+        st.error("❌ Data pelanggan tidak valid — kemungkinan tertimpa variabel lain.")
+        st.stop()
+    
+    # Bersihkan data kosong
     df_p = df_p.replace("data kosong", pd.NA)
     
-    # 2. Konversi tanggal lahir
+    # Konversi tanggal lahir
     df_p["Tanggal_Lahir"] = pd.to_datetime(df_p["Tanggal_Lahir"], errors="coerce")
     
-    # 3. Hitung umur
+    # Hitung umur
     df_p["Umur"] = ((pd.Timestamp("2024-12-31") - df_p["Tanggal_Lahir"]).dt.days / 365)
     
-    # 4. Tampilkan histogram umur bila datanya ada
     valid_umur = df_p["Umur"].dropna()
     
     if len(valid_umur) > 0:
@@ -234,6 +240,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
