@@ -110,57 +110,61 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     st.write(df_pelanggan.head())
     st.write(df_pelanggan.dtypes)
 
-# ===============================
-# 2️⃣ DEMOGRAFI PELANGGAN
-# ===============================
-
     # ===============================
-    # 2️⃣ DEMOGRAFI PELANGGAN
+    # 2️⃣ DEMOGRAFI PELANGGAN (FIXED)
     # ===============================
     st.header("2️⃣ Demografi Pelanggan")
     
-    # --- Hitung umur dengan aman ---
-    if "Tanggal_Lahir" in df_pelanggan.columns:
+    # --- Normalisasi teks "data kosong" menjadi NaN ---
+    df_pelanggan = df_pelanggan.replace("data kosong", pd.NA)
     
-        df_pelanggan["Tanggal_Lahir"] = pd.to_datetime(
-            df_pelanggan["Tanggal_Lahir"],
-            errors="coerce"         # invalid → NaT
-        )
+    # --- Pastikan Tanggal_Lahir valid ---
+    df_pelanggan["Tanggal_Lahir"] = pd.to_datetime(
+        df_pelanggan["Tanggal_Lahir"],
+        errors="coerce"  # invalid → NaT
+    )
     
-        # hitung umur (hasilnya float)
-        df_pelanggan["Umur"] = (
-            (pd.Timestamp("2024-12-31") - df_pelanggan["Tanggal_Lahir"]).dt.days / 365
-        )
+    # --- Hitung umur (jika tanggal valid) ---
+    df_pelanggan["Umur"] = (
+        (pd.Timestamp("2024-12-31") - df_pelanggan["Tanggal_Lahir"]).dt.days / 365
+    ).round(1)
     
-        # Ganti umur NaN menjadi 0 lalu konversi ke integer
-        df_pelanggan["Umur"] = df_pelanggan["Umur"].fillna(0).astype(int)
+    # Jangan paksa umur menjadi integer — biarkan float agar tidak error
+    # Jika umur NaN → buang dari perhitungan grafik
+    df_umur = df_pelanggan.dropna(subset=["Umur"])
     
     
-    # --- Distribusi Umur ---
-    if "Umur" in df_pelanggan.columns:
+    # --- HISTOGRAM UMUR ---
+    if len(df_umur) > 0:
         fig2 = px.histogram(
-            df_pelanggan,
+            df_umur,
             x="Umur",
             nbins=20,
             title="Distribusi Umur Pelanggan"
         )
         st.plotly_chart(fig2, use_container_width=True)
     else:
-        st.info("Kolom **Umur** tidak ditemukan atau gagal dihitung.")
+        st.info("Tidak ada data umur yang valid untuk ditampilkan.")
     
     
-    # --- Omzet per Provinsi ---
-    if "Provinsi" in df_trans.columns:
-        omzet = df_trans.groupby("Provinsi")["Total_Nilai"].sum().reset_index()
-        fig3 = px.bar(
-            omzet,
-            x="Provinsi",
-            y="Total_Nilai",
-            title="Omzet per Provinsi"
-        )
-        st.plotly_chart(fig3, use_container_width=True)
+    # --- BAR CHART PROVINSI ---
+    if "Provinsi" in df_pelanggan.columns:
+        df_prov = df_pelanggan.dropna(subset=["Provinsi"])
+    
+        if len(df_prov) > 0:
+            fig3 = px.bar(
+                df_prov["Provinsi"].value_counts().reset_index(),
+                x="index",
+                y="Provinsi",
+                labels={"index": "Provinsi", "Provinsi": "Jumlah"},
+                title="Sebaran Pelanggan per Provinsi"
+            )
+            st.plotly_chart(fig3, use_container_width=True)
+        else:
+            st.info("Tidak ada data provinsi yang valid.")
     else:
-        st.info("Kolom **Provinsi** tidak ditemukan.")
+        st.info("Kolom Provinsi tidak ditemukan.")
+
 
 
 
@@ -260,6 +264,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
