@@ -473,56 +473,78 @@ elif menu == "Analisa Tantangan Manajemen":
         # Load data Excel (tanpa mi_engine)
         # =============================
 
-        def read_xlsx_without_openpyxl(uploaded_file):
-            # Convert uploaded file → bytes
-            file_bytes = uploaded_file.read()
-            z = zipfile.ZipFile(io.BytesIO(file_bytes))
-        
-            # Ambil sheet pertama
-            sheet_name = [s for s in z.namelist() if s.startswith('xl/worksheets/sheet1')][0]
-        
-            xml_content = z.read(sheet_name)
+    def load_xlsx(uploaded_file):
+        try:
+            content = uploaded_file.read()
+            z = zipfile.ZipFile(io.BytesIO(content))
+    
+            # cari sheet pertama
+            sheet_files = [f for f in z.namelist() if f.startswith("xl/worksheets/sheet")]
+            sheet_files.sort()
+            sheet = sheet_files[0]
+    
+            xml_content = z.read(sheet)
             root = ET.fromstring(xml_content)
-        
-            # Extract shared strings
+    
+            # shared strings
             shared_strings = []
-            if 'xl/sharedStrings.xml' in z.namelist():
-                ss_xml = z.read('xl/sharedStrings.xml')
+            if "xl/sharedStrings.xml" in z.namelist():
+                ss_xml = z.read("xl/sharedStrings.xml")
                 ss_root = ET.fromstring(ss_xml)
-                for si in ss_root:
-                    t = si.find("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}t")
+                namespace = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
+                for si in ss_root.findall(f"{namespace}si"):
+                    t = si.find(f"{namespace}t")
                     shared_strings.append(t.text if t is not None else "")
-        
-            # Extract rows
+    
+            # rows
+            namespace = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
             rows = []
-            for row in root.findall(".//{http://schemas.openxmlformats.org/spreadsheetml/2006/main}row"):
+            max_cols = 0
+            for row in root.findall(f".//{namespace}row"):
                 values = []
-                for c in row.findall("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}c"):
-                    value = c.find("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}v")
-                    if value is not None:
-                        if c.attrib.get("t") == "s":  # shared string
-                            values.append(shared_strings[int(value.text)])
+                for c in row.findall(f"{namespace}c"):
+                    v = c.find(f"{namespace}v")
+                    if v is not None:
+                        if c.get("t") == "s":
+                            idx = int(v.text)
+                            val = shared_strings[idx] if idx < len(shared_strings) else ""
                         else:
-                            values.append(value.text)
+                            val = v.text
                     else:
-                        values.append("")
+                        val = ""
+                    values.append(val)
+    
+                max_cols = max(max_cols, len(values))
                 rows.append(values)
-        
-            df = pd.DataFrame(rows)
-            # Assume first row = header
-            df.columns = df.iloc[0]
-            df = df[1:]
-            df = df.reset_index(drop=True)
-        
+    
+            # NORMALISASI PANJANG KOLOM
+            clean_rows = []
+            for r in rows:
+                if len(r) < max_cols:
+                    r = r + [""] * (max_cols - len(r))
+                clean_rows.append(r)
+    
+            df = pd.DataFrame(clean_rows)
+    
+            # Gunakan baris pertama sebagai header
+            df.columns = df.iloc[0].fillna("")
+            df = df[1:].reset_index(drop=True)
+    
             return df
+    
+        except Exception as e:
+            st.error(f"❌ Gagal membuka file Excel: {e}")
+            return pd.DataFrame()
 
-        df_harga = read_xlsx_without_openpyxl(harga_file)
-        df_trans = read_xlsx_without_openpyxl(transaksi_file)
-        df_pelanggan = read_xlsx_without_openpyxl(pelanggan_file)
+        df_harga = load_xlsx(harga_file)
+        df_trans = load_xlsx(transaksi_file)
+        df_pelanggan = load_xlsx(pelanggan_file)
+
 
 
         # Run analysis
         run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
