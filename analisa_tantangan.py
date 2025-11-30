@@ -130,39 +130,36 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
             pel[k] = clean_col(pel[k])
     
     # ============================
-    # 🗺️ DISTRIBUSI PROVINSI
+    # 🗺️ DISTRIBUSI PROVINSI (Metode Anti Error — Matplotlib)
     # ============================
     if "Provinsi" in pel.columns:
         st.subheader("🗺️ Distribusi Provinsi (Valid per Customer)")
 
-        # Ambil hanya baris yang bukan 'data kosong', '', None, atau NaN
+        # Filter data valid
         prov = pel[["Customer_ID", "Provinsi"]].copy()
         prov["Provinsi"] = prov["Provinsi"].replace(
             ["data kosong", "", "0", 0], pd.NA
         )
-
         prov = prov.dropna(subset=["Provinsi"])
 
-        # Hitung distribusi
-        prov_count = prov["Provinsi"].value_counts().reset_index()
-        prov_count.columns = ["Provinsi", "Jumlah"]
+        prov_count = prov["Provinsi"].value_counts()
 
         if len(prov_count) > 0:
-            fig_prov = px.bar(
-                prov_count,
-                x="Provinsi",
-                y="Jumlah",
-                text="Jumlah",
-                color="Jumlah",
-                title="Distribusi Provinsi Berdasarkan Data Valid"
-            )
-            fig_prov.update_traces(textposition="outside")
-            st.plotly_chart(fig_prov, use_container_width=True)
+            import matplotlib.pyplot as plt
+
+            fig, ax = plt.subplots(figsize=(8, 4))
+            prov_count.plot(kind="bar", ax=ax, color="skyblue")
+
+            ax.set_title("Distribusi Provinsi Berdasarkan Data Valid")
+            ax.set_xlabel("Provinsi")
+            ax.set_ylabel("Jumlah")
+            ax.grid(axis="y", linestyle="--", alpha=0.5)
+
+            st.pyplot(fig)
 
         else:
             st.info("Tidak ada data Provinsi valid.")
- 
-        
+
 
     
     
@@ -307,6 +304,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
