@@ -524,7 +524,7 @@ elif menu == "EWS":
        
 elif menu == "Analisa Tantangan Manajemen":
 
-    st.title("Analisa Tantangan dari Manajemen")
+    st.title("Analisa Data")
     st.write("Analisa otomatis menggunakan 3 dataset 2024: Harga Emas, Pelanggan & Transaksi.")
 
     # Uploaders
@@ -582,6 +582,7 @@ elif menu == "Analisa Tantangan Manajemen":
         
             # ========== JALANKAN ANALISA ==========
             run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
