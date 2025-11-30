@@ -199,43 +199,44 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.info("Kolom Provinsi tidak ditemukan dalam data pelanggan.")
 
     # ============================
-    # 3️⃣ RFM (Strict Quantile + Weighted + Tie-Break)
+    # 3️⃣ RFM (PERCENTILE SCORING 0–100)
     # ============================
     
-    st.header("3️⃣ RFM (Recency, Frequency, Monetary) — Strict Mode")
+    st.header("3️⃣ RFM (Recency, Frequency, Monetary) — Percentile 0–100")
     
+    # Hitung dasar RFM
     rfm = df_trans.groupby("Customer_ID").agg(
         Frequency=("Tanggal", "count"),
         Monetary=("Total_Nilai", "sum"),
         Last_Tanggal=("Tanggal", "max")
     ).reset_index()
     
+    # Recency
     rfm["Recency"] = (pd.Timestamp("2024-12-31") - rfm["Last_Tanggal"]).dt.days
     
-    # SAFE RANKS (ANTI QCUT ERROR)
-    rfm["Recency_rank"]   = rfm["Recency"].rank(method="first")
-    rfm["Frequency_rank"] = rfm["Frequency"].rank(method="first")
-    rfm["Monetary_rank"]  = rfm["Monetary"].rank(method="first")
+    # ============================
+    # Percentile Scoring 0–100
+    # ============================
     
-    rfm["R_Score"] = pd.qcut(rfm["Recency_rank"],   5, labels=[5,4,3,2,1]).astype(int)
-    rfm["F_Score"] = pd.qcut(rfm["Frequency_rank"], 5, labels=[1,2,3,4,5]).astype(int)
-    rfm["M_Score"] = pd.qcut(rfm["Monetary_rank"],  5, labels=[1,2,3,4,5]).astype(int)
+    # Recency → lebih kecil lebih baik → score terbalik
+    rfm["R_pct"] = 100 - rfm["Recency"].rank(pct=True) * 100
     
-    # Weighted scoring
-    rfm["RFM_Weighted"] = (
-        rfm["R_Score"]*0.4 +
-        rfm["F_Score"]*0.3 +
-        rfm["M_Score"]*0.3
-    )
+    # Frequency → lebih besar lebih baik
+    rfm["F_pct"] = rfm["Frequency"].rank(pct=True) * 100
     
-    # Final strict ranking
-    top10 = rfm.sort_values(
-        ["RFM_Weighted", "Monetary", "Frequency", "Recency"],
-        ascending=[False, False, False, True]
-    ).head(10)
+    # Monetary → lebih besar lebih baik
+    rfm["M_pct"] = rfm["Monetary"].rank(pct=True) * 100
     
-    st.subheader("🏆 Top 10 Customer Terbaik (Strict RFM + Weighted + Tie-Break)")
+    # Total RFM Weighted (bobot bisa diubah)
+    rfm["RFM_Score"] = (rfm["R_pct"] * 0.4) + (rfm["F_pct"] * 0.3) + (rfm["M_pct"] * 0.3)
+    
+    # Ambil top 10
+    top10 = rfm.sort_values("RFM_Score", ascending=False).head(10)
+    
+    # Tampilkan tabel
+    st.subheader("🏆 Top 10 Customer Terbaik (Percentile Mode 0–100)")
     st.dataframe(top10)
+
     
     # Scatter
     fig_scatter = px.scatter(
@@ -263,6 +264,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
