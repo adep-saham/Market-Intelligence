@@ -199,48 +199,87 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.info("Kolom Provinsi tidak ditemukan dalam data pelanggan.")
 
     # ============================
-    # 3️⃣ RFM (FIXED VERSION)
+    # 3️⃣ RFM (Recency, Frequency, Monetary) — STRICT & CLEAN
     # ============================
     
     st.header("3️⃣ RFM (Recency, Frequency, Monetary)")
     
-    # 1️⃣ Buang duplikasi real transaksi supaya frequency benar
+    # 1️⃣ Buang duplikasi supaya Frequency tidak over-count
     df_trans_clean = df_trans.drop_duplicates(subset=["Customer_ID", "Tanggal", "Total_Nilai"])
     
-    # 2️⃣ Hitung RFM dengan definisi baku
+    # 2️⃣ Hitung RFM
     rfm = df_trans_clean.groupby("Customer_ID").agg(
-        Frequency=("Tanggal", "count"),              # jumlah transaksi (bukan qty!)
-        Monetary=("Total_Nilai", "sum"),             # total belanja
-        Last_Tanggal=("Tanggal", "max")              # transaksi terakhir
+        Frequency=("Tanggal", "count"),
+        Monetary=("Total_Nilai", "sum"),
+        Last_Tanggal=("Tanggal", "max")
     ).reset_index()
     
-    # 3️⃣ Recency dari posisi "hari ini"
+    # 3️⃣ Hitung Recency dari end-of-year 2024
     today = pd.Timestamp("2024-12-31")
     rfm["Recency"] = (today - rfm["Last_Tanggal"]).dt.days
     
-    # 4️⃣ Score (pakai qcut, paling stabil)
-    rfm["R_Score"] = pd.qcut(rfm["Recency"].rank(method="first"), 5, labels=[5,4,3,2,1]).astype(int)
-    rfm["F_Score"] = pd.qcut(rfm["Frequency"].rank(method="first"), 5, labels=[1,2,3,4,5]).astype(int)
-    rfm["M_Score"] = pd.qcut(rfm["Monetary"].rank(method="first"), 5, labels=[1,2,3,4,5]).astype(int)
+    # ============================
+    # STRICT RFM SCORING
+    # ============================
     
+    # Recency (lebih kecil lebih bagus)
+    rfm["R_Score"] = pd.cut(
+        rfm["Recency"],
+        bins=[-1, 7, 30, 90, 180, 99999],
+        labels=[5, 4, 3, 2, 1]
+    ).astype(int)
+    
+    # Frequency (lebih besar lebih bagus)
+    rfm["F_Score"] = pd.cut(
+        rfm["Frequency"],
+        bins=[-1, 4, 10, 20, 50, 999999],
+        labels=[1, 2, 3, 4, 5]
+    ).astype(int)
+    
+    # Monetary (lebih besar lebih bagus)
+    rfm["M_Score"] = pd.cut(
+        rfm["Monetary"],
+        bins=[-1, 100_000_000, 250_000_000, 500_000_000, 1_000_000_000, 999999999999],
+        labels=[1, 2, 3, 4, 5]
+    ).astype(int)
+    
+    # Total RFM Score
     rfm["RFM_Score"] = rfm["R_Score"] + rfm["F_Score"] + rfm["M_Score"]
     
-    # 5️⃣ TOP 10 Customer
+    # ============================
+    # 3B. TOP 10 CUSTOMER TERBAIK
+    # ============================
+    
     top10 = rfm.sort_values("RFM_Score", ascending=False).head(10)
-    st.subheader("🏆 Top 10 Customer Terbaik (Fixed & Stable)")
+    
+    st.subheader("🏆 Top 10 Customer Terbaik (Strict RFM)")
     st.dataframe(top10)
     
-    # 6️⃣ SCATTER (Fix: No Random Sample)
-    rfm_plot = rfm.copy()      # tidak pakai sample
+    # ============================
+    # 3C. SCATTER PLOT — FIXED & CLEAN
+    # ============================
+    
+    st.subheader("Scatter Frequency vs Monetary (Fixed & Clean)")
+    
     fig_scatter = px.scatter(
-        rfm_plot,
+        rfm,
         x="Frequency",
         y="Monetary",
         size="Monetary",
-        title="Scatter Frequency vs Monetary (Fixed & Stable)",
-        hover_data=["Customer_ID", "RFM_Score"]
+        color="RFM_Score",
+        color_continuous_scale="Viridis",
+        hover_data=["Customer_ID", "Frequency", "Monetary", "RFM_Score"],
+        title="Scatter Plot: Frequency vs Monetary per Customer"
     )
+    
+    fig_scatter.update_layout(
+        xaxis_title="Frequency (Jumlah Transaksi)",
+        yaxis_title="Monetary (Total Belanja)",
+        template="plotly_white"
+    )
+    
     st.plotly_chart(fig_scatter, use_container_width=True)
+
 
 
     # ============================
@@ -255,6 +294,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
