@@ -106,16 +106,34 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     
     # Tampilkan di Streamlit
     st.pyplot(fig)
+    # Debug untuk cek data pelanggan
+    st.write(df_pelanggan.head())
+    st.write(df_pelanggan.dtypes)
+
+# ===============================
+# 2️⃣ DEMOGRAFI PELANGGAN
+# ===============================
 
     # ===============================
     # 2️⃣ DEMOGRAFI PELANGGAN
     # ===============================
     st.header("2️⃣ Demografi Pelanggan")
     
-    # --- Hitung umur (apabila belum ada) ---
+    # --- Hitung umur dengan aman ---
     if "Tanggal_Lahir" in df_pelanggan.columns:
-        df_pelanggan["Tanggal_Lahir"] = pd.to_datetime(df_pelanggan["Tanggal_Lahir"], errors="coerce")
-        df_pelanggan["Umur"] = ((pd.Timestamp("2024-12-31") - df_pelanggan["Tanggal_Lahir"]).dt.days / 365).astype(int)
+    
+        df_pelanggan["Tanggal_Lahir"] = pd.to_datetime(
+            df_pelanggan["Tanggal_Lahir"],
+            errors="coerce"         # invalid → NaT
+        )
+    
+        # hitung umur (hasilnya float)
+        df_pelanggan["Umur"] = (
+            (pd.Timestamp("2024-12-31") - df_pelanggan["Tanggal_Lahir"]).dt.days / 365
+        )
+    
+        # Ganti umur NaN menjadi 0 lalu konversi ke integer
+        df_pelanggan["Umur"] = df_pelanggan["Umur"].fillna(0).astype(int)
     
     
     # --- Distribusi Umur ---
@@ -128,7 +146,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         )
         st.plotly_chart(fig2, use_container_width=True)
     else:
-        st.info("Kolom **Umur** tidak ditemukan, atau tidak dapat dihitung dari Tanggal Lahir.")
+        st.info("Kolom **Umur** tidak ditemukan atau gagal dihitung.")
     
     
     # --- Omzet per Provinsi ---
@@ -142,7 +160,8 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         )
         st.plotly_chart(fig3, use_container_width=True)
     else:
-        st.info("Kolom **Provinsi** tidak ditemukan pada dataset transaksi.")
+        st.info("Kolom **Provinsi** tidak ditemukan.")
+
 
 
     # ============================
@@ -241,6 +260,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
