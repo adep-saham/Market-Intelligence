@@ -169,6 +169,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     
     
     # ===================== DISTRIBUSI TAHUN LAHIR =====================
+    
     if "Tahun_Lahir" in df_valid.columns:
         tahun_series = (
             df_valid.dropna(subset=["Tahun_Lahir"])
@@ -178,11 +179,19 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         )
     
         fig, ax = plt.subplots(figsize=(10, 3))
-        ax.bar(tahun_series.index.astype(str), tahun_series.values, color="orange")
+    
+        ax.bar(tahun_series.index.astype(int), tahun_series.values, color="orange")
         ax.set_title("Distribusi Tahun Lahir Customer")
         ax.set_ylabel("Jumlah")
-        plt.xticks(rotation=90, fontsize=6)
+    
+        # Atur xtick setiap 5 tahun
+        tahun_list = tahun_series.index.astype(int).tolist()
+        xticks = [t for t in tahun_list if t % 5 == 0]
+        ax.set_xticks(xticks)
+        ax.set_xticklabels(xticks, rotation=45, fontsize=6)
+    
         st.pyplot(fig)
+
 
 
     
@@ -284,6 +293,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
