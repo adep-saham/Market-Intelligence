@@ -473,77 +473,29 @@ elif menu == "Analisa Tantangan Manajemen":
         # Load data Excel (tanpa mi_engine)
         # =============================
 
-    def load_xlsx(uploaded_file):
-        try:
-            content = uploaded_file.read()
-            z = zipfile.ZipFile(io.BytesIO(content))
-    
-            # cari sheet pertama
-            sheet_files = [f for f in z.namelist() if f.startswith("xl/worksheets/sheet")]
-            sheet_files.sort()
-            sheet = sheet_files[0]
-    
-            xml_content = z.read(sheet)
-            root = ET.fromstring(xml_content)
-    
-            # shared strings
-            shared_strings = []
-            if "xl/sharedStrings.xml" in z.namelist():
-                ss_xml = z.read("xl/sharedStrings.xml")
-                ss_root = ET.fromstring(ss_xml)
-                namespace = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
-                for si in ss_root.findall(f"{namespace}si"):
-                    t = si.find(f"{namespace}t")
-                    shared_strings.append(t.text if t is not None else "")
-    
-            # rows
-            namespace = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
-            rows = []
-            max_cols = 0
-            for row in root.findall(f".//{namespace}row"):
-                values = []
-                for c in row.findall(f"{namespace}c"):
-                    v = c.find(f"{namespace}v")
-                    if v is not None:
-                        if c.get("t") == "s":
-                            idx = int(v.text)
-                            val = shared_strings[idx] if idx < len(shared_strings) else ""
-                        else:
-                            val = v.text
-                    else:
-                        val = ""
-                    values.append(val)
-    
-                max_cols = max(max_cols, len(values))
-                rows.append(values)
-    
-            # NORMALISASI PANJANG KOLOM
-            clean_rows = []
-            for r in rows:
-                if len(r) < max_cols:
-                    r = r + [""] * (max_cols - len(r))
-                clean_rows.append(r)
-    
-            df = pd.DataFrame(clean_rows)
-    
-            # Gunakan baris pertama sebagai header
-            df.columns = df.iloc[0].fillna("")
-            df = df[1:].reset_index(drop=True)
-    
-            return df
-    
-        except Exception as e:
-            st.error(f"❌ Gagal membuka file Excel: {e}")
-            return pd.DataFrame()
+    # Tombol analisa
+        if st.button("🚀 Mulai Analisa"):
+            # Muat file dengan loader terbaru
+            df_harga = load_xlsx(harga_file)
+            df_trans = load_xlsx(transaksi_file)
+            df_pelanggan = load_xlsx(pelanggan_file)
 
-        df_harga = load_xlsx(harga_file)
-        df_trans = load_xlsx(transaksi_file)
-        df_pelanggan = load_xlsx(pelanggan_file)
+            # Debug optional
+            st.write("Ukuran Data Harga:", df_harga.shape)
+            st.write("Ukuran Data Transaksi:", df_trans.shape)
+            st.write("Ukuran Data Pelanggan:", df_pelanggan.shape)
 
+            # Validasi jika DF kosong
+            if df_harga.empty:
+                st.error("❌ Data Harga kosong atau format tidak terbaca.")
+            elif df_trans.empty:
+                st.error("❌ Data Transaksi kosong atau format tidak terbaca.")
+            elif df_pelanggan.empty:
+                st.error("❌ Data Pelanggan kosong atau format tidak terbaca.")
+            else:
+                # Jalankan analisa
+                run_analisa(df_harga, df_trans, df_pelanggan)
 
-
-        # Run analysis
-        run_analisa(df_harga, df_trans, df_pelanggan)
 
 
 
