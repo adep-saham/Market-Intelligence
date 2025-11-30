@@ -114,7 +114,7 @@ menu = st.sidebar.selectbox(
         "Competitor",
         "Customer & Product Intelligence",
         "EWS",
-        "Pricing"
+        "Analisa Tantangan Manajemen"
     ]
 )
 
@@ -448,14 +448,30 @@ elif menu == "EWS":
                 st.warning(f"🟠 Traffic berubah {traffic_change:.2f}% (masih dalam ambang aman).")
 
 
-# ===========================================================
-# PRICING PAGE
-# ===========================================================
-elif menu == "Pricing":
-    st.title("💰 Pricing Intelligence")
-    st.metric("Harga Rekomendasi", f"Rp {recommended_price:,.0f}")
-    st.markdown("### 📌 Gap Kompetitor")
-    st.dataframe(gap.sort_values("gap"), use_container_width=True)
+# ====================================================
+# 4. MENU BARU: ANALISA TANTANGAN MANAJEMEN
+# ====================================================
+elif menu == "Analisa Tantangan Manajemen":
+
+    st.title("Analisa Tantangan dari Manajemen")
+    st.write("Analisa otomatis menggunakan 3 dataset 2024: Harga Emas, Pelanggan & Transaksi.")
+
+    # Uploaders
+    harga_file = st.file_uploader("Upload Data Harga Emas", type=["xlsx"])
+    transaksi_file = st.file_uploader("Upload Data Transaksi Penjualan", type=["xlsx"])
+    pelanggan_file = st.file_uploader("Upload Data Pelanggan", type=["xlsx"])
+
+    if harga_file and transaksi_file and pelanggan_file:
+        st.success("✔ Semua file sudah diupload. Siap dianalisa.")
+        
+        # Load data
+        df_harga = load_price_data(harga_file)
+        df_trans = load_transaction_data(transaksi_file)
+        df_pelanggan = load_customer_data(pelanggan_file)
+
+        # Run analysis
+        run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
