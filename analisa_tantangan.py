@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import numpy as np
+import plotly.graph_objects as go  # <--- WAJIB ADA
 
 def run_analisa(df_harga, df_trans, df_pelanggan):
 
@@ -215,6 +217,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
