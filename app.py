@@ -59,6 +59,9 @@ def convert_number(x):
 
     return x
 
+@st.cache_data(show_spinner=False)
+def load_xlsx_cached(file):
+    return load_xlsx(file)
 
 # ============================
 # FINAL LOADER EXCEL (AMAN)
@@ -540,9 +543,10 @@ elif menu == "Analisa Tantangan Manajemen":
     if st.button("🚀 Mulai Analisa"):
     
         # Muat file dengan loader terbaru
-        df_harga = load_xlsx(harga_file)
-        df_trans = load_xlsx(transaksi_file)
-        df_pelanggan = load_xlsx(pelanggan_file)
+        df_harga = load_xlsx_cached(harga_file)
+        df_trans = load_xlsx_cached(transaksi_file)
+        df_pelanggan = load_xlsx_cached(pelanggan_file)
+
 
     
         # Debug optional
@@ -566,6 +570,7 @@ elif menu == "Analisa Tantangan Manajemen":
     
         # Tampilkan kolom untuk debug
         st.write("Kolom Harga:", df_harga.columns.tolist())
+
 
 
 
