@@ -204,40 +204,31 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     
     st.header("3️⃣ RFM (Recency, Frequency, Monetary) — Strict Mode")
     
-    # --- Hitung dasar RFM ---
     rfm = df_trans.groupby("Customer_ID").agg(
-        Frequency=("Tanggal", "count"),            # hitung semua transaksi (termasuk duplikat)
-        Monetary=("Total_Nilai", "sum"),           # total nilai transaksi
-        Last_Tanggal=("Tanggal", "max")            # transaksi terakhir
+        Frequency=("Tanggal", "count"),
+        Monetary=("Total_Nilai", "sum"),
+        Last_Tanggal=("Tanggal", "max")
     ).reset_index()
     
-    # Recency dihitung dari tanggal terakhir transaksi
     rfm["Recency"] = (pd.Timestamp("2024-12-31") - rfm["Last_Tanggal"]).dt.days
     
-    # ============================
-    # STRICT SCORING MENGGUNAKAN QCUT (Distribusi rata & adil)
-    # ============================
+    # SAFE RANKS (ANTI QCUT ERROR)
+    rfm["Recency_rank"]   = rfm["Recency"].rank(method="first")
+    rfm["Frequency_rank"] = rfm["Frequency"].rank(method="first")
+    rfm["Monetary_rank"]  = rfm["Monetary"].rank(method="first")
     
-    rfm["R_Score"] = pd.qcut(rfm["Recency"], 5, labels=[5,4,3,2,1]).astype(int)
-    rfm["F_Score"] = pd.qcut(rfm["Frequency"], 5, labels=[1,2,3,4,5]).astype(int)
-    rfm["M_Score"] = pd.qcut(rfm["Monetary"], 5, labels=[1,2,3,4,5]).astype(int)
+    rfm["R_Score"] = pd.qcut(rfm["Recency_rank"],   5, labels=[5,4,3,2,1]).astype(int)
+    rfm["F_Score"] = pd.qcut(rfm["Frequency_rank"], 5, labels=[1,2,3,4,5]).astype(int)
+    rfm["M_Score"] = pd.qcut(rfm["Monetary_rank"],  5, labels=[1,2,3,4,5]).astype(int)
     
-    # ============================
-    # WEIGHTED RFM SCORE (Lebih Ketat)
-    # Recency = 40% | Frequency = 30% | Monetary = 30%
-    # ============================
-    
+    # Weighted scoring
     rfm["RFM_Weighted"] = (
         rfm["R_Score"]*0.4 +
         rfm["F_Score"]*0.3 +
         rfm["M_Score"]*0.3
     )
     
-    # ============================
-    # FINAL RANKING DENGAN TIE-BREAKER
-    # urutan: Weighted → Monetary → Frequency → Recency
-    # ============================
-    
+    # Final strict ranking
     top10 = rfm.sort_values(
         ["RFM_Weighted", "Monetary", "Frequency", "Recency"],
         ascending=[False, False, False, True]
@@ -246,18 +237,14 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     st.subheader("🏆 Top 10 Customer Terbaik (Strict RFM + Weighted + Tie-Break)")
     st.dataframe(top10)
     
-    # ============================
-    # Scatter (Frequency vs Monetary)
-    # ============================
-    
+    # Scatter
     fig_scatter = px.scatter(
-        rfm.sample(min(5000, len(rfm))),   # sampel agar cepat
+        rfm.sample(min(5000, len(rfm))),
         x="Frequency",
         y="Monetary",
         size="Monetary",
         color="RFM_Weighted",
-        title="Scatter Plot — Frequency vs Monetary (Strict RFM)",
-        labels={"Frequency": "Jumlah Transaksi", "Monetary": "Total Nilai (Rp)"}
+        title="Scatter Plot — Frequency vs Monetary (Strict RFM)"
     )
     
     st.plotly_chart(fig_scatter, use_container_width=True)
@@ -276,6 +263,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
