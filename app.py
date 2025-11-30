@@ -22,6 +22,7 @@ from forecast_demand import forecast_demand_page
 from prioritas_produk import prioritas_produk_page
 from segmentasi import segmentasi_pelanggan_lm
 from ews_module import ews_pro
+from analisa_tantangan import run_analisa
 
 
 # ===========================================================
@@ -471,6 +472,7 @@ elif menu == "Analisa Tantangan Manajemen":
 
         # Run analysis
         run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
