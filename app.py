@@ -541,35 +541,30 @@ elif menu == "Analisa Tantangan Manajemen":
 
     # Tombol analisa
     if st.button("🚀 Mulai Analisa"):
+
+        # ============================
+        # VALIDASI FILE UPLOADER
+        # ============================
+        if harga_file is None:
+            st.error("❌ File harga belum diupload.")
+            st.stop()
     
-        # Muat file dengan loader terbaru
+        if transaksi_file is None:
+            st.error("❌ File transaksi belum diupload.")
+            st.stop()
+    
+        if pelanggan_file is None:
+            st.error("❌ File pelanggan belum diupload.")
+            st.stop()
+    
+        # ============================
+        # LOAD FILE (AMAN)
+        # ============================
         df_harga = load_xlsx_cached(harga_file)
         df_trans = load_xlsx_cached(transaksi_file)
         df_pelanggan = load_xlsx_cached(pelanggan_file)
 
 
-    
-        # Debug optional
-        st.write("Ukuran Data Harga:", df_harga.shape)
-        st.write("Ukuran Data Transaksi:", df_trans.shape)
-        st.write("Ukuran Data Pelanggan:", df_pelanggan.shape)
-    
-        # Validasi jika DF kosong
-        if df_harga.empty:
-            st.error("❌ Data Harga kosong atau format tidak terbaca.")
-            st.stop()
-        if df_trans.empty:
-            st.error("❌ Data Transaksi kosong atau format tidak terbaca.")
-            st.stop()
-        if df_pelanggan.empty:
-            st.error("❌ Data Pelanggan kosong atau format tidak terbaca.")
-            st.stop()
-    
-        # Langsung jalankan analisa (TIDAK ADA TOMBOL KEDUA)
-        run_analisa(df_harga, df_trans, df_pelanggan)
-    
-        # Tampilkan kolom untuk debug
-        st.write("Kolom Harga:", df_harga.columns.tolist())
 
 
 
