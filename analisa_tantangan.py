@@ -130,38 +130,44 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
             pel[k] = clean_col(pel[k])
     
     # ============================
-    # 🗺️ DISTRIBUSI PROVINSI (Metode Anti Error — Matplotlib)
+    # 🗺️ DISTRIBUSI PROVINSI (Top 50 — Matplotlib Clean)
     # ============================
+    
     if "Provinsi" in pel.columns:
-        st.subheader("🗺️ Distribusi Provinsi (Valid per Customer)")
-
-        # Filter data valid
+        st.subheader("🗺️ Distribusi Provinsi (Top 50 — Valid per Customer)")
+    
+        import matplotlib.pyplot as plt
+    
+        # bersihkan data
         prov = pel[["Customer_ID", "Provinsi"]].copy()
         prov["Provinsi"] = prov["Provinsi"].replace(
-            ["data kosong", "", "0", 0], pd.NA
+            ["data kosong", "", "0", "-", None], pd.NA
         )
         prov = prov.dropna(subset=["Provinsi"])
-
+    
         prov_count = prov["Provinsi"].value_counts()
-
+    
         if len(prov_count) > 0:
-            import matplotlib.pyplot as plt
-
-            fig, ax = plt.subplots(figsize=(8, 4))
-            prov_count.plot(kind="bar", ax=ax, color="skyblue")
-
-            ax.set_title("Distribusi Provinsi Berdasarkan Data Valid")
-            ax.set_xlabel("Provinsi")
-            ax.set_ylabel("Jumlah")
-            ax.grid(axis="y", linestyle="--", alpha=0.5)
-
+    
+            # Ambil top 50
+            prov_top = prov_count.head(50)
+            fig, ax = plt.subplots(figsize=(10, 12))
+    
+            # Horizontal bar chart
+            ax.barh(prov_top.index[::-1], prov_top.values[::-1], color="skyblue")
+            ax.set_title("Top 50 Provinsi berdasarkan Jumlah Customer Valid", fontsize=14)
+            ax.set_xlabel("Jumlah", fontsize=12)
+            ax.set_ylabel("Provinsi", fontsize=12)
+            ax.grid(axis="x", linestyle="--", alpha=0.5)
+    
+            # biar tulisan tidak nabrak
+            plt.tight_layout()
+    
             st.pyplot(fig)
-
+    
         else:
             st.info("Tidak ada data Provinsi valid.")
 
-
-    
     
     # ============================
     # 🏙️ KOTA
@@ -304,6 +310,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
