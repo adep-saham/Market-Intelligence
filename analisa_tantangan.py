@@ -118,20 +118,23 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     # Bersihkan nilai teks yang salah
     df_pelanggan = df_pelanggan.replace("data kosong", pd.NA)
     
-    # Pastikan tanggal lahir valid
+    # Konversi tanggal lahir
     df_pelanggan["Tanggal_Lahir"] = pd.to_datetime(
         df_pelanggan["Tanggal_Lahir"],
         errors="coerce"
     )
     
-    # Hitung umur (float)
+    # Hitung umur
     df_pelanggan["Umur"] = (
         (pd.Timestamp("2024-12-31") - df_pelanggan["Tanggal_Lahir"]).dt.days / 365
     )
     
-    # Drop umur invalid
+    # Drop invalid umur
     df_umur = df_pelanggan.dropna(subset=["Umur"])
     
+    # ===============================
+    # Histogram umur
+    # ===============================
     if len(df_umur) > 0:
         fig2 = px.histogram(
             df_umur,
@@ -143,8 +146,9 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     else:
         st.info("Tidak ada data umur valid.")
     
-    
-    # Grafik sebaran Provinsi
+    # ===============================
+    # Sebaran Provinsi
+    # ===============================
     if "Provinsi" in df_pelanggan.columns:
         df_prov = df_pelanggan.dropna(subset=["Provinsi"])
         
@@ -161,8 +165,6 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
             st.info("Tidak ada data provinsi valid.")
     else:
         st.info("Kolom Provinsi tidak ditemukan.")
-
-
 
 
 
@@ -262,6 +264,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
