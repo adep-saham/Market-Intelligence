@@ -4,11 +4,7 @@ import plotly.express as px
 
 def run_analisa(df_harga, df_trans, df_pelanggan):
 
-    # =============================
-    # TURBO 1: OPTIMASI TIPE DATA
-    # =============================
-    df_trans["Customer_ID"] = df_trans["Customer_ID"].astype("category")
-    df_pelanggan["Customer_ID"] = df_pelanggan["Customer_ID"].astype("category")
+   def run_analisa(df_harga, df_trans, df_pelanggan):
 
     # ============================
     # NORMALISASI K0L0M HARGA EMAS
@@ -42,18 +38,12 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         "Tanggal Lahir": "Tanggal_Lahir"
     })
 
-    if "Tanggal_Lahir" in df_pelanggan.columns:
-        df_pelanggan["Tanggal_Lahir"] = pd.to_datetime(df_pelanggan["Tanggal_Lahir"], errors="coerce")
-        df_pelanggan["Umur"] = (
-            pd.Timestamp("2024-12-31") - df_pelanggan["Tanggal_Lahir"]
-        ).dt.days // 365
-
     # =============================
-    # TURBO 2: MERGE CEPAT (DROP DUPES)
+    # TURBO 1: OPTIMASI TIPE DATA (SETELAH RENAME) ← LETAK YANG BENAR
     # =============================
-    df_pelanggan = df_pelanggan.drop_duplicates(subset=["Customer_ID"])
+    df_trans["Customer_ID"] = df_trans["Customer_ID"].astype("category")
+    df_pelanggan["Customer_ID"] = df_pelanggan["Customer_ID"].astype("category")
 
-    df_trans = df_trans.merge(df_pelanggan, on="Customer_ID", how="left")
 
     # ============================
     # 1️⃣ TREND PENJUALAN (OPTIMIZED)
@@ -135,3 +125,4 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
