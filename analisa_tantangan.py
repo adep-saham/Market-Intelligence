@@ -294,33 +294,6 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
 
     
     # ============================
-    # 3C. SCATTER PLOT — FIXED & CLEAN
-    # ============================
-    
-    st.subheader("Scatter Frequency vs Monetary (Fixed & Clean)")
-    
-    fig_scatter = px.scatter(
-        rfm,
-        x="Frequency",
-        y="Monetary",
-        size="Monetary",
-        color="RFM_Score",
-        color_continuous_scale="Viridis",
-        hover_data=["Customer_ID", "Frequency", "Monetary", "RFM_Score"],
-        title="Scatter Plot: Frequency vs Monetary per Customer"
-    )
-    
-    fig_scatter.update_layout(
-        xaxis_title="Frequency (Jumlah Transaksi)",
-        yaxis_title="Monetary (Total Belanja)",
-        template="plotly_white"
-    )
-    
-    st.plotly_chart(fig_scatter, use_container_width=True)
-
-
-
-    # ============================
     # 4️⃣ PRODUK TERLARIS
     # ============================
     st.header("4️⃣ Produk / Jasa Terlaris")
@@ -332,6 +305,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
