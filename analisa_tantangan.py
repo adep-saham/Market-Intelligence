@@ -233,7 +233,6 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     st.subheader("🏆 Top 10 Customer Terbaik (Percentile Mode 0–100)")
     st.dataframe(top10)
 
-
     # ================================
     # TOP 100 STRICT RFM
     # ================================
@@ -242,15 +241,14 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         top100 = rfm_strict.head(100).copy()
     else:
         st.warning("⚠️ RFM_Weighted tidak ditemukan. Scatter plot dilewati.")
-        top100 = pd.DataFrame()  # supaya tidak error
-
+        top100 = pd.DataFrame()  # fallback aman
+    
     # ================================
-    # SCATTER PLOT — TOP 100 STRICT RFM
+    # SCATTER PLOT MATPLOTLIB
     # ================================
+    st.subheader("📈 Scatter Plot (Matplotlib) — Frequency vs Monetary (Top 100 Strict RFM)")
     
     if not top100.empty:
-    
-        st.subheader("📈 Scatter Plot — Frequency vs Monetary (Top 100 Strict RFM)")
     
         df_scatter = top100.copy()
     
@@ -258,30 +256,40 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         df_scatter["Frequency"] = pd.to_numeric(df_scatter["Frequency"], errors="coerce")
         df_scatter["Monetary"] = pd.to_numeric(df_scatter["Monetary"], errors="coerce")
     
-        # Bersihkan
+        # Bersihkan data invalid
         df_scatter = df_scatter.dropna(subset=["Frequency", "Monetary"])
         df_scatter = df_scatter[(df_scatter["Frequency"] > 0) & (df_scatter["Monetary"] > 0)]
     
-        import plotly.express as px
+        import matplotlib.pyplot as plt
     
-        fig_scatter = px.scatter(
-            df_scatter,
-            x="Frequency",
-            y="Monetary",
-            hover_data=["Customer_ID", "R_Score", "F_Score", "M_Score", "RFM_Weighted"],
-            title="Scatter Plot — Frequency vs Monetary (Top 100 Strict RFM)",
+        # Ukuran figur 1/3 layar
+        fig, ax = plt.subplots(figsize=(7, 4))
+    
+        # Scatter
+        ax.scatter(
+            df_scatter["Frequency"],
+            df_scatter["Monetary"],
+            alpha=0.7,
+            s=60,
+            edgecolor="black",
+            linewidth=0.5,
+            color="#1f77b4"
         )
     
-        fig_scatter.update_layout(
-            xaxis=dict(type="log", title="Frequency (log)"),
-            yaxis=dict(type="log", title="Monetary (log)"),
-            template="plotly_white"
-        )
+        # Log scale agar tidak menumpuk
+        ax.set_xscale("log")
+        ax.set_yscale("log")
     
-        st.plotly_chart(fig_scatter, use_container_width=True)
+        ax.set_title("Scatter Plot — Frequency vs Monetary (Top 100 Strict RFM)")
+        ax.set_xlabel("Frequency (log)")
+        ax.set_ylabel("Monetary (log)")
+    
+        ax.grid(True, alpha=0.3, linestyle="--")
+    
+        st.pyplot(fig)
+    
     else:
         st.info("Tidak tersedia data Top 100 untuk scatter plot.")
-
 
 
 
@@ -298,6 +306,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
