@@ -112,33 +112,31 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     st.write("Kolom pelanggan:", list(df_pelanggan.columns))
 
     # ===============================
-    # 2️⃣ DEMOGRAFI PELANGGAN – SAFE
+    # 2️⃣ DEMOGRAFI PELANGGAN – FINAL FIX
     # ===============================
-    st.header("2️⃣ Demografi Pelanggan")
     
-    # Pastikan df_pelanggan valid
-    if not isinstance(df_pelanggan, pd.DataFrame):
-        st.error("❌ Data pelanggan tidak valid. Pastikan file pelanggan sudah diupload.")
-        st.stop()
+    st.header("2️⃣ Demografi Pelanggan")
     
     df_p = df_pelanggan.copy()
     
-    # Bersihkan "data kosong"
-    df_p = df_p.replace("data kosong", pd.NA)
+    # 1. Bersihkan nilai tidak valid
+    df_p = df_p.replace(["data kosong", "0", 0, "1.0", 1.0, ""], pd.NA)
     
-    # Convert Tanggal_Lahir
+    # 2. Convert tanggal lahir ke datetime
     df_p["Tanggal_Lahir"] = pd.to_datetime(df_p["Tanggal_Lahir"], errors="coerce")
     
-    # Hitung umur
-    df_p["Umur"] = ((pd.Timestamp("2024-12-31") - df_p["Tanggal_Lahir"]).dt.days / 365).astype(float)
+    # 3. Hitung umur
+    df_p["Umur"] = (pd.Timestamp("2024-12-31") - df_p["Tanggal_Lahir"]).dt.days / 365
     
-    # Ambil hanya umur valid
+    # 4. Ambil umur valid saja
     valid_umur = df_p["Umur"].dropna()
     
+    # 5. Cek apakah ada data
     if len(valid_umur) == 0:
-        st.warning("Tidak ada data umur valid untuk divisualisasikan.")
+        st.warning("⚠️ Tidak ada data umur valid untuk divisualisasikan.")
     else:
-        fig2 = px.histogram(valid_umur, nbins=20, title="Distribusi Umur Pelanggan")
+        fig2 = px.histogram(valid_umur, nbins=20,
+                            title="Distribusi Umur Pelanggan (Final)")
         st.plotly_chart(fig2, use_container_width=True)
 
 
@@ -241,6 +239,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
