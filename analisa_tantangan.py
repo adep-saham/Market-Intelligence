@@ -117,16 +117,16 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     
     df_valid = df_pelanggan.copy()
     
-    # Semua kolom diubah ke string & dibersihkan
+    # Bersihkan isi kolom → uniform uppercase, tapi NAMA kolom TIDAK diubah
     for col in df_valid.columns:
         df_valid[col] = df_valid[col].astype(str).str.strip().str.upper()
     
-    # Buang nilai tidak valid
+    # Ganti nilai tidak valid
     df_valid = df_valid.replace(
         {"NAN": None, "NONE": None, "NULL": None, "DATA KOSONG": None, "": None}
     )
     
-    # Tahun lahir (aman)
+    # Tahun Lahir
     df_valid["Tahun_Lahir"] = pd.to_datetime(
         df_valid["Tanggal_Lahir"], errors="coerce"
     ).dt.year
@@ -136,59 +136,65 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     # 2. Grafik Distribusi Provinsi (Top 50 Per Customer)
     # ================================================
     
-    prov_series = (
-        df_valid.dropna(subset=["PROVINSI"])
-        .groupby("PROVINSI")["CUSTOMER_ID"]
-        .count()
-        .sort_values(ascending=False)
-        .head(50)
-    )
+    if "Provinsi" in df_valid.columns:
     
-    fig, ax = plt.subplots(figsize=(10, 3))  # 1/3 layar
-    ax.bar(prov_series.index, prov_series.values, color="skyblue")
-    ax.set_title("Top 50 Provinsi Customer")
-    ax.set_ylabel("Jumlah")
-    plt.xticks(rotation=90, fontsize=6)
-    st.pyplot(fig)
+        prov_series = (
+            df_valid.dropna(subset=["Provinsi"])
+            .groupby("Provinsi")["Customer_ID"]
+            .count()
+            .sort_values(ascending=False)
+            .head(50)
+        )
+    
+        fig, ax = plt.subplots(figsize=(10, 3))
+        ax.bar(prov_series.index, prov_series.values, color="skyblue")
+        ax.set_title("Top 50 Provinsi Customer")
+        ax.set_ylabel("Jumlah")
+        plt.xticks(rotation=90, fontsize=6)
+        st.pyplot(fig)
     
     
     # =============================================
     # 3. Grafik Distribusi Kota (Top 50 Per Customer)
     # =============================================
     
-    kota_series = (
-        df_valid.dropna(subset=["KOTA"])
-        .groupby("KOTA")["CUSTOMER_ID"]
-        .count()
-        .sort_values(ascending=False)
-        .head(50)
-    )
+    if "Kota" in df_valid.columns:
     
-    fig, ax = plt.subplots(figsize=(10, 3))  # 1/3 layar
-    ax.bar(kota_series.index, kota_series.values, color="teal")
-    ax.set_title("Top 50 Kota Customer")
-    ax.set_ylabel("Jumlah")
-    plt.xticks(rotation=90, fontsize=6)
-    st.pyplot(fig)
+        kota_series = (
+            df_valid.dropna(subset=["Kota"])
+            .groupby("Kota")["Customer_ID"]
+            .count()
+            .sort_values(ascending=False)
+            .head(50)
+        )
+    
+        fig, ax = plt.subplots(figsize=(10, 3))
+        ax.bar(kota_series.index, kota_series.values, color="teal")
+        ax.set_title("Top 50 Kota Customer")
+        ax.set_ylabel("Jumlah")
+        plt.xticks(rotation=90, fontsize=6)
+        st.pyplot(fig)
     
     
     # ================================
     # 4. Distribusi Tahun Kelahiran
     # ================================
     
-    tahun_series = (
-        df_valid.dropna(subset=["Tahun_Lahir"])
-        .groupby("Tahun_Lahir")["CUSTOMER_ID"]
-        .count()
-        .sort_index()
-    )
+    if "Tahun_Lahir" in df_valid.columns:
     
-    fig, ax = plt.subplots(figsize=(10, 3))  # 1/3 layar
-    ax.bar(tahun_series.index.astype(str), tahun_series.values, color="orange")
-    ax.set_title("Distribusi Tahun Kelahiran Customer")
-    ax.set_ylabel("Jumlah")
-    plt.xticks(rotation=90, fontsize=6)
-    st.pyplot(fig)
+        tahun_series = (
+            df_valid.dropna(subset=["Tahun_Lahir"])
+            .groupby("Tahun_Lahir")["Customer_ID"]
+            .count()
+            .sort_index()
+        )
+    
+        fig, ax = plt.subplots(figsize=(10, 3))
+        ax.bar(tahun_series.index.astype(str), tahun_series.values, color="orange")
+        ax.set_title("Distribusi Tahun Kelahiran Customer")
+        ax.set_ylabel("Jumlah")
+        plt.xticks(rotation=90, fontsize=6)
+        st.pyplot(fig)
 
     
     
@@ -289,6 +295,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
