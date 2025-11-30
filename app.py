@@ -3,6 +3,8 @@ import pandas as pd
 import plotly.graph_objects as go
 import io
 import tempfile
+import zipfile
+import xml.etree.ElementTree as ET
 from xlsx2csv import Xlsx2csv
 from mi_engine import (
     load_global_price,
@@ -471,22 +473,58 @@ elif menu == "Analisa Tantangan Manajemen":
         # =============================
         # Load data Excel (tanpa mi_engine)
         # =============================
-        
-        def load_excel(file):
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
-                tmp.write(file.read())
-                tmp.flush()
 
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as csv_tmp:
-                    Xlsx2csv(tmp.name).convert(csv_tmp.name)
-                    return pd.read_csv(csv_tmp.name)
+        def read_xlsx_without_openpyxl(uploaded_file):
+        # Convert uploaded file → bytes
+        file_bytes = uploaded_file.read()
+        z = zipfile.ZipFile(io.BytesIO(file_bytes))
+    
+        # Ambil sheet pertama
+        sheet_name = [s for s in z.namelist() if s.startswith('xl/worksheets/sheet1')][0]
+    
+        xml_content = z.read(sheet_name)
+        root = ET.fromstring(xml_content)
+    
+        # Extract shared strings
+        shared_strings = []
+        if 'xl/sharedStrings.xml' in z.namelist():
+            ss_xml = z.read('xl/sharedStrings.xml')
+            ss_root = ET.fromstring(ss_xml)
+            for si in ss_root:
+                t = si.find("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}t")
+                shared_strings.append(t.text if t is not None else "")
+    
+        # Extract rows
+        rows = []
+        for row in root.findall(".//{http://schemas.openxmlformats.org/spreadsheetml/2006/main}row"):
+            values = []
+            for c in row.findall("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}c"):
+                value = c.find("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}v")
+                if value is not None:
+                    if c.attrib.get("t") == "s":  # shared string
+                        values.append(shared_strings[int(value.text)])
+                    else:
+                        values.append(value.text)
+                else:
+                    values.append("")
+            rows.append(values)
+    
+        df = pd.DataFrame(rows)
+        # Assume first row = header
+        df.columns = df.iloc[0]
+        df = df[1:]
+        df = df.reset_index(drop=True)
+    
+        return df
 
-        df_harga = load_excel(harga_file)
-        df_trans = load_excel(transaksi_file)
-        df_pelanggan = load_excel(pelanggan_file)
+        df_harga = read_xlsx_without_openpyxl(harga_file)
+        df_trans = read_xlsx_without_openpyxl(transaksi_file)
+        df_pelanggan = read_xlsx_without_openpyxl(pelanggan_file)
+
 
         # Run analysis
         run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
