@@ -96,6 +96,60 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     )
     st.plotly_chart(fig, use_container_width=True)
 
+    # =============================
+    # DUAL AXIS CHART (PROFESSIONAL)
+    # =============================
+    st.subheader("Harga Emas vs Volume Penjualan (Dual Axis Turbo Mode)")
+    
+    fig = go.Figure()
+    
+    # Garis HARGA EMAS (axis kiri)
+    fig.add_trace(
+        go.Scatter(
+            x=df_plot["Tanggal"],
+            y=df_plot[kolom_harga],
+            name="Harga Emas Antam",
+            line=dict(color="#1f77b4", width=2)
+        )
+    )
+    
+    # Garis VOLUME (axis kanan)
+    fig.add_trace(
+        go.Scatter(
+            x=df_plot["Tanggal"],
+            y=df_plot["Total_Qty"],
+            name="Total Qty",
+            yaxis="y2",
+            line=dict(color="#ff7f0e", width=2)
+        )
+    )
+    
+    # Layout
+    fig.update_layout(
+        title="Tren Harga Emas vs Volume Penjualan (Dual Axis Turbo Mode)",
+        xaxis=dict(title="Tanggal"),
+        
+        yaxis=dict(
+            title="Harga Emas (Rp)",
+            showgrid=False,
+            zeroline=False
+        ),
+        
+        yaxis2=dict(
+            title="Volume Penjualan (Qty)",
+            overlaying="y",
+            side="right",
+            showgrid=False,
+            zeroline=False
+        ),
+        
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        hovermode="x unified",
+        template="plotly_white"
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
+
 
     # ============================
     # 2️⃣ DEMOGRAFI PELANGGAN
@@ -161,6 +215,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
