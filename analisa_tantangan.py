@@ -117,30 +117,40 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     st.header("2️⃣ Demografi Pelanggan")
     
     # -----------------------------
-    # 2A. Distribusi Provinsi
+    # 2A. Distribusi Provinsi (SAFE)
     # -----------------------------
     if "Provinsi" in df_pelanggan.columns:
-        prov_count = (
-            df_pelanggan["Provinsi"]
-            .replace(["data kosong", "-", ""], pd.NA)
-            .dropna()
-            .value_counts()
-            .reset_index()
-        )
-        prov_count.columns = ["Provinsi", "Jumlah"]
     
-        st.subheader("📌 Distribusi Provinsi Pelanggan")
-        fig_prov = px.bar(
-            prov_count, 
-            x="Provinsi", 
-            y="Jumlah",
-            text="Jumlah",
-            title="Sebaran Pelanggan Berdasarkan Provinsi"
+        # Normalisasi provinsi
+        prov = (
+            df_pelanggan["Provinsi"]
+            .astype(str)
+            .str.strip()
+            .str.lower()
+            .replace(["data kosong", "kosong", "-", "", "nan"], pd.NA)
+            .dropna()
         )
-        fig_prov.update_layout(xaxis_tickangle=-45)
-        st.plotly_chart(fig_prov, use_container_width=True)
+    
+        if prov.empty:
+            st.warning("⚠ Tidak ada data provinsi valid untuk ditampilkan.")
+        else:
+            prov_count = prov.value_counts().reset_index()
+            prov_count.columns = ["Provinsi", "Jumlah"]
+    
+            st.subheader("📌 Distribusi Provinsi Pelanggan")
+            fig_prov = px.bar(
+                prov_count,
+                x="Provinsi",
+                y="Jumlah",
+                text="Jumlah",
+                title="Sebaran Pelanggan Berdasarkan Provinsi",
+            )
+            fig_prov.update_layout(xaxis_tickangle=-45)
+            st.plotly_chart(fig_prov, use_container_width=True)
+    
     else:
         st.info("Kolom Provinsi tidak ditemukan.")
+
     
     # -----------------------------
     # 2B. Distribusi Kota
@@ -298,6 +308,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
