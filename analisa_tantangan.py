@@ -111,7 +111,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     st.write(df_pelanggan.dtypes)
 
     # ===============================
-    # 2️⃣ DEMOGRAFI PELANGGAN (FIXED)
+    # 2️⃣ DEMOGRAFI PELANGGAN (FINAL FIX)
     # ===============================
     st.header("2️⃣ Demografi Pelanggan")
     
@@ -121,7 +121,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     # Pastikan tanggal lahir valid
     df_pelanggan["Tanggal_Lahir"] = pd.to_datetime(
         df_pelanggan["Tanggal_Lahir"],
-        errors="coerce"   # invalid → NaT
+        errors="coerce"
     )
     
     # Hitung umur (float)
@@ -129,10 +129,9 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         (pd.Timestamp("2024-12-31") - df_pelanggan["Tanggal_Lahir"]).dt.days / 365
     )
     
-    # Drop umur yang tidak valid
+    # Drop umur invalid
     df_umur = df_pelanggan.dropna(subset=["Umur"])
     
-    # Hanya jalankan histogram jika ada data valid
     if len(df_umur) > 0:
         fig2 = px.histogram(
             df_umur,
@@ -142,19 +141,19 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         )
         st.plotly_chart(fig2, use_container_width=True)
     else:
-        st.info("Tidak ada data umur valid untuk ditampilkan.")
+        st.info("Tidak ada data umur valid.")
     
     
-    # Grafik sebaran pelanggan per provinsi
+    # Grafik sebaran Provinsi
     if "Provinsi" in df_pelanggan.columns:
         df_prov = df_pelanggan.dropna(subset=["Provinsi"])
-    
+        
         if len(df_prov) > 0:
             fig3 = px.bar(
                 df_prov["Provinsi"].value_counts().reset_index(),
                 x="index",
                 y="Provinsi",
-                labels={"index": "Provinsi", "Provinsi": "Jumlah Pelanggan"},
+                labels={"index": "Provinsi", "Provinsi": "Jumlah"},
                 title="Sebaran Pelanggan per Provinsi"
             )
             st.plotly_chart(fig3, use_container_width=True)
@@ -263,6 +262,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
