@@ -83,30 +83,36 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig3, use_container_width=True)
 
     # ============================
-    # 3B. RFM SCORING (1–5 Scale)
+    # 3A. HITUNG RFM DASAR
     # ============================
 
-    # Recency: semakin kecil semakin bagus → rank terbalik
+    rfm = df_trans.groupby("Customer_ID").agg(
+        Frequency=("Tanggal", "count"),
+        Monetary=("Total_Nilai", "sum"),
+        Last_Tanggal=("Tanggal", "max")
+    ).reset_index()
+    
+    # Recency = selisih hari dari 2024-12-31
+    rfm["Recency"] = (pd.Timestamp("2024-12-31") - rfm["Last_Tanggal"]).dt.days
+
+    # ============================
+    # 3B. RFM SCORING (1–5 Scale)
+    # ============================
+    
     rfm["R_Score"] = pd.qcut(rfm["Recency"].rank(method="first", ascending=True), 5, labels=[5,4,3,2,1]).astype(int)
-    
-    # Frequency: semakin besar semakin bagus
     rfm["F_Score"] = pd.qcut(rfm["Frequency"].rank(method="first", ascending=False), 5, labels=[5,4,3,2,1]).astype(int)
-    
-    # Monetary: semakin besar semakin bagus
     rfm["M_Score"] = pd.qcut(rfm["Monetary"].rank(method="first", ascending=False), 5, labels=[5,4,3,2,1]).astype(int)
     
-    # Total RFM Score (Semakin besar semakin bagus)
     rfm["RFM_Score"] = rfm["R_Score"] + rfm["F_Score"] + rfm["M_Score"]
+
     
     # ============================
     # 3C. TOP 10 CUSTOMER TERBAIK
     # ============================
     
     top10 = rfm.sort_values("RFM_Score", ascending=False).head(10)
-    
     st.subheader("🏆 Top 10 Customer Terbaik Berdasarkan RFM Score")
     st.dataframe(top10)
-
 
     # ============================
     # 4. PRODUK TERLARIS
@@ -119,6 +125,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔")
+
 
 
 
