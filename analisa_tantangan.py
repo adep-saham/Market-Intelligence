@@ -108,20 +108,20 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     st.pyplot(fig)
     
     # ==========================================================
-    # DEMOGRAFI PELANGGAN – FINAL VERSION (NO PDP)
+    # DEMOGRAFI – FIXED VERSION (NO ERROR, NO KEYERROR)
     # ==========================================================
     
-    # ============================
-    # 1. Normalisasi Data Pelanggan
-    # ============================
+    # Pastikan nama kolom konsisten
+    rename_map = {col: col.strip().title() for col in df_pelanggan.columns}
+    df_pelanggan = df_pelanggan.rename(columns=rename_map)
     
     df_valid = df_pelanggan.copy()
     
-    # Bersihkan isi kolom → uniform uppercase, tapi NAMA kolom TIDAK diubah
+    # Bersihkan isinya (bukan kolom)
     for col in df_valid.columns:
         df_valid[col] = df_valid[col].astype(str).str.strip().str.upper()
     
-    # Ganti nilai tidak valid
+    # Replace nilai kosong
     df_valid = df_valid.replace(
         {"NAN": None, "NONE": None, "NULL": None, "DATA KOSONG": None, "": None}
     )
@@ -132,15 +132,11 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     ).dt.year
     
     
-    # ================================================
-    # 2. Grafik Distribusi Provinsi (Top 50 Per Customer)
-    # ================================================
-    
+    # ====================== DISTRIBUSI PROVINSI ======================
     if "Provinsi" in df_valid.columns:
-    
         prov_series = (
             df_valid.dropna(subset=["Provinsi"])
-            .groupby("Provinsi")["Customer_ID"]
+            .groupby("Provinsi")["Customer_Id"]
             .count()
             .sort_values(ascending=False)
             .head(50)
@@ -154,15 +150,11 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.pyplot(fig)
     
     
-    # =============================================
-    # 3. Grafik Distribusi Kota (Top 50 Per Customer)
-    # =============================================
-    
+    # ======================== DISTRIBUSI KOTA ========================
     if "Kota" in df_valid.columns:
-    
         kota_series = (
             df_valid.dropna(subset=["Kota"])
-            .groupby("Kota")["Customer_ID"]
+            .groupby("Kota")["Customer_Id"]
             .count()
             .sort_values(ascending=False)
             .head(50)
@@ -176,25 +168,22 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.pyplot(fig)
     
     
-    # ================================
-    # 4. Distribusi Tahun Kelahiran
-    # ================================
-    
+    # ===================== DISTRIBUSI TAHUN LAHIR =====================
     if "Tahun_Lahir" in df_valid.columns:
-    
         tahun_series = (
             df_valid.dropna(subset=["Tahun_Lahir"])
-            .groupby("Tahun_Lahir")["Customer_ID"]
+            .groupby("Tahun_Lahir")["Customer_Id"]
             .count()
             .sort_index()
         )
     
         fig, ax = plt.subplots(figsize=(10, 3))
         ax.bar(tahun_series.index.astype(str), tahun_series.values, color="orange")
-        ax.set_title("Distribusi Tahun Kelahiran Customer")
+        ax.set_title("Distribusi Tahun Lahir Customer")
         ax.set_ylabel("Jumlah")
         plt.xticks(rotation=90, fontsize=6)
         st.pyplot(fig)
+
 
     
     
@@ -295,6 +284,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
