@@ -112,52 +112,90 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     st.write("Kolom pelanggan:", list(df_pelanggan.columns))
 
     # ============================
-    # 2️⃣ DEMOGRAFI PELANGGAN — FIXED
+    # 2️⃣ DEMOGRAFI PELANGGAN (SAFE MODE)
     # ============================
-    
     st.header("2️⃣ Demografi Pelanggan")
     
-    # --- Hitung Umur (Tahun) Aman ---
-    # Pastikan kolom tanggal lahir menjadi datetime.date
-    df_pelanggan["Tanggal_Lahir"] = pd.to_datetime(df_pelanggan["Tanggal_Lahir"], errors="coerce").dt.date
-    
-    today = dt.date.today()
-    
-    def hitung_umur_tahun(tgl):
-        if pd.isna(tgl):
-            return None
-        return relativedelta(today, tgl).years
-    
-    df_pelanggan["Umur_Tahun"] = df_pelanggan["Tanggal_Lahir"].apply(hitung_umur_tahun)
-    
-    # Filter umur valid
-    valid_umur = df_pelanggan["Umur_Tahun"].dropna()
-    
-    # Jika tidak ada umur valid → tampilkan pesan
-    if len(valid_umur) == 0:
-        st.warning("Tidak ada data umur yang valid untuk dianalisis.")
-    else:
-        # Histogram Umur
-        fig_umur = px.histogram(
-            valid_umur,
-            nbins=20,
-            title="Distribusi Umur Pelanggan (Tahun)"
-        )
-        st.plotly_chart(fig_umur, use_container_width=True)
-    
-    # ====================== Tambahan: Demografi Provinsi ======================
+    # -----------------------------
+    # 2A. Distribusi Provinsi
+    # -----------------------------
     if "Provinsi" in df_pelanggan.columns:
-        df_prov = df_pelanggan["Provinsi"].replace(["", "data kosong", None, np.nan], "Tidak diketahui")
-        provinsi_count = df_prov.value_counts().reset_index()
-        provinsi_count.columns = ["Provinsi", "Jumlah"]
+        prov_count = (
+            df_pelanggan["Provinsi"]
+            .replace(["data kosong", "-", ""], pd.NA)
+            .dropna()
+            .value_counts()
+            .reset_index()
+        )
+        prov_count.columns = ["Provinsi", "Jumlah"]
     
+        st.subheader("📌 Distribusi Provinsi Pelanggan")
         fig_prov = px.bar(
-            provinsi_count,
-            x="Provinsi",
+            prov_count, 
+            x="Provinsi", 
             y="Jumlah",
+            text="Jumlah",
             title="Sebaran Pelanggan Berdasarkan Provinsi"
         )
+        fig_prov.update_layout(xaxis_tickangle=-45)
         st.plotly_chart(fig_prov, use_container_width=True)
+    else:
+        st.info("Kolom Provinsi tidak ditemukan.")
+    
+    # -----------------------------
+    # 2B. Distribusi Kota
+    # -----------------------------
+    if "Kota" in df_pelanggan.columns:
+        kota_count = (
+            df_pelanggan["Kota"]
+            .replace(["data kosong", "-", ""], pd.NA)
+            .dropna()
+            .value_counts()
+            .head(20)                 # hanya tampilkan 20 besar agar rapi
+            .reset_index()
+        )
+        kota_count.columns = ["Kota", "Jumlah"]
+    
+        st.subheader("📌 Top 20 Kota Pelanggan")
+        fig_kota = px.bar(
+            kota_count,
+            x="Kota",
+            y="Jumlah",
+            text="Jumlah",
+            title="Sebaran Pelanggan Berdasarkan Kota"
+        )
+        fig_kota.update_layout(xaxis_tickangle=-45)
+        st.plotly_chart(fig_kota, use_container_width=True)
+    else:
+        st.info("Kolom Kota tidak ditemukan.")
+    
+    # -----------------------------
+    # 2C. Distribusi Tempat Lahir
+    # -----------------------------
+    if "Tempat Lahir" in df_pelanggan.columns:
+        tempat_lahir = (
+            df_pelanggan["Tempat Lahir"]
+            .replace(["data kosong", "-", ""], pd.NA)
+            .dropna()
+            .value_counts()
+            .head(20)
+            .reset_index()
+        )
+        tempat_lahir.columns = ["Tempat Lahir", "Jumlah"]
+    
+        st.subheader("📌 Top 20 Tempat Lahir Pelanggan")
+        fig_lahir = px.bar(
+            tempat_lahir,
+            x="Tempat Lahir",
+            y="Jumlah",
+            text="Jumlah",
+            title="Sebaran Tempat Lahir Pelanggan"
+        )
+        fig_lahir.update_layout(xaxis_tickangle=-45)
+        st.plotly_chart(fig_lahir, use_container_width=True)
+    else:
+        st.info("Kolom Tempat Lahir tidak ditemukan.")
+
 
 
 
@@ -260,6 +298,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
