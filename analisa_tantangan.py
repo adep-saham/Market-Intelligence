@@ -107,96 +107,36 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     # Tampilkan di Streamlit
     st.pyplot(fig)
 
-
-    # ============================
-    # 2️⃣ DEMOGRAFI PELANGGAN (FIX: UMUR + PROVINSI)
-    # ============================
-    
+    # ===============================
+    # 2️⃣ DEMOGRAFI PELANGGAN
+    # ===============================
     st.header("2️⃣ Demografi Pelanggan")
     
-    # =====================================================
-    # 2A. UMUR PELANGGAN
-    # =====================================================
-    
-    # --- pastikan Tanggal_Lahir selalu datetime ---
-    if "Tanggal_Lahir" in df_pelanggan.columns:
-        df_pelanggan["Tanggal_Lahir"] = pd.to_datetime(df_pelanggan["Tanggal_Lahir"], errors="coerce")
-        
-        # hitung umur
-        today = pd.Timestamp("2024-12-31")
-        df_pelanggan["Umur"] = ((today - df_pelanggan["Tanggal_Lahir"]).dt.days // 365)
-    
-        # merge umur ke df_trans
-        df_trans = df_trans.merge(
-            df_pelanggan[["Customer_ID", "Umur"]],
-            on="Customer_ID",
-            how="left"
-        )
-    
-    # --- histogram umur ---
+    # ---- Distribusi Umur ----
     if "Umur" in df_trans.columns:
-        df_plot_age = df_trans.dropna(subset=["Umur"])
-    
-        if len(df_plot_age) > 0:
-            fig2 = px.histogram(
-                df_plot_age.sample(min(5000, len(df_plot_age))),
-                x="Umur",
-                nbins=20,
-                title="Distribusi Umur Pelanggan"
-            )
-            st.plotly_chart(fig2, use_container_width=True)
-        else:
-            st.info("Tidak ada data umur valid untuk ditampilkan.")
+        fig2 = px.histogram(
+            df_trans,
+            x="Umur",
+            nbins=20,
+            title="Distribusi Umur Pelanggan"
+        )
+        st.plotly_chart(fig2, use_container_width=True)
     else:
-        st.info("Data tanggal lahir / umur tidak tersedia.")
+        st.info("Kolom **Umur** tidak ditemukan pada dataset Transaksi.")
     
-    # =====================================================
-    # 2B. DEMOGRAFI PROVINSI
-    # =====================================================
-    
-    # --- deteksi kolom provinsi di df_pelanggan ---
-    prov_cols = ["Provinsi", "provinsi", "Province", "PROVINSI"]
-    
-    kolom_provinsi = None
-    for c in df_pelanggan.columns:
-        if c.strip() in prov_cols:
-            kolom_provinsi = c
-            break
-    
-    # --- merge provinsi ke df_trans ---
-    if kolom_provinsi is not None:
-        df_trans = df_trans.merge(
-            df_pelanggan[["Customer_ID", kolom_provinsi]],
-            on="Customer_ID",
-            how="left"
-        )
-    
-        # --- grafik jumlah pelanggan per provinsi ---
-        prov_count = df_pelanggan[kolom_provinsi].value_counts().reset_index()
-        prov_count.columns = ["Provinsi", "Jumlah_Pelanggan"]
-    
-        fig_prov1 = px.bar(
-            prov_count,
-            x="Provinsi",
-            y="Jumlah_Pelanggan",
-            title="Jumlah Pelanggan per Provinsi"
-        )
-        st.plotly_chart(fig_prov1, use_container_width=True)
-    
-        # --- grafik omzet total per provinsi ---
-        omzet = df_trans.groupby(kolom_provinsi)["Total_Nilai"].sum().reset_index()
-        omzet.columns = ["Provinsi", "Total_Omzet"]
-    
-        fig_prov2 = px.bar(
+    # ---- Distribusi Provinsi ----
+    if "Provinsi" in df_trans.columns:
+        omzet = df_trans.groupby("Provinsi")["Total_Nilai"].sum().reset_index()
+        fig3 = px.bar(
             omzet,
             x="Provinsi",
-            y="Total_Omzet",
-            title="Omzet Penjualan per Provinsi"
+            y="Total_Nilai",
+            title="Omzet per Provinsi"
         )
-        st.plotly_chart(fig_prov2, use_container_width=True)
-    
+        st.plotly_chart(fig3, use_container_width=True)
     else:
-        st.info("Kolom Provinsi tidak ditemukan dalam data pelanggan.")
+        st.info("Kolom **Provinsi** tidak ditemukan pada dataset Transaksi.")
+
 
     # ============================
     # 3️⃣ RFM (PERCENTILE SCORING 0–100)
@@ -294,6 +234,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
