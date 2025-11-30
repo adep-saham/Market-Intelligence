@@ -112,19 +112,26 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     # ===============================
     st.header("2️⃣ Demografi Pelanggan")
     
-    # ---- Distribusi Umur ----
-    if "Umur" in df_trans.columns:
+    # --- Hitung umur (apabila belum ada) ---
+    if "Tanggal_Lahir" in df_pelanggan.columns:
+        df_pelanggan["Tanggal_Lahir"] = pd.to_datetime(df_pelanggan["Tanggal_Lahir"], errors="coerce")
+        df_pelanggan["Umur"] = ((pd.Timestamp("2024-12-31") - df_pelanggan["Tanggal_Lahir"]).dt.days / 365).astype(int)
+    
+    
+    # --- Distribusi Umur ---
+    if "Umur" in df_pelanggan.columns:
         fig2 = px.histogram(
-            df_trans,
+            df_pelanggan,
             x="Umur",
             nbins=20,
             title="Distribusi Umur Pelanggan"
         )
         st.plotly_chart(fig2, use_container_width=True)
     else:
-        st.info("Kolom **Umur** tidak ditemukan pada dataset Transaksi.")
+        st.info("Kolom **Umur** tidak ditemukan, atau tidak dapat dihitung dari Tanggal Lahir.")
     
-    # ---- Distribusi Provinsi ----
+    
+    # --- Omzet per Provinsi ---
     if "Provinsi" in df_trans.columns:
         omzet = df_trans.groupby("Provinsi")["Total_Nilai"].sum().reset_index()
         fig3 = px.bar(
@@ -135,7 +142,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         )
         st.plotly_chart(fig3, use_container_width=True)
     else:
-        st.info("Kolom **Provinsi** tidak ditemukan pada dataset Transaksi.")
+        st.info("Kolom **Provinsi** tidak ditemukan pada dataset transaksi.")
 
 
     # ============================
@@ -234,6 +241,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
