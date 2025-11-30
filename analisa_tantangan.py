@@ -237,34 +237,48 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     st.subheader("🏆 Top 10 Customer Terbaik (Percentile Mode 0–100)")
     st.dataframe(top10)
 
-    # ============================
-    # SCATTER PLOT — FREQUENCY vs MONETARY (Strict RFM)
-    # ============================
+
+    # Ambil top 100 strict RFM
+    top100 = rfm_strict.head(100).copy()
+
+    # ================================
+    # SCATTER PLOT — TOP 100 STRICT RFM
+    # ================================
     
-    # Ambil sampel untuk mempercepat render
-    df_scatter = rfm.sample(n=min(3000, len(rfm)), random_state=42)
+    st.subheader("📈 Scatter Plot — Frequency vs Monetary (Top 100 Strict RFM)")
+    
+    # Ambil top 100
+    df_scatter = top100.copy()
+    
+    # Pastikan data numeric
+    df_scatter["Frequency"] = pd.to_numeric(df_scatter["Frequency"], errors="coerce")
+    df_scatter["Monetary"] = pd.to_numeric(df_scatter["Monetary"], errors="coerce")
+    
+    # Buang baris bermasalah
+    df_scatter = df_scatter.dropna(subset=["Frequency", "Monetary"])
+    df_scatter = df_scatter[df_scatter["Frequency"] > 0]
+    df_scatter = df_scatter[df_scatter["Monetary"] > 0]
+    
+    # Scatter plot simple (anti error)
+    import plotly.express as px
     
     fig_scatter = px.scatter(
         df_scatter,
         x="Frequency",
         y="Monetary",
-        size="Monetary",
-        color="RFM_Weighted",
-        hover_data=["Customer_ID", "Recency", "Frequency", "Monetary", "RFM_Weighted"],
-        title="Scatter Plot — Frequency vs Monetary (Strict RFM)",
+        hover_data=["Customer_ID", "R_Score", "F_Score", "M_Score", "RFM_Weighted"],
+        title="Scatter Plot — Frequency vs Monetary (Top 100 Strict RFM)",
     )
     
-    # Tambahkan log scale agar visual lebih rapi
+    # Log agar titik tidak numpuk
     fig_scatter.update_layout(
-        xaxis=dict(title="Frequency", type="log"),
-        yaxis=dict(title="Monetary (Rp)", type="log"),
+        xaxis=dict(type="log", title="Frequency (log)"),
+        yaxis=dict(type="log", title="Monetary (log)"),
         template="plotly_white"
     )
     
-    # Tambahkan efek hover unified
-    fig_scatter.update_traces(marker=dict(opacity=0.7, line=dict(width=0.5, color="grey")))
-    
     st.plotly_chart(fig_scatter, use_container_width=True)
+
 
 
     
@@ -280,6 +294,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
