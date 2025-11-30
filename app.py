@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 import io
+import tempfile
+from xlsx2csv import Xlsx2csv
 from mi_engine import (
     load_global_price,
     load_competitor,
@@ -471,7 +473,13 @@ elif menu == "Analisa Tantangan Manajemen":
         # =============================
         
         def load_excel(file):
-            return pd.read_excel(io.BytesIO(file.read()))
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
+            tmp.write(file.read())
+            tmp.flush()
+
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as csv_tmp:
+                Xlsx2csv(tmp.name).convert(csv_tmp.name)
+                return pd.read_csv(csv_tmp.name)
 
         df_harga = load_excel(harga_file)
         df_trans = load_excel(transaksi_file)
@@ -479,6 +487,7 @@ elif menu == "Analisa Tantangan Manajemen":
 
         # Run analysis
         run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
