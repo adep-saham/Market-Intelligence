@@ -237,16 +237,32 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     st.subheader("🏆 Top 10 Customer Terbaik (Percentile Mode 0–100)")
     st.dataframe(top10)
 
+    # ============================
+    # SCATTER PLOT — FREQUENCY vs MONETARY (Strict RFM)
+    # ============================
     
-    # Scatter
+    # Ambil sampel untuk mempercepat render
+    df_scatter = rfm.sample(n=min(3000, len(rfm)), random_state=42)
+    
     fig_scatter = px.scatter(
-        rfm.sample(min(5000, len(rfm))),
+        df_scatter,
         x="Frequency",
         y="Monetary",
         size="Monetary",
         color="RFM_Weighted",
-        title="Scatter Plot — Frequency vs Monetary (Strict RFM)"
+        hover_data=["Customer_ID", "Recency", "Frequency", "Monetary", "RFM_Weighted"],
+        title="Scatter Plot — Frequency vs Monetary (Strict RFM)",
     )
+    
+    # Tambahkan log scale agar visual lebih rapi
+    fig_scatter.update_layout(
+        xaxis=dict(title="Frequency", type="log"),
+        yaxis=dict(title="Monetary (Rp)", type="log"),
+        template="plotly_white"
+    )
+    
+    # Tambahkan efek hover unified
+    fig_scatter.update_traces(marker=dict(opacity=0.7, line=dict(width=0.5, color="grey")))
     
     st.plotly_chart(fig_scatter, use_container_width=True)
 
@@ -264,6 +280,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
