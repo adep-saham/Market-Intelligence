@@ -539,9 +539,10 @@ elif menu == "Analisa Tantangan Manajemen":
     # Tombol analisa
         if st.button("🚀 Mulai Analisa"):
             # Muat file dengan loader terbaru
-            df_harga = normalize_columns(df_harga)
-            df_trans = normalize_columns(df_trans)
-            df_pelanggan = normalize_columns(df_pelanggan)
+            df_harga = df_harga.rename(...)
+            df_trans = df_trans.rename(...)
+            df_pelanggan = df_pelanggan.rename(...)
+
 
             # Debug optional
             st.write("Ukuran Data Harga:", df_harga.shape)
@@ -587,6 +588,7 @@ elif menu == "Analisa Tantangan Manajemen":
                 # Jalankan analisa
                 run_analisa(df_harga, df_trans, df_pelanggan)
                 st.write("Kolom Harga:", df_harga.columns.tolist())
+
 
 
 
