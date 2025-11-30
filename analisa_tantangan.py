@@ -111,33 +111,54 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     st.write(df_pelanggan.dtypes)
     st.write("Kolom pelanggan:", list(df_pelanggan.columns))
 
-    # ===============================
-    # 2️⃣ DEMOGRAFI PELANGGAN – FINAL FIX
-    # ===============================
+    # ============================
+    # 2️⃣ DEMOGRAFI PELANGGAN — FIXED
+    # ============================
     
     st.header("2️⃣ Demografi Pelanggan")
     
-    df_p = df_pelanggan.copy()
+    # --- Hitung Umur (Tahun) Aman ---
+    # Pastikan kolom tanggal lahir menjadi datetime.date
+    df_pelanggan["Tanggal_Lahir"] = pd.to_datetime(df_pelanggan["Tanggal_Lahir"], errors="coerce").dt.date
     
-    # 1. Bersihkan nilai tidak valid
-    df_p = df_p.replace(["data kosong", "0", 0, "1.0", 1.0, ""], pd.NA)
+    today = dt.date.today()
     
-    # 2. Convert tanggal lahir ke datetime
-    df_p["Tanggal_Lahir"] = pd.to_datetime(df_p["Tanggal_Lahir"], errors="coerce")
+    def hitung_umur_tahun(tgl):
+        if pd.isna(tgl):
+            return None
+        return relativedelta(today, tgl).years
     
-    # 3. Hitung umur
-    df_p["Umur"] = (pd.Timestamp("2024-12-31") - df_p["Tanggal_Lahir"]).dt.days / 365
+    df_pelanggan["Umur_Tahun"] = df_pelanggan["Tanggal_Lahir"].apply(hitung_umur_tahun)
     
-    # 4. Ambil umur valid saja
-    valid_umur = df_p["Umur"].dropna()
+    # Filter umur valid
+    valid_umur = df_pelanggan["Umur_Tahun"].dropna()
     
-    # 5. Cek apakah ada data
+    # Jika tidak ada umur valid → tampilkan pesan
     if len(valid_umur) == 0:
-        st.warning("⚠️ Tidak ada data umur valid untuk divisualisasikan.")
+        st.warning("Tidak ada data umur yang valid untuk dianalisis.")
     else:
-        fig2 = px.histogram(valid_umur, nbins=20,
-                            title="Distribusi Umur Pelanggan (Final)")
-        st.plotly_chart(fig2, use_container_width=True)
+        # Histogram Umur
+        fig_umur = px.histogram(
+            valid_umur,
+            nbins=20,
+            title="Distribusi Umur Pelanggan (Tahun)"
+        )
+        st.plotly_chart(fig_umur, use_container_width=True)
+    
+    # ====================== Tambahan: Demografi Provinsi ======================
+    if "Provinsi" in df_pelanggan.columns:
+        df_prov = df_pelanggan["Provinsi"].replace(["", "data kosong", None, np.nan], "Tidak diketahui")
+        provinsi_count = df_prov.value_counts().reset_index()
+        provinsi_count.columns = ["Provinsi", "Jumlah"]
+    
+        fig_prov = px.bar(
+            provinsi_count,
+            x="Provinsi",
+            y="Jumlah",
+            title="Sebaran Pelanggan Berdasarkan Provinsi"
+        )
+        st.plotly_chart(fig_prov, use_container_width=True)
+
 
 
 
@@ -239,6 +260,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
