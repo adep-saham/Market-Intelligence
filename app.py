@@ -541,8 +541,9 @@ elif menu == "Analisa Tantangan Manajemen":
     
         # Muat file dengan loader terbaru
         df_harga = load_xlsx(harga_file)
-        df_trans = load_xlsx(trans_file)
+        df_trans = load_xlsx(transaksi_file)
         df_pelanggan = load_xlsx(pelanggan_file)
+
     
         # Debug optional
         st.write("Ukuran Data Harga:", df_harga.shape)
@@ -565,6 +566,7 @@ elif menu == "Analisa Tantangan Manajemen":
     
         # Tampilkan kolom untuk debug
         st.write("Kolom Harga:", df_harga.columns.tolist())
+
 
 
 
