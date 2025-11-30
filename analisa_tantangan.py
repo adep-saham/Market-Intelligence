@@ -48,23 +48,40 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
     # ============================
     st.header("1️⃣ Trend Harga vs Volume Penjualan")
     
-    # Turbo groupby
     df_daily = df_trans[["Tanggal", "Total_Nilai", "Qty"]].groupby("Tanggal").sum().reset_index()
     df_merge = df_daily.merge(df_harga, on="Tanggal", how="left")
     
-    # Hapus baris yang NaN agar graph tidak error
-    df_plot = df_merge.dropna(subset=["Harga_Jual_Antam", "Total_Qty"])
+    # DETEKSI K0LOM HARGA
+    harga_candidates = [
+        "Harga_Jual_Antam",
+        "Harga Jual Antam",
+        "Harga Jual",
+        "Harga Jual (Rp)",
+        "Harga_Jual",
+        "HargaJualAntam"
+    ]
     
-    # TURBO: downsampling untuk percepat grafik
+    kolom_harga = None
+    for c in df_merge.columns:
+        if c.strip() in harga_candidates:
+            kolom_harga = c
+            break
+    
+    if kolom_harga is None:
+        st.error(f"❌ Tidak menemukan kolom harga Antam. Kolom tersedia: {df_merge.columns.tolist()}")
+        st.stop()
+    
+    # DROP NA
+    df_plot = df_merge.dropna(subset=[kolom_harga, "Total_Qty"])
+    
+    # SAMPLING TURBO
     df_plot = df_plot.sample(min(3000, len(df_plot)))
     
-    fig = px.line(
-        df_plot,
-        x="Tanggal",
-        y=["Harga_Jual_Antam", "Total_Qty"],
-        title="Harga Emas vs Volume Penjualan (Turbo Mode)"
-    )
+    # PLOT
+    fig = px.line(df_plot, x="Tanggal", y=[kolom_harga, "Total_Qty"],
+                  title="Harga Emas vs Volume Penjualan (Turbo Mode)")
     st.plotly_chart(fig, use_container_width=True)
+
 
     # ============================
     # 2️⃣ DEMOGRAFI PELANGGAN
@@ -130,6 +147,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
