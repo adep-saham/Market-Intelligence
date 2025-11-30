@@ -537,57 +537,35 @@ elif menu == "Analisa Tantangan Manajemen":
         # =============================
 
     # Tombol analisa
-        if st.button("🚀 Mulai Analisa"):
-            # Muat file dengan loader terbaru
-            df_harga = df_harga.rename(...)
-            df_trans = df_trans.rename(...)
-            df_pelanggan = df_pelanggan.rename(...)
+    if st.button("🚀 Mulai Analisa"):
+    
+        # Muat file dengan loader terbaru
+        df_harga = load_xlsx(harga_file)
+        df_trans = load_xlsx(trans_file)
+        df_pelanggan = load_xlsx(pelanggan_file)
+    
+        # Debug optional
+        st.write("Ukuran Data Harga:", df_harga.shape)
+        st.write("Ukuran Data Transaksi:", df_trans.shape)
+        st.write("Ukuran Data Pelanggan:", df_pelanggan.shape)
+    
+        # Validasi jika DF kosong
+        if df_harga.empty:
+            st.error("❌ Data Harga kosong atau format tidak terbaca.")
+            st.stop()
+        if df_trans.empty:
+            st.error("❌ Data Transaksi kosong atau format tidak terbaca.")
+            st.stop()
+        if df_pelanggan.empty:
+            st.error("❌ Data Pelanggan kosong atau format tidak terbaca.")
+            st.stop()
+    
+        # Langsung jalankan analisa (TIDAK ADA TOMBOL KEDUA)
+        run_analisa(df_harga, df_trans, df_pelanggan)
+    
+        # Tampilkan kolom untuk debug
+        st.write("Kolom Harga:", df_harga.columns.tolist())
 
-
-            # Debug optional
-            st.write("Ukuran Data Harga:", df_harga.shape)
-            st.write("Ukuran Data Transaksi:", df_trans.shape)
-            st.write("Ukuran Data Pelanggan:", df_pelanggan.shape)
-
-            # Validasi jika DF kosong
-            if df_harga.empty:
-                st.error("❌ Data Harga kosong atau format tidak terbaca.")
-            elif df_trans.empty:
-                st.error("❌ Data Transaksi kosong atau format tidak terbaca.")
-            elif df_pelanggan.empty:
-                st.error("❌ Data Pelanggan kosong atau format tidak terbaca.")
-            else:
-                
-                def normalize_columns(df):
-                    mapping = {
-                        "tanggal": "Tanggal",
-                        "date": "Tanggal",
-                        "day": "Hari",
-                        "harga jual antam": "Harga_Jual",
-                        "harga buyback": "Harga_Buyback",
-                        "harga pokok persediaan (rp/kg)": "HPP",
-                        "volume inventory (kg)": "Volume",
-                        "nilai tukar rp/usd": "Kurs",
-                        "ihsg": "IHSG",
-                        "harga lme troyz/ usd": "LME_Troy",
-                        "harga lme kg/rp": "LME_Kg",
-                        "harga lme/gram": "LME_Gram",
-                        "jumlah kasus covid": "Kasus",
-                    }
-                
-                    df_new = df.copy()
-                    cols = df_new.columns
-                
-                    for col in cols:
-                        key = col.strip().lower()
-                        if key in mapping:
-                            df_new.rename(columns={col: mapping[key]}, inplace=True)
-                
-                    return df_new
-
-                # Jalankan analisa
-                run_analisa(df_harga, df_trans, df_pelanggan)
-                st.write("Kolom Harga:", df_harga.columns.tolist())
 
 
 
