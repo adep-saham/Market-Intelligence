@@ -5,6 +5,7 @@ import io
 import tempfile
 import zipfile
 import xml.etree.ElementTree as ET
+import re
 from mi_engine import (
     load_global_price,
     load_competitor,
@@ -557,6 +558,7 @@ elif menu == "Analisa Tantangan Manajemen":
             else:
                 # Jalankan analisa
                 run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
