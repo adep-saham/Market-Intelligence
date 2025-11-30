@@ -199,98 +199,69 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.info("Kolom Provinsi tidak ditemukan dalam data pelanggan.")
 
     # ============================
-    # 3️⃣ RFM (Recency, Frequency, Monetary) — FINAL GABUNGAN
+    # 3️⃣ RFM (Strict Quantile + Weighted + Tie-Break)
     # ============================
     
-    st.header("3️⃣ RFM (Recency, Frequency, Monetary)")
+    st.header("3️⃣ RFM (Recency, Frequency, Monetary) — Strict Mode")
     
-    # 1️⃣ Bersihkan duplikasi persis (aman, tidak menghapus transaksi valid)
-    df_trans_clean = df_trans.drop_duplicates()
-    
-    # 2️⃣ Hitung Frequency (jumlah transaksi asli)
-    freq = df_trans_clean.groupby("Customer_ID").size().reset_index(name="Frequency")
-    
-    # 3️⃣ Hitung Monetary (total belanja) dan Last_Tanggal (tanggal terakhir)
-    mon_last = df_trans_clean.groupby("Customer_ID").agg(
-        Monetary=("Total_Nilai", "sum"),
-        Last_Tanggal=("Tanggal", "max")
+    # --- Hitung dasar RFM ---
+    rfm = df_trans.groupby("Customer_ID").agg(
+        Frequency=("Tanggal", "count"),            # hitung semua transaksi (termasuk duplikat)
+        Monetary=("Total_Nilai", "sum"),           # total nilai transaksi
+        Last_Tanggal=("Tanggal", "max")            # transaksi terakhir
     ).reset_index()
     
-    # 4️⃣ Gabungkan RFM
-    rfm = freq.merge(mon_last, on="Customer_ID", how="left")
-    
-    # 5️⃣ Hitung Recency
-    today = pd.Timestamp("2024-12-31")
-    rfm["Recency"] = (today - rfm["Last_Tanggal"]).dt.days
-    rfm["Recency"] = rfm["Recency"].fillna(9999)
-    
-    # Pastikan Frequency & Monetary tidak kosong
-    rfm["Frequency"] = rfm["Frequency"].fillna(0)
-    rfm["Monetary"] = rfm["Monetary"].fillna(0)
+    # Recency dihitung dari tanggal terakhir transaksi
+    rfm["Recency"] = (pd.Timestamp("2024-12-31") - rfm["Last_Tanggal"]).dt.days
     
     # ============================
-    # 6️⃣ STRICT RFM SCORING — TANPA ERROR
+    # STRICT SCORING MENGGUNAKAN QCUT (Distribusi rata & adil)
     # ============================
     
-    # Recency scoring
-    rfm["R_Score"] = pd.cut(
-        rfm["Recency"],
-        bins=[-1, 7, 30, 90, 180, 999999999],
-        labels=[5, 4, 3, 2, 1],
-        include_lowest=True
-    ).astype(int)
-    
-    # Frequency scoring
-    rfm["F_Score"] = pd.cut(
-        rfm["Frequency"],
-        bins=[-1, 4, 10, 20, 50, 999999999],
-        labels=[1, 2, 3, 4, 5],
-        include_lowest=True
-    ).astype(int)
-    
-    # Monetary scoring
-    rfm["M_Score"] = pd.cut(
-        rfm["Monetary"],
-        bins=[-1, 100_000_000, 250_000_000, 500_000_000, 1_000_000_000, 999999999999999],
-        labels=[1, 2, 3, 4, 5],
-        include_lowest=True
-    ).astype(int)
-    
-    # Total RFM Score
-    rfm["RFM_Score"] = rfm["R_Score"] + rfm["F_Score"] + rfm["M_Score"]
+    rfm["R_Score"] = pd.qcut(rfm["Recency"], 5, labels=[5,4,3,2,1]).astype(int)
+    rfm["F_Score"] = pd.qcut(rfm["Frequency"], 5, labels=[1,2,3,4,5]).astype(int)
+    rfm["M_Score"] = pd.qcut(rfm["Monetary"], 5, labels=[1,2,3,4,5]).astype(int)
     
     # ============================
-    # 7️⃣ TOP 10 CUSTOMER
+    # WEIGHTED RFM SCORE (Lebih Ketat)
+    # Recency = 40% | Frequency = 30% | Monetary = 30%
     # ============================
     
-    top10 = rfm.sort_values("RFM_Score", ascending=False).head(10)
-    st.subheader("🏆 Top 10 Customer Terbaik (Strict RFM)")
+    rfm["RFM_Weighted"] = (
+        rfm["R_Score"]*0.4 +
+        rfm["F_Score"]*0.3 +
+        rfm["M_Score"]*0.3
+    )
+    
+    # ============================
+    # FINAL RANKING DENGAN TIE-BREAKER
+    # urutan: Weighted → Monetary → Frequency → Recency
+    # ============================
+    
+    top10 = rfm.sort_values(
+        ["RFM_Weighted", "Monetary", "Frequency", "Recency"],
+        ascending=[False, False, False, True]
+    ).head(10)
+    
+    st.subheader("🏆 Top 10 Customer Terbaik (Strict RFM + Weighted + Tie-Break)")
     st.dataframe(top10)
     
     # ============================
-    # 8️⃣ SCATTER PLOT (Final & Clean)
+    # Scatter (Frequency vs Monetary)
     # ============================
     
-    st.subheader("Scatter Frequency vs Monetary (Fixed & Clean)")
-    
     fig_scatter = px.scatter(
-        rfm,
+        rfm.sample(min(5000, len(rfm))),   # sampel agar cepat
         x="Frequency",
         y="Monetary",
         size="Monetary",
-        color="RFM_Score",
-        color_continuous_scale="Viridis",
-        hover_data=["Customer_ID", "Frequency", "Monetary", "RFM_Score"],
-        title="Scatter Plot: Frequency vs Monetary per Customer"
-    )
-    
-    fig_scatter.update_layout(
-        xaxis_title="Frequency (Jumlah Transaksi)",
-        yaxis_title="Monetary (Total Belanja)",
-        template="plotly_white"
+        color="RFM_Weighted",
+        title="Scatter Plot — Frequency vs Monetary (Strict RFM)",
+        labels={"Frequency": "Jumlah Transaksi", "Monetary": "Total Nilai (Rp)"}
     )
     
     st.plotly_chart(fig_scatter, use_container_width=True)
+
 
     
     # ============================
@@ -305,6 +276,7 @@ def run_analisa(df_harga, df_trans, df_pelanggan):
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("Analisa selesai ✔ (Turbo Mode)")
+
 
 
 
