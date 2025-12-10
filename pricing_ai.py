@@ -1,11 +1,22 @@
 import google.generativeai as genai
-import os
+from google.oauth2 import service_account
+import json
+import streamlit as st
 
-# Konfigurasi API Key
-genai.configure(api_key=os.getenv("AIzaSyBRSGLbIvqV0Tc6njysqI6QxYo95LjKnoM"))
+# --- Load Service Account dari Streamlit Secrets ---
+service_account_info = json.loads(st.secrets["654c63a6f0215a748fad89f38f7b41de949397bb"])
+
+credentials = service_account.Credentials.from_service_account_info(
+    service_account_info,
+    scopes=["https://www.googleapis.com/auth/cloud-platform"],
+)
+
+genai.configure(credentials=credentials)
+
 
 def gemini_price_recommendation(spot, indo, harta, g24, my_price):
-    model_name = "models/gemini-flash-latest"
+    model_name = "models/gemini-1.5-flash"
+
     prompt = f"""
 Anda adalah AI Pricing Analyst Emas Logam Mulia.
 
@@ -34,8 +45,6 @@ ALASAN:
 """
 
     model = genai.GenerativeModel(model_name)
-
     response = model.generate_content(prompt)
 
     return response.text
-
