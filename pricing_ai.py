@@ -4,7 +4,10 @@ import json
 import streamlit as st
 
 # --- Load Service Account dari Streamlit Secrets ---
-service_account_info = json.loads(st.secrets["654c63a6f0215a748fad89f38f7b41de949397bb"])
+if "GCP_SERVICE_ACCOUNT" not in st.secrets:
+    raise RuntimeError("Secret GCP_SERVICE_ACCOUNT belum diset di Streamlit Secrets.")
+
+service_account_info = json.loads(st.secrets["GCP_SERVICE_ACCOUNT"])
 
 credentials = service_account.Credentials.from_service_account_info(
     service_account_info,
@@ -46,5 +49,4 @@ ALASAN:
 
     model = genai.GenerativeModel(model_name)
     response = model.generate_content(prompt)
-
     return response.text
