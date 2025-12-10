@@ -3,8 +3,6 @@ from google.oauth2 import service_account
 import base64
 import json
 import streamlit as st
-st.write("DEBUG SECRET:")
-st.write(st.secrets["GCP_SERVICE_ACCOUNT"])
 
 # ============================================================
 # 1. LOAD & DECODE SERVICE ACCOUNT FROM STREAMLIT SECRETS
@@ -95,5 +93,6 @@ ALASAN:
 
     except Exception as e:
         return f"ERROR saat memanggil Gemini AI: {e}"
+
 
 
