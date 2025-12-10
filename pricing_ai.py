@@ -16,7 +16,7 @@ credentials = service_account.Credentials.from_service_account_info(
 
 genai.configure(credentials=credentials)
 
-
+st.write(st.secrets["GCP_SERVICE_ACCOUNT"])
 def gemini_price_recommendation(spot, indo, harta, g24, my_price):
     model_name = "models/gemini-1.5-flash"
 
@@ -50,3 +50,4 @@ ALASAN:
     model = genai.GenerativeModel(model_name)
     response = model.generate_content(prompt)
     return response.text
+
