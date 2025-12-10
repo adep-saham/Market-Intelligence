@@ -3,6 +3,10 @@ from google.oauth2 import service_account
 import json
 import streamlit as st
 
+st.write("DEBUG SECRET:")
+st.write(st.secrets["GCP_SERVICE_ACCOUNT"])
+
+
 # --- Load Service Account dari Streamlit Secrets ---
 if "GCP_SERVICE_ACCOUNT" not in st.secrets:
     raise RuntimeError("Secret GCP_SERVICE_ACCOUNT belum diset di Streamlit Secrets.")
@@ -16,7 +20,7 @@ credentials = service_account.Credentials.from_service_account_info(
 
 genai.configure(credentials=credentials)
 
-st.write(st.secrets["GCP_SERVICE_ACCOUNT"])
+
 def gemini_price_recommendation(spot, indo, harta, g24, my_price):
     model_name = "models/gemini-1.5-flash"
 
@@ -50,4 +54,5 @@ ALASAN:
     model = genai.GenerativeModel(model_name)
     response = model.generate_content(prompt)
     return response.text
+
 
