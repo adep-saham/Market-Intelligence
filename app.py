@@ -415,6 +415,7 @@ elif menu == "Competitor":
             competitors["Galeri 24"],
             my_price
         )
+
     
         st.success(ai_text)
 
@@ -580,6 +581,7 @@ elif menu == "Analisa Tantangan Manajemen":
         
             # ========== JALANKAN ANALISA ==========
             run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
