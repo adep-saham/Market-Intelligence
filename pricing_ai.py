@@ -1,55 +1,66 @@
-from openai import OpenAI
 import streamlit as st
+import requests
+import json
 
 # ==========================================
-# 1. Load OpenAI API KEY
+# 1. LOAD DEEPSEEK API KEY
 # ==========================================
-if "OPENAI_API_KEY" not in st.secrets:
-    st.error("❌ OPENAI_API_KEY belum diset di Streamlit Secrets.")
+if "DEEPSEEK_API_KEY" not in st.secrets:
+    st.error("❌ DEEPSEEK_API_KEY belum diset di Streamlit Secrets.")
 else:
-    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+    API_KEY = st.secrets["DEEPSEEK_API_KEY"]
+
+API_URL = "https://api.deepseek.com/chat/completions"
 
 
 # ==========================================
-# 2. GPT Pricing Recommendation
+# 2. PRICE RECOMMENDATION FUNCTION
 # ==========================================
 def gpt_price_recommendation(spot, indo, harta, g24, my_price):
 
     prompt = f"""
-Anda adalah AI Pricing Analyst Logam Mulia.
+Anda adalah AI Pricing Analyst Senior Logam Mulia.
 
-Gunakan data berikut untuk membuat analisis harga emas ANTAM:
+Gunakan data berikut untuk memberikan rekomendasi harga jual ANTAM:
 
 Spot Gold (IDR/gram): {spot}
 
 Harga Kompetitor:
-- IndoGold : {indo}
-- Hartadinata : {harta}
-- Galeri 24 : {g24}
+- IndoGold: {indo}
+- Hartadinata: {harta}
+- Galeri 24: {g24}
 
-Harga Jual ANTAM: {my_price}
+Harga ANTAM saat ini: {my_price}
 
-Tugas:
-1. Hitung premium kompetitor terhadap spot.
-2. Evaluasi apakah harga ANTAM masih kompetitif.
-3. Berikan SATU rekomendasi harga jual terbaik.
-4. Format jawaban seperti berikut:
+Tugas Anda:
+1. Hitung premium kompetitor dibandingkan spot.
+2. Analisis apakah harga ANTAM kompetitif atau tidak.
+3. Rekomendasikan SATU harga jual terbaik hari ini.
+4. Format WAJIB sebagai:
 
 REKOMENDASI: Rp <angka>
 ALASAN:
-- <point 1>
-- <point 2>
-- <point 3>
+- <alasan 1>
+- <alasan 2>
+- <alasan 3>
 """
 
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.3,
-        )
+    payload = {
+        "model": "deepseek-chat",  
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.3
+    }
 
-        return response.choices[0].message["content"]
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    try:
+        response = requests.post(API_URL, headers=headers, data=json.dumps(payload))
+        data = response.json()
+
+        return data["choices"][0]["message"]["content"]
 
     except Exception as e:
-        return f"❌ ERROR memanggil GPT API:\n{e}"
+        return f"❌ ERROR memanggil DeepSeek API:\n{e}"
