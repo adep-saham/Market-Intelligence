@@ -1,5 +1,6 @@
 import requests
 import os
+import json
 
 AIML_API_KEY = os.getenv("AIML_API_KEY")
 
@@ -8,26 +9,26 @@ def aiml_price_ai(spot, indo, harta, g24, my_price):
     prompt = f"""
 Anda adalah analis harga emas profesional.
 
-Data pasar:
-- Spot emas: {spot}
-- IndoGold: {indo}
-- Hartadinata: {harta}
-- Galeri 24: {g24}
-- Harga ANTAM saat ini: {my_price}
+Data:
+Spot: {spot}
+IndoGold: {indo}
+Hartadinata: {harta}
+Galeri 24: {g24}
+Harga ANTAM: {my_price}
 
-Tugas AI:
-1. Hitung premium masing-masing kompetitor.
-2. Analisis kondisi pasar (spread, deviasi ANTAM, tekanan harga).
-3. Tentukan apakah harga ANTAM overpriced, fair, atau underpriced.
-4. Berikan SATU harga rekomendasi final.
-5. Gunakan Bahasa Indonesia profesional dan rapi.
+Tugas:
+1. Hitung premium kompetitor.
+2. Analisis tekanan pasar.
+3. Tentukan apakah harga ANTAM overpriced atau underpriced.
+4. Berikan rekomendasi harga final dalam 1 angka.
+5. Jelaskan secara singkat dan profesional.
 
-FORMAT WAJIB:
+Format:
 REKOMENDASI: Rp <angka>
 ALASAN:
-- <point 1>
-- <point 2>
-- <point 3>
+- <poin1>
+- <poin2>
+- <poin3>
 """
 
     url = "https://api.aimlapi.com/v1/chat/completions"
@@ -38,7 +39,7 @@ ALASAN:
     }
 
     payload = {
-        "model": "llama-3.1-70b-instruct",
+        "model": "llama-3.1-70b-instruct",   # model gratis & paling pintar
         "messages": [
             {"role": "user", "content": prompt}
         ],
@@ -47,7 +48,16 @@ ALASAN:
     }
 
     response = requests.post(url, json=payload, headers=headers)
-    result = response.json()
 
-    # Return output text
-    return result["choices"][0]["message"]["content"]
+    # DEBUG: tampilkan respons mentah jika error
+    try:
+        data = response.json()
+    except:
+        return f"❌ Response bukan JSON:\n{response.text}"
+
+    # Jika response mengandung error
+    if "error" in data:
+        return f"❌ AIMLAPI Error:\n{json.dumps(data, indent=2)}"
+
+    # Format benar (OpenAI style)
+    return data["choices"][0]["message"]["content"]
