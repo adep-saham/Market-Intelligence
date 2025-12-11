@@ -9,8 +9,8 @@ plotly
 openpyxl
 matplotlib
 openai>=1.54.0
-deepseek
-random
+
+
 
 
 
