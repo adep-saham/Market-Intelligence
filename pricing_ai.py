@@ -1,4 +1,10 @@
+import streamlit as st
+import requests
+
+AIML_API_KEY = st.secrets["AIML_API_KEY"]  # ← WAJIB ADA
+
 def aiml_price_ai(spot, indo, harta, g24, my_price):
+
     url = "https://api.aimlapi.com/v1/chat/completions"
 
     headers = {
@@ -12,15 +18,24 @@ def aiml_price_ai(spot, indo, harta, g24, my_price):
             {
                 "role": "user",
                 "content": f"""
-Anda adalah AI analis harga emas...
 Spot: {spot}
 IndoGold: {indo}
-Harta: {harta}
-Galeri 24: {g24}
+Hartadinata: {harta}
+Galeri24: {g24}
 Harga Antam: {my_price}
-Buat rekomendasi harga dan alasan.
+
+Buat rekomendasi harga final dan alasannya.
 """
             }
-        ],
-        "temperature": 0.5
+        ]
     }
+
+    res = requests.post(url, json=payload, headers=headers)
+
+    data = res.json()
+
+    # Debug kalau error
+    if "choices" not in data:
+        return f"❌ AIML API Error:\n\n{data}"
+
+    return data["choices"][0]["message"]["content"]
