@@ -400,26 +400,24 @@ elif menu == "Competitor":
     my_price = st.number_input("Harga Kamu (Rp)", min_value=0, value=2300000)
 
     # ===========================================================
-    # AI PRICE RECOMMENDATION BY COPILOT
+    # AI PRICE RECOMMENDATION BY GPT-4o-mini
     # ===========================================================
     st.write("---")
     st.subheader("🤖 Rekomendasi Harga (Berdasarkan AI)")
-
+    
     if st.button("Generate with Ade AI"):
-        from pricing_ai import gemini_price_recommendation
-
-        ai_text = gemini_price_recommendation(
-        spot_per_gram_idr,
-        competitors["IndoGold"],
-        competitors["Hartadinata"],
-        competitors["Galeri 24"],
-        my_price
-    )
-
-
-
-        # tampilkan AI response
+        from pricing_ai import gpt_price_recommendation
+    
+        ai_text = gpt_price_recommendation(
+            spot_per_gram_idr,
+            competitors["IndoGold"],
+            competitors["Hartadinata"],
+            competitors["Galeri 24"],
+            my_price
+        )
+    
         st.success(ai_text)
+
       
 
 # ===========================================================
@@ -582,6 +580,7 @@ elif menu == "Analisa Tantangan Manajemen":
         
             # ========== JALANKAN ANALISA ==========
             run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
