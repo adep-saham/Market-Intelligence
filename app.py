@@ -405,10 +405,10 @@ elif menu == "Competitor":
     st.write("---")
     st.subheader("🤖 Rekomendasi Harga (Berdasarkan AI)")
     
-    from pricing_ai import local_price_recommendation
-    
+    from pricing_ai import local_intelligence_recommendation
+
     if st.button("Generate with Ade AI"):
-        ai_text = local_price_recommendation(
+        ai_text = local_intelligence_recommendation(
             spot_per_gram_idr,
             competitors["IndoGold"],
             competitors["Hartadinata"],
@@ -416,6 +416,7 @@ elif menu == "Competitor":
             my_price
         )
         st.success(ai_text)
+
 
 
       
@@ -580,6 +581,7 @@ elif menu == "Analisa Tantangan Manajemen":
         
             # ========== JALANKAN ANALISA ==========
             run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
