@@ -7,57 +7,32 @@ AIML_API_KEY = os.getenv("AIML_API_KEY")
 def aiml_price_ai(spot, indo, harta, g24, my_price):
 
     prompt = f"""
-Anda adalah analis harga emas profesional.
+Anda adalah analis harga emas profesional...
 
-Data:
-Spot: {spot}
-IndoGold: {indo}
-Hartadinata: {harta}
-Galeri 24: {g24}
-Harga ANTAM: {my_price}
-
-Tugas:
-1. Hitung premium kompetitor.
-2. Analisis tekanan pasar.
-3. Tentukan apakah harga ANTAM overpriced atau underpriced.
-4. Berikan rekomendasi harga final dalam 1 angka.
-5. Jelaskan secara singkat dan profesional.
-
-Format:
-REKOMENDASI: Rp <angka>
-ALASAN:
-- <poin1>
-- <poin2>
-- <poin3>
+(isi prompt terserah, bukan ini masalahnya)
 """
 
     url = "https://api.aimlapi.com/v1/chat/completions"
-
     headers = {
         "Authorization": f"Bearer {AIML_API_KEY}",
         "Content-Type": "application/json"
     }
 
     payload = {
-        "model": "llama-3.1-70b-instruct",   # model gratis & paling pintar
+        "model": "llama-3.1-70b-instruct",
         "messages": [
             {"role": "user", "content": prompt}
         ],
-        "max_tokens": 500,
-        "temperature": 0.4
+        "max_tokens": 300
     }
 
-    response = requests.post(url, json=payload, headers=headers)
+    r = requests.post(url, json=payload, headers=headers)
 
-    # DEBUG: tampilkan respons mentah jika error
+    # LANGSUNG TAMPILKAN RESPONSE RAW DULU
     try:
-        data = response.json()
+        data = r.json()
     except:
-        return f"❌ Response bukan JSON:\n{response.text}"
+        return f"❌ RESPONSE BUKAN JSON:\n\n{r.text}"
 
-    # Jika response mengandung error
-    if "error" in data:
-        return f"❌ AIMLAPI Error:\n{json.dumps(data, indent=2)}"
-
-    # Format benar (OpenAI style)
-    return data["choices"][0]["message"]["content"]
+    # TAMPILKAN RESPONS PENUH
+    return f"🔎 RAW RESPONSE:\n\n{json.dumps(data, indent=2)}"
