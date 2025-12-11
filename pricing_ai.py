@@ -3,18 +3,18 @@ import requests
 import json
 
 # ==========================================
-# 1. LOAD DEEPSEEK API KEY
+# LOAD API
 # ==========================================
-if "DEEPSEEK_API_KEY" not in st.secrets:
+API_KEY = st.secrets.get("DEEPSEEK_API_KEY", None)
+
+if not API_KEY:
     st.error("❌ DEEPSEEK_API_KEY belum diset di Streamlit Secrets.")
-else:
-    API_KEY = st.secrets["DEEPSEEK_API_KEY"]
 
-API_URL = "https://api.deepseek.com/chat/completions"
+API_URL = "https://api.deepseek.com/v1/chat/completions"
 
 
 # ==========================================
-# 2. PRICE RECOMMENDATION FUNCTION
+# PRICE RECOMMENDATION FUNCTION
 # ==========================================
 def gpt_price_recommendation(spot, indo, harta, g24, my_price):
 
@@ -32,7 +32,7 @@ Harga Kompetitor:
 
 Harga ANTAM saat ini: {my_price}
 
-Tugas Anda:
+Tugas:
 1. Hitung premium kompetitor dibandingkan spot.
 2. Analisis apakah harga ANTAM kompetitif atau tidak.
 3. Rekomendasikan SATU harga jual terbaik hari ini.
@@ -46,8 +46,10 @@ ALASAN:
 """
 
     payload = {
-        "model": "deepseek-chat",  
-        "messages": [{"role": "user", "content": prompt}],
+        "model": "deepseek-chat",
+        "messages": [
+            {"role": "user", "content": prompt}
+        ],
         "temperature": 0.3
     }
 
@@ -57,9 +59,17 @@ ALASAN:
     }
 
     try:
-        response = requests.post(API_URL, headers=headers, data=json.dumps(payload))
+        response = requests.post(API_URL, headers=headers, json=payload)
         data = response.json()
 
+        # Debugging block (sementara)
+        # st.write("RAW RESPONSE:", data)
+
+        # Handle API error
+        if "error" in data:
+            return f"❌ DeepSeek Error: {data['error']}"
+
+        # Extract result
         return data["choices"][0]["message"]["content"]
 
     except Exception as e:
