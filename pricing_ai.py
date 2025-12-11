@@ -1,59 +1,40 @@
-import streamlit as st
-import requests
-import json
+import onnxruntime as ort
+import numpy as np
 
-HF_URL = "https://router.huggingface.co/v1/chat/completions"
+# Load model Phi-3 Mini ONNX sekali saja
+session = ort.InferenceSession("phi-3-mini.onnx")
+
+def run_local_llm(prompt):
+    inputs = {
+        "input_text": np.array([prompt])
+    }
+    output = session.run(None, inputs)
+    return output[0][0]
 
 
-def gpt_price_recommendation(spot, indo, harta, g24, my_price):
+def local_price_recommendation(spot, indo, harta, g24, my_price):
 
     prompt = f"""
-Anda adalah AI Pricing Analyst Senior Logam Mulia.
+Anda adalah analis harga emas.
 
-Gunakan data berikut:
-
-Spot Gold (IDR/gram): {spot}
-
-Harga Kompetitor:
-- IndoGold: {indo}
-- Hartadinata: {harta}
-- Galeri 24: {g24}
-
-Harga ANTAM saat ini: {my_price}
+Data:
+Spot emas per gram: {spot}
+IndoGold: {indo}
+Hartadinata: {harta}
+Galeri 24: {g24}
+Harga jual ANTAM: {my_price}
 
 Tugas:
-1. Hitung premium kompetitor dibandingkan spot.
-2. Tentukan apakah harga ANTAM overpriced / fair / underpriced.
-3. Berikan SATU rekomendasi harga jual terbaik hari ini.
-4. Format jawaban:
+1. Hitung premium 3 kompetitor.
+2. Berikan evaluasi ringkas.
+3. Berikan rekomendasi harga final.
 
+Format:
 REKOMENDASI: Rp <angka>
 ALASAN:
-- <alasan 1>
-- <alasan 2>
-- <alasan 3>
+- <point1>
+- <point2>
+- <point3>
 """
 
-    payload = {
-        "model": "meta-llama/Llama-3.2-3B-Instruct",
-        "messages": [
-            {"role": "user", "content": prompt}
-        ],
-        "max_tokens": 300,
-        "temperature": 0.3
-    }
-
-    try:
-        response = requests.post(HF_URL, json=payload)
-        data = response.json()
-
-        # Debug
-        # st.write("HF RAW RESPONSE:", data)
-
-        if "error" in data:
-            return f"❌ HF Error: {data['error']}"
-
-        return data["choices"][0]["message"]["content"]
-
-    except Exception as e:
-        return f"❌ ERROR memanggil HF Router API:\n{e}"
+    return run_local_llm(prompt)
