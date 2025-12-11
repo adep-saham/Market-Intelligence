@@ -8,6 +8,8 @@ numpy
 plotly
 openpyxl
 matplotlib
+openai>=1.54.0
+
 
 
 
