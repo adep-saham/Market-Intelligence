@@ -1,20 +1,19 @@
-import google.generativeai as genai
+from openai import OpenAI
 import streamlit as st
 
 # ==========================================
-# Load API Key
+# 1. Load OpenAI API KEY
 # ==========================================
-if "GEMINI_API_KEY" not in st.secrets:
-    st.error("❌ GEMINI_API_KEY belum diset di Streamlit Secrets.")
+if "OPENAI_API_KEY" not in st.secrets:
+    st.error("❌ OPENAI_API_KEY belum diset di Streamlit Secrets.")
 else:
-    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 
 # ==========================================
-# Gemini Price Recommendation
+# 2. GPT Pricing Recommendation
 # ==========================================
-def gemini_price_recommendation(spot, indo, harta, g24, my_price):
-    model_name = "models/gemini-1.5-flash"
+def gpt_price_recommendation(spot, indo, harta, g24, my_price):
 
     prompt = f"""
 Anda adalah AI Pricing Analyst Logam Mulia.
@@ -34,7 +33,7 @@ Tugas:
 1. Hitung premium kompetitor terhadap spot.
 2. Evaluasi apakah harga ANTAM masih kompetitif.
 3. Berikan SATU rekomendasi harga jual terbaik.
-4. Format jawaban sebagai berikut:
+4. Format jawaban seperti berikut:
 
 REKOMENDASI: Rp <angka>
 ALASAN:
@@ -44,9 +43,13 @@ ALASAN:
 """
 
     try:
-        model = genai.GenerativeModel(model_name)
-        response = model.generate_content(prompt)
-        return response.text
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+        )
+
+        return response.choices[0].message["content"]
 
     except Exception as e:
-        return f"❌ ERROR saat memanggil Gemini API: {e}"
+        return f"❌ ERROR memanggil GPT API:\n{e}"
