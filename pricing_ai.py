@@ -2,20 +2,9 @@ import streamlit as st
 import requests
 import json
 
-# ==========================================
-# LOAD API
-# ==========================================
-API_KEY = st.secrets.get("DEEPSEEK_API_KEY", None)
-
-if not API_KEY:
-    st.error("❌ DEEPSEEK_API_KEY belum diset di Streamlit Secrets.")
-
-API_URL = "https://api.deepseek.com/v1/chat/completions"
+HF_URL = "https://api-inference.huggingface.co/models/meta-llama/Llama-3.2-3B-Instruct"
 
 
-# ==========================================
-# PRICE RECOMMENDATION FUNCTION
-# ==========================================
 def gpt_price_recommendation(spot, indo, harta, g24, my_price):
 
     prompt = f"""
@@ -33,44 +22,33 @@ Harga Kompetitor:
 Harga ANTAM saat ini: {my_price}
 
 Tugas:
-1. Hitung premium kompetitor dibandingkan spot.
-2. Analisis apakah harga ANTAM kompetitif atau tidak.
-3. Rekomendasikan SATU harga jual terbaik hari ini.
-4. Format WAJIB sebagai:
+1. Hitung premium kompetitor dibanding spot.
+2. Tentukan apakah harga ANTAM overpriced / fair / underpriced.
+3. Berikan SATU rekomendasi harga terbaik hari ini.
+4. Format WAJIB:
 
 REKOMENDASI: Rp <angka>
 ALASAN:
-- <alasan 1>
-- <alasan 2>
-- <alasan 3>
+- <point1>
+- <point2>
+- <point3>
 """
 
     payload = {
-        "model": "deepseek-chat",
-        "messages": [
-            {"role": "user", "content": prompt}
-        ],
-        "temperature": 0.3
-    }
-
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Content-Type": "application/json"
+        "inputs": prompt,
+        "parameters": {"temperature": 0.3, "max_new_tokens": 300}
     }
 
     try:
-        response = requests.post(API_URL, headers=headers, json=payload)
+        response = requests.post(HF_URL, json=payload)
         data = response.json()
 
-        # Debugging block (sementara)
-        # st.write("RAW RESPONSE:", data)
-
-        # Handle API error
+        # Jika error dari HF
         if "error" in data:
-            return f"❌ DeepSeek Error: {data['error']}"
+            return f"❌ HF Error: {data['error']}"
 
-        # Extract result
-        return data["choices"][0]["message"]["content"]
+        # Model output berada pada index 0
+        return data[0]["generated_text"]
 
     except Exception as e:
-        return f"❌ ERROR memanggil DeepSeek API:\n{e}"
+        return f"❌ ERROR memanggil HF API:\n{e}"
