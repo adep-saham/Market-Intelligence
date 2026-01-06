@@ -191,11 +191,90 @@ elif menu == "Competitor":
     hartadinata = get_hartadinata_price()
     galeri24 = get_galeri24_price()
 
+    st.subheader("📦 Price Comparison (API)")
+
     col1, col2, col3 = st.columns(3)
 
-    col1.metric("IndoGold Jual", f"Rp {indogold['jual']:,}" if indogold else "N/A")
-    col2.metric("Hartadinata Jual", f"Rp {hartadinata['jual']:,}" if hartadinata else "N/A")
-    col3.metric("Galeri24 Jual", f"Rp {galeri24['jual']:,}" if galeri24 else "N/A")
+    # ============================
+    # INDO GOLD
+    # ============================
+    with col1:
+        st.write("### IndoGold")
+        st.metric("Harga Jual", f"Rp {indogold['jual']:,}" if indogold else "N/A")
+        st.metric("Harga Beli", f"Rp {indogold['beli']:,}" if indogold else "N/A")
+        st.caption("Update: —")
+
+    # ============================
+    # HARTADINATA
+    # ============================
+    with col2:
+        st.write("### Hartadinata (Emasku)")
+        st.metric("Harga Jual", f"Rp {hartadinata['jual']:,}" if hartadinata else "N/A")
+        st.metric("Harga Beli", f"Rp {hartadinata['beli']:,}" if hartadinata else "N/A")
+        st.caption(f"Update: {hartadinata['last_update']}" if hartadinata else "Update: —")
+
+    # ============================
+    # GALERI 24
+    # ============================
+    with col3:
+        st.write("### Galeri 24 (Pegadaian)")
+        st.metric("Harga Jual", f"Rp {int(galeri24['jual']):,}" if galeri24 else "N/A")
+        st.metric("Harga Beli", f"Rp {int(galeri24['beli']):,}" if galeri24 else "N/A")
+        st.caption(f"Update: {galeri24['last_update']}" if galeri24 else "Update: —")
+
+    # ===========================================================
+    # PRICE ELASTICITY
+    # ===========================================================
+    st.write("---")
+    st.title("🏷 Price Elasticity")
+
+    gold_usd = kitco.get("mid", 0)
+    usdidr = fetch_usdidr()
+    gold_per_gram_usd = gold_usd / 31.1034768
+    spot_per_gram_idr = gold_per_gram_usd * usdidr
+
+    st.metric("Spot Gold (IDR/gram)", f"Rp {spot_per_gram_idr:,.0f}")
+
+    st.write("### Premium vs Spot")
+
+    competitors = {
+        "IndoGold": indogold["jual"] if indogold else None,
+        "Hartadinata": hartadinata["jual"] if hartadinata else None,
+        "Galeri 24": galeri24["jual"] if galeri24 else None
+    }
+
+    def calc_premium(price, spot):
+        if not price or not spot:
+            return None
+        return (price / spot) - 1
+
+    for name, price in competitors.items():
+        premium = calc_premium(price, spot_per_gram_idr)
+        if premium is None:
+            st.write(f"- {name}: N/A")
+        else:
+            st.write(f"- {name}: **{premium*100:.2f}%**")
+
+    st.write("### Input Harga Kamu")
+    my_price = st.number_input("Harga Kamu (Rp)", min_value=0, value=2300000)
+
+    # ===========================================================
+    # AI PRICE RECOMMENDATION
+    # ===========================================================
+    st.write("---")
+    st.subheader("🤖 Rekomendasi Harga (Berdasarkan AI)")
+
+    from pricing_ai import aiml_price_ai
+
+    if st.button("Generate with Ade AI"):
+        ai_text = aiml_price_ai(
+            spot_per_gram_idr,
+            competitors["IndoGold"],
+            competitors["Hartadinata"],
+            competitors["Galeri 24"],
+            my_price
+        )
+        st.success(ai_text)
 
 
 # =====================
@@ -243,6 +322,7 @@ elif menu == "Analisa Tantangan Manajemen":
             df_pelanggan = load_xlsx(pelanggan_file)
 
             run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
