@@ -149,6 +149,11 @@ if menu == "Dashboard":
 
     # ===== GOLD OHLC =====
     st.markdown("### 🟡 Gold OHLC – XAUUSD")
+    gold_tf = st.sidebar.selectbox(
+    "Timeframe",
+    ["1m", "5m", "15m", "1h", "4h", "1d"],
+    index=5
+    )
 
     try:
         df_gold = fetch_gold_ohlc(interval=gold_tf, limit=200)
@@ -322,6 +327,7 @@ elif menu == "Analisa Tantangan Manajemen":
             df_pelanggan = load_xlsx(pelanggan_file)
 
             run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
