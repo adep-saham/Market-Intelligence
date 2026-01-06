@@ -126,17 +126,17 @@ if menu == "Dashboard":
     c3.metric("Gold / gram (IDR)", f"Rp {gold_per_gram_idr:,.0f}")
 
     # ===== GLOBAL PRICE TREND =====
-    st.markdown("### 📈 Tren Harga Global")
+  #  st.markdown("### 📈 Tren Harga Global")
 
-    fig_global = go.Figure()
-    fig_global.add_trace(go.Scatter(
-        x=g["date"],
-        y=g["price"],
-        mode="lines",
-        line=dict(width=3)
-    ))
-    fig_global.update_layout(height=260)
-    st.plotly_chart(fig_global, use_container_width=True)
+  #  fig_global = go.Figure()
+  #  fig_global.add_trace(go.Scatter(
+  #      x=g["date"],
+  #      y=g["price"],
+  #      mode="lines",
+  #      line=dict(width=3)
+  #  ))
+  #  fig_global.update_layout(height=260)
+  #  st.plotly_chart(fig_global, use_container_width=True)
 
     # ===== GOLD OHLC =====
     col_t, col_tf = st.columns([4,1])    
@@ -323,6 +323,7 @@ elif menu == "Analisa Tantangan Manajemen":
             df_pelanggan = load_xlsx(pelanggan_file)
 
             run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
