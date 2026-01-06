@@ -139,7 +139,7 @@ if menu == "Dashboard":
     st.plotly_chart(fig_global, use_container_width=True)
 
     # ===== GOLD OHLC =====
-        
+    col_t, col_tf = st.columns([4,1])    
     with col_t:
         st.markdown("### 🟡 Gold OHLC – XAUUSD")
     
@@ -323,6 +323,7 @@ elif menu == "Analisa Tantangan Manajemen":
             df_pelanggan = load_xlsx(pelanggan_file)
 
             run_analisa(df_harga, df_trans, df_pelanggan)
+
 
 
 
