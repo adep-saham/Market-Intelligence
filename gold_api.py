@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 
-RAPIDAPI_KEY = "ISI_API_KEY_KAMU"
+RAPIDAPI_KEY = "c11d24988cmshecb72052603b6d2p18030fjsn35022957c5da"
 RAPIDAPI_HOST = "gold-price-xauusd-ohcl-api.p.rapidapi.com"
 
 def fetch_gold_ohlc(interval="1d", limit=200):
